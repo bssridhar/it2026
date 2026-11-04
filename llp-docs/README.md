@@ -44,6 +44,26 @@ NOC: `owner_name`, `owner_name_upper`, `property_address`, `noc_date`, `noc_plac
 
 Subscription sheet table rows: `{#partners}` … `{/partners}` with `name_upper`, `designation_upper`, `witness_details`
 
+## Loading the details from Excel (for scanned KYC copies)
+
+Scanned PAN, Aadhaar or bank statement copies can't be read automatically. For these, use the Excel route:
+
+1. Click **Download Excel template** (section 1 of the form). The file is `templates/LLP_data_template.xlsx`.
+2. Fill in the **LLP** sheet (LLP, registered office, NOC and witness details) and the **Partners** sheet
+   (one row per partner, from row 3). Cells shaded yellow are required, and the designation, relation and
+   proof of address cells have drop-down lists.
+3. Click **Upload filled Excel**. The form fills in, with the number of partners set from the rows in the file.
+   Check the details on screen, then click **Generate documents**.
+
+* Enter the **date of last transaction in the bank statement** for each partner; it is used for the
+  2-month warning in **Document checks**.
+* Dates can be typed as DD/MM/YYYY or entered as Excel dates.
+* Invalid dates, PIN codes that aren't 6 digits and unknown designations are reported after the upload.
+* Don't delete the hidden column A of the LLP sheet or the hidden row 1 of the Partners sheet; the form
+  uses them to find each field.
+* To change the template layout, edit `tools/build_excel_template.py` and run it, then run
+  `tools/embed_templates.py`.
+
 ## Reading PAN, Aadhaar and bank statement PDFs
 
 | Detail | Taken from |
@@ -85,7 +105,8 @@ against the current MCA (FiLLiP) requirements and the client's KYC before they a
 * `index.html` – the web form
 * `templates/` – the Word templates (editable)
 * `lib/` – docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0 licence), the embedded templates
-  and `extract.js` (reads the PAN, Aadhaar and bank statement PDFs)
+  `extract.js` (reads the PAN, Aadhaar and bank statement PDFs) and `xlsxread.js` (reads the Excel template)
 * `tools/build_templates.py` – one-time script that turned the firm's sample documents into templates
   (the samples contained client data and are not kept here)
-* `tools/embed_templates.py` – packs `templates/*.docx` into `lib/templates.js`
+* `tools/build_excel_template.py` – builds the Excel data template
+* `tools/embed_templates.py` – packs the templates into `lib/templates.js`

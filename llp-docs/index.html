@@ -42,6 +42,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .src{font-size:.72rem;color:var(--accent);margin-left:4px}
 .counts{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 .counts > div{width:190px}
+.excel{margin-top:14px;padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:6px}
 .partner{border:1px dashed var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
 .partner h3{margin:0 0 10px;font-size:.98rem}
 .uploads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 14px;padding:12px;border-radius:8px;background:var(--bg)}
@@ -85,6 +86,15 @@ details summary{cursor:pointer;color:var(--muted)}
       <button type="button" class="primary" id="setCounts">Set up partner forms</button>
     </div>
     <div class="hint">An LLP needs at least two partners (Section 6(1)) and at least two designated partners who are individuals, at least one of them resident in India (Section 7(1)), LLP Act, 2008.</div>
+    <div class="excel">
+      <strong>Have the details in Excel instead?</strong>
+      <span class="hint">Useful when the KYC copies are scanned. Download the template, fill it in and upload it. This fills the LLP, partner, NOC and witness details below.</span>
+      <div class="bar">
+        <button type="button" id="dlExcel">Download Excel template</button>
+        <button type="button" id="upExcel">Upload filled Excel</button>
+        <input type="file" id="excelFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+      </div>
+    </div>
   </section>
 
   <section class="card">
@@ -194,6 +204,7 @@ details summary{cursor:pointer;color:var(--muted)}
 <script src="lib/docxtemplater.js"></script>
 <script src="lib/templates.js"></script>
 <script src="lib/extract.js"></script>
+<script src="lib/xlsxread.js"></script>
 <script>
 (function(){
 "use strict";
@@ -219,6 +230,7 @@ function makeCard(data){
     for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
     node._docs = data._docs || {};
     node._auto = data._auto || {};
+    node._excel = !!data._excel;
     for (const [k,v] of Object.entries(node._auto)){
       const el = node.querySelector(`[data-k="${k}"]`); if (el && el.value === v) el.classList.add('auto');
     }
@@ -332,7 +344,7 @@ function partnerChecks(node, title){
   }
   if (D.bank && !D.bank.scanned){
     const today = new Date(); today.setHours(0,0,0,0);
-    if (!D.bank.lastTxn) out.push(['m-warn', `${title}: no transaction dates could be found in the bank statement (${D.bank.file}). Check how recent it is by hand.`]);
+    if (!D.bank.lastTxn && !D.bank.fromExcel) out.push(['m-warn', `${title}: no transaction dates could be found in the bank statement (${D.bank.file}). Check how recent it is by hand.`]);
     else {
       const last = new Date(D.bank.lastTxn + 'T00:00:00'), limit = X.monthsBefore(today, 2);
       if (last < limit) out.push(['m-err', `⚠ ${title}: the bank statement is not recent. Its last transaction is dated ${fmt(D.bank.lastTxn)}, which is more than 2 months before today (${fmt(X.iso(today))}). Obtain a recent statement.`]);
@@ -348,8 +360,10 @@ function partnerChecks(node, title){
     const addrEl = node.querySelector('[data-k=address]');
     if (!bank.address && aad.address && addrEl.value === node._auto.address) out.push(['m-warn', `${title}: the address was taken from Aadhaar because ${D.bank ? 'none was found in the bank statement' : 'no bank statement has been uploaded'}.`]);
     const missing = ['pan','aadhaar','bank'].filter(k => !D[k]).map(k => DOC_LABEL[k]);
-    if (missing.length) out.push(['m-warn', `${title}: not uploaded yet: ${missing.join(', ')}.`]);
+    if (missing.length && !node._excel) out.push(['m-warn', `${title}: not uploaded yet: ${missing.join(', ')}.`]);
   }
+  if (node._excel && !(D.bank && D.bank.lastTxn))
+    out.push(['m-warn', `${title}: no date of last bank transaction was entered in the Excel file, so check how recent the bank statement is by hand.`]);
   return out;
 }
 function refreshChecks(){
@@ -378,7 +392,7 @@ function collect(){
     witness_address: form.elements.witness_address.value.trim(),
     partners: [...partnersEl.children].map(node => {
       const o = {}; node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
-      o._docs = node._docs || {}; o._auto = node._auto || {}; return o;
+      o._docs = node._docs || {}; o._auto = node._auto || {}; if (node._excel) o._excel = true; return o;
     })
   };
 }
@@ -553,6 +567,93 @@ Object.entries(TEMPLATE_NAMES).forEach(([key,label]) => {
   });
   row.append(span, inp, st); tplBox.appendChild(row);
 });
+
+/* ================= Excel template ================= */
+document.getElementById('dlExcel').addEventListener('click', () => {
+  download('LLP_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.LLP_data_template)],
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+});
+const xf = document.getElementById('excelFile');
+document.getElementById('upExcel').addEventListener('click', () => xf.click());
+xf.addEventListener('change', async () => {
+  const file = xf.files[0]; xf.value = ''; if (!file) return;
+  let res;
+  try { res = excelToCase(LLPXlsx.readWorkbook(new Uint8Array(await file.arrayBuffer())), file.name); }
+  catch(e){ showMessages([['m-err', 'Excel file not loaded: ' + e.message]]); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  if (res.errors.length){ showMessages(res.errors.map(e=>['m-err',e])); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const cur = collect();
+  if ((cur.llp_name || cur.partners.some(p => p.name || p.pan)) && !confirm('Replace the details now on screen with the details from ' + file.name + '?')) return;
+  restore(res.data); saveDraft();
+  showMessages([['m-ok', `Loaded the LLP details and ${res.data.partners.length} partner(s) from ${file.name}. Shaded fields came from the file; please check them, then click Generate documents.`]]
+    .concat(res.warns.map(w=>['m-warn',w])));
+  document.getElementById('messages').scrollIntoView({behavior:'smooth'});
+});
+
+function excelToCase(sheets, fname){
+  const errors = [], warns = [];
+  const L = sheets['LLP'], P = sheets['Partners'];
+  if (!L || !P) return { errors: ['This does not look like the LLP data template (the sheets "LLP" and "Partners" were not found). Use "Download Excel template".'], warns };
+  const S = LLPXlsx.str;
+  // LLP sheet: key in column A, value in column C
+  const llp = {};
+  for (const ref of Object.keys(L)) {
+    const m = ref.match(/^A(\d+)$/); if (!m) continue;
+    llp[S(L[ref])] = L['C' + m[1]];
+  }
+  if (!('llp_name' in llp)) return { errors: ['The hidden column A of the "LLP" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const dt = (v, label, who) => { const d = LLPXlsx.date(v); if (d === null) { warns.push(`${who}: "${S(v)}" is not a valid date for ${label}; please enter it on screen.`); return ''; } return d; };
+  const addr = (l1, l2, city, pin, state) => {
+    const lines = [S(l1), S(l2)].filter(Boolean);
+    const cp = [S(city), S(pin)].filter(Boolean).join(' - ');
+    if (cp) lines.push(cp);
+    if (S(state)) lines.push(S(state));
+    return lines.join('\n');
+  };
+  const data = {
+    llp_name: S(llp.llp_name),
+    llp_address: addr(llp.ro_addr1, llp.ro_addr2, llp.ro_city, llp.ro_pin, llp.ro_state),
+    place: S(llp.place), date: dt(llp.date, 'date of signing', 'LLP sheet'), id_proof: S(llp.id_proof) || 'PAN',
+    owner_name: S(llp.owner_name), noc_date: dt(llp.noc_date, 'date of NOC', 'LLP sheet'), noc_place: S(llp.noc_place),
+    prop_same: !/^n/i.test(S(llp.prop_same)), property_address: S(llp.prop_addr),
+    witness_name: S(llp.witness_name), witness_profession: S(llp.witness_profession), witness_address: S(llp.witness_address),
+    partners: []
+  };
+  if (!data.prop_same && !data.property_address) warns.push('LLP sheet: the property address is marked as different but is blank.');
+  // Partners sheet: keys in row 1, data from row 3
+  const keyCol = {};
+  for (const ref of Object.keys(P)) { const m = ref.match(/^([A-Z]+)1$/); if (m) keyCol[S(P[ref])] = m[1]; }
+  if (!keyCol.name) return { errors: ['The hidden row 1 of the "Partners" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const maxRow = Math.max(0, ...Object.keys(P).map(r => +r.replace(/^[A-Z]+/, '')));
+  const DES = { 'designated partner':'Designated Partner', 'dp':'Designated Partner', 'partner':'Partner', 'p':'Partner' };
+  const REL = { 's/o':'S/o', 'so':'S/o', 'd/o':'D/o', 'do':'D/o', 'w/o':'W/o', 'wo':'W/o' };
+  for (let r = 3; r <= maxRow; r++) {
+    const g = k => keyCol[k] ? P[keyCol[k] + r] : undefined;
+    if (!S(g('name'))) continue;
+    const who = `Partners sheet row ${r} (${S(g('name'))})`;
+    let des = DES[S(g('designation')).toLowerCase()];
+    if (!des) { des = 'Designated Partner'; warns.push(`${who}: designation "${S(g('designation'))}" not recognised; set to Designated Partner.`); }
+    let rel = REL[S(g('relation')).toLowerCase().replace(/\s/g,'')];
+    if (!rel) { rel = 'S/o'; if (S(g('relation'))) warns.push(`${who}: relation "${S(g('relation'))}" not recognised; set to S/o.`); }
+    const p = {
+      designation: des, name: S(g('name')), relation: rel, father_name: S(g('father_name')), relation_name: S(g('relation_name')),
+      dob: dt(g('dob'), 'date of birth', who), pan: S(g('pan')).toUpperCase(), mobile: S(g('mobile')), email: S(g('email')),
+      address: addr(g('addr1'), g('addr2'), g('city'), g('pin'), g('state')).toUpperCase(),
+      address_proof: S(g('address_proof')) || 'BANK STATEMENT', occupation: S(g('occupation')) || 'Business',
+      nationality: S(g('nationality')) || 'Indian', dpin: S(g('dpin')),
+      nominee_of: S(g('nominee_of')) || 'NA', prof_membership: S(g('prof_membership')) || 'NA'
+    };
+    if (/^\d{10}$/.test(p.mobile)) p.mobile = '+91 ' + p.mobile;
+    if (S(g('pin')) && !/^\d{3}\s?\d{3}$/.test(S(g('pin')))) warns.push(`${who}: PIN code "${S(g('pin'))}" is not 6 digits.`);
+    const auto = {}; for (const [k,v] of Object.entries(p)) if (v) auto[k] = v;
+    const last = dt(g('bank_last_txn'), 'date of last bank transaction', who);
+    const docs = {};
+    if (last) docs.bank = { file: fname, fromExcel: true, fields: {}, notes: [], lastTxn: last, statusCls: 'ok',
+      status: `From Excel: last bank transaction ${last.split('-').reverse().join('/')}` };
+    data.partners.push(Object.assign(p, { _auto: auto, _docs: docs, _excel: true }));
+  }
+  if (!data.partners.length) errors.push('No partners found in the "Partners" sheet (rows from row 3 with a name).');
+  return { data, errors, warns };
+}
 
 /* ================= init ================= */
 function setDefaults(){
