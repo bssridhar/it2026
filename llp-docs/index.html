@@ -42,6 +42,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .src{font-size:.72rem;color:var(--accent);margin-left:4px}
 .counts{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 .counts > div{width:190px}
+.objbox{padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:4px}
+.acts{display:flex;flex-wrap:wrap;gap:6px 16px}
+.acts label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.88rem;margin:0}
+.acts input{width:auto}
+textarea[readonly]{opacity:.75}
 .cl-block{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px}
 .cl-block h3{font-size:.92rem;margin:0 0 6px}
 .cl-block label{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:.88rem;margin:3px 0}
@@ -154,6 +159,22 @@ details summary{cursor:pointer;color:var(--muted)}
       <div><label>Courts at (dispute clause)</label><input name="jurisdiction" placeholder="Same as place of signing"></div>
       <div><label>Remuneration to designated partner (Rs. per month) <span class="req">*</span></label><input type="number" min="0" step="1" name="remuneration" required></div>
       <div><label>Minimum contribution of an incoming partner (Rs.)</label><input type="number" min="0" step="1" name="incoming_min" value="50000"></div>
+      <div class="full objbox">
+        <strong>Draft the objects clause</strong>
+        <span class="hint">Describe the business and the tool suggests a draft main objects clause, which you can edit here.</span>
+        <div class="grid" style="margin-top:8px">
+          <div class="full"><label>Type of activity</label><div id="objActs" class="acts"></div></div>
+          <div class="full"><label>Services provided</label><input name="obj_services" placeholder="e.g. interior designing, space planning and fit-out works"></div>
+          <div class="full"><label>Goods dealt in / made</label><input name="obj_products" placeholder="e.g. modular furniture, false ceiling materials and furnishings"></div>
+          <div class="full"><label>Customers / sectors (optional)</label><input name="obj_customers" placeholder="e.g. residential, commercial and hospitality projects"></div>
+          <div class="full"><label class="check"><input type="checkbox" name="obj_abroad"> Business in India and abroad</label></div>
+        </div>
+        <div class="bar" style="margin:10px 0 8px"><button type="button" id="objSuggest">Suggest draft objects</button></div>
+        <div id="objNotes" class="msgs"></div>
+        <label>Draft objects clause (one object per line; edit freely)</label>
+        <textarea name="obj_draft" rows="8" placeholder="Click &quot;Suggest draft objects&quot;, or type the objects here"></textarea>
+        <label class="check" style="margin-top:8px"><input type="checkbox" name="obj_use"> Use in LLP agreement (clause 6 below is replaced by this draft)</label>
+      </div>
       <div class="full"><label>Main business of the LLP (clause 6) <span class="req">*</span></label><textarea name="main_business" required rows="5" placeholder="One object per line"></textarea>
         <div class="hint">Each line becomes a separate paragraph. The first line is also shown as the main business in the data sheet.</div></div>
       <div class="full"><label>Other business (Schedule 1, part B)</label><textarea name="other_business" rows="5" placeholder="One object per line"></textarea>
@@ -245,6 +266,7 @@ details summary{cursor:pointer;color:var(--muted)}
 <script src="lib/extract.js"></script>
 <script src="lib/xlsxread.js"></script>
 <script src="lib/merge.js"></script>
+<script src="lib/objects.js"></script>
 <script>
 (function(){
 "use strict";
@@ -444,6 +466,9 @@ function collect(){
     llp_email: g('llp_email'), agreement_date: g('agreement_date'), jurisdiction: g('jurisdiction'),
     remuneration: g('remuneration'), incoming_min: g('incoming_min'),
     main_business: form.elements.main_business.value.trim(), other_business: form.elements.other_business.value.trim(),
+    obj_acts: [...document.querySelectorAll('#objActs input:checked')].map(c => c.value),
+    obj_products: g('obj_products'), obj_services: g('obj_services'), obj_customers: g('obj_customers'), obj_abroad: form.elements.obj_abroad.checked,
+    obj_draft: form.elements.obj_draft.value.trim(), obj_use: form.elements.obj_use.checked,
     llp_check: llpCheck,
     partners: [...partnersEl.children].map(node => {
       const o = {}; node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
@@ -456,13 +481,14 @@ function restore(d){
   for (const [k,v] of Object.entries(d)){
     if (k === 'partners') continue;
     if (k === 'llp_check') { llpCheck = Object.assign({}, v || {}); continue; }
+    if (k === 'obj_acts') { document.querySelectorAll('#objActs input').forEach(c => c.checked = (v || []).includes(c.value)); continue; }
     const el = form.elements[k]; if (!el || el instanceof RadioNodeList) continue;
     if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
   }
   if (!d.llp_check) llpCheck = {};
   const list = d.partners && d.partners.length ? d.partners : [{designation:'Designated Partner'},{designation:'Designated Partner'}];
   partnersEl.replaceChildren(...list.map(p => makeCard(p)));
-  renumber(); syncProp(); refreshChecks();
+  renumber(); syncProp(); syncObjects(); refreshChecks();
 }
 function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch(e){} }
 form.addEventListener('input', () => { saveDraft(); });
@@ -925,6 +951,44 @@ function excelToCase(sheets, fname){
   if (!data.partners.length) errors.push('No partners found in the "Partners" sheet (rows from row 3 with a name).');
   return { data, errors, warns };
 }
+
+/* ================= objects clause drafting ================= */
+const objActs = document.getElementById('objActs');
+LLPObjects.ACTIVITIES.forEach(a => {
+  const l = document.createElement('label'), c = document.createElement('input');
+  c.type = 'checkbox'; c.value = a.key; l.append(c, document.createTextNode(a.label)); objActs.appendChild(l);
+});
+function syncObjects(){
+  const use = form.elements.obj_use.checked, mb = form.elements.main_business;
+  mb.readOnly = use;
+  if (use) { mb.value = form.elements.obj_draft.value.trim(); mb.classList.remove('invalid'); }
+}
+form.elements.obj_use.addEventListener('change', () => {
+  if (form.elements.obj_use.checked && !form.elements.obj_draft.value.trim()) {
+    form.elements.obj_use.checked = false;
+    document.getElementById('objNotes').innerHTML = '<div class="m-warn">The draft is empty. Suggest or type the objects first.</div>';
+    return;
+  }
+  syncObjects(); saveDraft();
+});
+form.elements.obj_draft.addEventListener('input', syncObjects);
+document.getElementById('objSuggest').addEventListener('click', () => {
+  const box = document.getElementById('objNotes'); box.innerHTML = '';
+  const r = LLPObjects.draft({
+    activities: [...objActs.querySelectorAll('input:checked')].map(c => c.value),
+    goods: form.elements.obj_products.value, services: form.elements.obj_services.value, customers: form.elements.obj_customers.value,
+    abroad: form.elements.obj_abroad.checked
+  });
+  r.notes.forEach(n => { const d = document.createElement('div'); d.className = 'm-warn'; d.textContent = n; box.appendChild(d); });
+  if (!r.lines.length) return;
+  const ta = form.elements.obj_draft;
+  if (ta.value.trim() && !confirm('Replace the current draft (including any edits) with a new suggestion?')) return;
+  ta.value = r.lines.join('\n\n');
+  const d = document.createElement('div'); d.className = 'm-ok';
+  d.textContent = 'Draft suggested from standard clause wording. Review and edit it, then tick "Use in LLP agreement".';
+  box.prepend(d);
+  syncObjects(); saveDraft();
+});
 
 /* ================= init ================= */
 function setDefaults(){

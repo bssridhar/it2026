@@ -60,6 +60,20 @@ to the contribution percentage and must add up to 100%. Amounts are written in w
 system (lakh / crore). The parties, contribution table, profit-sharing table, designated partners
 clause and signature lines grow with the number of partners.
 
+### Drafting the objects clause
+
+Inside section 6, **Draft the objects clause** takes the type of activity (trading, manufacturing, services,
+consultancy, contracts, import/export, IT, e-commerce, agency), the services provided, the goods dealt in,
+the customers or sectors, and whether the business is in India only or also abroad.
+**Suggest draft objects** writes a draft from standard clause wording, one clause per activity plus a
+closing incidental clause. The draft can be edited freely. When **Use in LLP agreement** is ticked, clause 6
+(main business) is replaced by the draft and kept in step with any further edits.
+
+The draft is built from fixed wording inside the tool (it works offline and nothing is sent anywhere).
+It is a starting point: review it for the client's actual business. A warning appears if the description
+mentions an activity that may need a regulator's licence or registration, or that may be open only to
+members of a profession.
+
 ## Print set
 
 `0_PRINT_SET_All_Documents.docx` holds every document to be signed, each starting on a new page with its own
@@ -136,7 +150,7 @@ against the current MCA (FiLLiP) requirements and the client's KYC before they a
   data sheet, request list, and the Excel data template
 * `lib/` – docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0 licence), the embedded templates
   `extract.js` (reads the PAN, Aadhaar and bank statement PDFs), `xlsxread.js` (reads the Excel template)
-  and `merge.js` (builds the print set)
+  `merge.js` (builds the print set) and `objects.js` (suggests the draft objects clause)
 * `tools/build_templates.py` – one-time script that turned the firm's sample documents into templates
   (the samples contained client data and are not kept here)
 * `tools/build_excel_template.py` – builds the Excel data template
