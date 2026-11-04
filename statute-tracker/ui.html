@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statute Update Tracker</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1d2433;--muted:#5a6478;--line:#dde3ee;--acc:#1f4e9c;--acc2:#e8eefb;--ok:#1a7f37;--warn:#9a6700;--err:#b42318;--errbg:#fdecea;--warnbg:#fff6dd}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+header{background:var(--acc);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:19px;margin:0;font-weight:600}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:14px}
+nav button.on{background:#fff;color:var(--acc);border-color:#fff}
+main{max-width:1050px;margin:0 auto;padding:18px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}
+button.b{background:var(--acc);color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px}
+button.b:disabled{opacity:.55;cursor:default}
+button.s{background:#fff;color:var(--acc);border:1px solid var(--acc);padding:6px 11px;border-radius:6px;cursor:pointer;font-size:13px}
+button.d{background:#fff;color:var(--err);border:1px solid #e6b4ae;padding:6px 11px;border-radius:6px;cursor:pointer;font-size:13px}
+select,input[type=text],input[type=number],input[type=password],input[type=url],textarea{font:inherit;padding:7px 9px;border:1px solid #c5cdda;border-radius:6px;background:#fff;color:var(--ink)}
+textarea{width:100%;min-height:70px}
+label.f{display:block;margin:10px 0 3px;font-weight:600;font-size:14px}
+label.f + input,label.f + select,label.f + textarea{width:100%}
+.hint{font-size:12.5px;color:var(--muted);margin-top:3px}
+h2{font-size:17px;margin:0 0 8px}
+.stat{font-size:12px;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.st-ok{background:#e6f4ea;color:var(--ok)}.st-error{background:var(--errbg);color:var(--err)}
+.st-baseline,.st-changed,.st-no-items{background:var(--warnbg);color:var(--warn)}.st-off{background:#eef0f4;color:var(--muted)}
+.group h3{font-size:16px;margin:16px 0 6px;color:var(--acc)}
+.item{padding:9px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item a{color:#0b57d0;text-decoration:none;font-weight:500}
+.item a:hover{text-decoration:underline}
+.item .muted{margin-top:2px}
+.empty{color:var(--muted);padding:18px 0;text-align:center}
+.prob{background:var(--warnbg);border:1px solid #f0d58a;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:14px}
+.prob ul{margin:6px 0 0 18px;padding:0}
+.prob li{margin:4px 0}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:top;font-size:14px}
+th{font-size:12.5px;color:var(--muted);font-weight:600;border-top:0}
+td.url{word-break:break-all;font-size:12.5px;color:var(--muted)}
+.statute-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.statute-head h2{margin:0;margin-right:auto}
+.dlg{position:fixed;inset:0;background:rgba(20,28,45,.45);display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto;z-index:10}
+.dlg.open{display:flex}
+.dlg .box{background:#fff;border-radius:10px;max-width:680px;width:100%;padding:18px 20px}
+.dlg .box h2{margin-bottom:4px}
+.dlg .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.testout{margin-top:12px;font-size:13.5px;max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:none}
+.testout ol{margin:4px 0 0 18px;padding:0}.testout li{margin:3px 0;word-break:break-word}
+.msg{padding:9px 12px;border-radius:6px;margin:10px 0;font-size:14px;display:none}
+.msg.e{display:block;background:var(--errbg);color:var(--err)}
+.msg.o{display:block;background:#e6f4ea;color:var(--ok)}
+.bar{height:6px;background:var(--acc2);border-radius:3px;overflow:hidden;width:180px;display:inline-block;vertical-align:middle}
+.bar i{display:block;height:100%;background:var(--acc);width:0}
+.disc{font-size:12.5px;color:var(--muted);margin-top:20px}
+@media (max-width:640px){td.url{display:none}header{padding:12px 16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Statute Update Tracker</h1>
+  <nav>
+    <button data-tab="updates" class="on">Updates</button>
+    <button data-tab="sources">Statutes &amp; websites</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+</header>
+<main>
+
+<!-- ============ UPDATES ============ -->
+<section id="tab-updates">
+  <div class="card">
+    <div class="row">
+      <button class="b" id="checkNow">Check now</button>
+      <span id="progress" class="muted"></span>
+      <span style="margin-left:auto" class="muted" id="lastRun"></span>
+    </div>
+    <div id="jobMsg" class="msg"></div>
+  </div>
+  <div id="problems"></div>
+  <div class="card">
+    <div class="row" style="margin-bottom:6px">
+      <h2 style="margin:0;margin-right:auto">New items found</h2>
+      <select id="fDays">
+        <option value="1">Last 24 hours</option>
+        <option value="7" selected>Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="0">All</option>
+      </select>
+      <select id="fStatute"><option value="">All statutes</option></select>
+      <input type="text" id="fText" placeholder="Search in titles" style="min-width:160px">
+    </div>
+    <div id="updates"></div>
+    <p class="disc">Each item links to the official government website where it was found. Read the
+      notification, circular or order itself (and the Gazette, where applicable) before relying on it.
+      <a href="/report" target="_blank">Open the report of the last check</a>.</p>
+  </div>
+</section>
+
+<!-- ============ SOURCES ============ -->
+<section id="tab-sources" hidden>
+  <div class="card">
+    <div class="row">
+      <div style="margin-right:auto">
+        <h2 style="margin:0">Statutes and the websites checked</h2>
+        <div class="muted">Only websites on the allowed government domains can be added (see Settings).</div>
+      </div>
+      <button class="b" id="addStatute">+ Add statute</button>
+    </div>
+    <div id="saveMsg" class="msg"></div>
+  </div>
+  <div id="statutes"></div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section id="tab-settings" hidden>
+  <div class="card">
+    <h2>Allowed government domains</h2>
+    <div class="muted">Websites are checked only if their address ends with one of these. Links found on a page that point
+      elsewhere (social media, private websites) are ignored, and a page that redirects elsewhere is not read.</div>
+    <label class="f" for="domains">One domain per line</label>
+    <textarea id="domains" rows="4"></textarea>
+    <div class="hint">For example <b>gov.in</b> covers incometaxindia.gov.in, cbic-gst.gov.in, esic.gov.in and so on.
+      <b>rbi.org.in</b> is the Reserve Bank of India's own website. Add only official government or regulator domains.</div>
+    <label class="f"><input type="checkbox" id="checkOnOpen"> Check automatically when this screen is opened, if not yet checked today</label>
+    <div class="row" style="margin-top:10px"><button class="b" id="saveDomains">Save</button></div>
+    <div id="domMsg" class="msg"></div>
+  </div>
+  <div class="card">
+    <h2>E-mail the daily report (optional)</h2>
+    <div class="muted">After each daily check the new items can be e-mailed to you. For Gmail, use an
+      "App password" (Google Account &gt; Security &gt; 2-Step Verification &gt; App passwords), not your normal password.
+      These settings are stored only on this computer, in the <code>data</code> folder.</div>
+    <label class="f"><input type="checkbox" id="emEnabled"> Send an e-mail after each check</label>
+    <label class="f"><input type="checkbox" id="emAlways"> Also send when nothing new was found</label>
+    <div class="row">
+      <div style="flex:3;min-width:200px"><label class="f" for="emHost">Mail server</label><input type="text" id="emHost" style="width:100%"></div>
+      <div style="flex:1;min-width:90px"><label class="f" for="emPort">Port</label><input type="number" id="emPort" style="width:100%"></div>
+    </div>
+    <label class="f" for="emUser">E-mail address used to send (user name)</label><input type="text" id="emUser">
+    <label class="f" for="emPass">Password / app password</label><input type="password" id="emPass" autocomplete="new-password">
+    <label class="f" for="emTo">Send to (separate several with commas)</label><input type="text" id="emTo">
+    <div class="row" style="margin-top:12px">
+      <button class="b" id="emSave">Save</button>
+      <button class="s" id="emTest">Send a test e-mail</button>
+    </div>
+    <div id="emMsg" class="msg"></div>
+  </div>
+</section>
+</main>
+
+<!-- ============ DIALOGS ============ -->
+<div class="dlg" id="dlgStatute"><div class="box">
+  <h2 id="dsTitle">Statute</h2>
+  <label class="f" for="dsName">Name of the statute / subject</label>
+  <input type="text" id="dsName" placeholder="e.g. Customs, SEBI, Labour Codes">
+  <div id="dsMsg" class="msg"></div>
+  <div class="acts"><button class="s" data-close>Cancel</button><button class="b" id="dsSave">Save</button></div>
+</div></div>
+
+<div class="dlg" id="dlgSource"><div class="box">
+  <h2 id="drTitle">Website</h2>
+  <div class="muted" id="drStatute"></div>
+  <label class="f" for="drName">Name</label>
+  <input type="text" id="drName" placeholder="e.g. CBIC - Central Tax notifications">
+  <label class="f" for="drUrl">Address (URL) of the page that lists the notifications / circulars</label>
+  <input type="url" id="drUrl" placeholder="https://....gov.in/...">
+  <div class="hint">Open the page in your browser, copy the address from the address bar and paste it here.</div>
+  <label class="f" for="drType">Type of page</label>
+  <select id="drType">
+    <option value="auto">Detect automatically</option>
+    <option value="html">Web page</option>
+    <option value="rss">RSS / Atom feed</option>
+  </select>
+  <label class="f" for="drKw">Keep only items containing any of these words (optional)</label>
+  <input type="text" id="drKw" placeholder="e.g. FEMA, Foreign Exchange, A.P. (DIR Series)">
+  <div class="hint">Separate words with commas. Leave blank to keep everything on the page.</div>
+  <label class="f" for="drEx">Ignore items containing any of these words (optional)</label>
+  <input type="text" id="drEx" placeholder="e.g. tender, recruitment, vacancy">
+  <label class="f"><input type="checkbox" id="drTls"> Old TLS settings (tick only if Test shows a "secure connection failed" error)</label>
+  <label class="f"><input type="checkbox" id="drOn"> Check this website daily</label>
+  <label class="f" for="drNote">Note (optional)</label>
+  <textarea id="drNote" rows="2"></textarea>
+  <div id="drMsg" class="msg"></div>
+  <div class="testout" id="drOut"></div>
+  <div class="acts">
+    <button class="s" id="drTest">Test - show what is read</button>
+    <span style="flex:1"></span>
+    <button class="s" data-close>Cancel</button><button class="b" id="drSave">Save</button>
+  </div>
+</div></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let CONFIG = null, STATUS = {}, UPDATES = [];
+
+async function api(path, body) {
+  const opt = body === undefined ? {} : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)};
+  const r = await fetch(path, opt);
+  let data = {};
+  try { data = await r.json(); } catch (e) {}
+  if (!r.ok && !data.errors && !data.error) data.error = "Error " + r.status;
+  return data;
+}
+function msg(el, text, ok) { el.textContent = text; el.className = "msg " + (text ? (ok ? "o" : "e") : ""); }
+function fmt(iso) {
+  if (!iso) return "";
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  const p = n => String(n).padStart(2, "0");
+  let h = d.getHours(), am = h < 12 ? "AM" : "PM"; h = h % 12 || 12;
+  return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()} ${p(h)}:${p(d.getMinutes())} ${am}`;
+}
+const STATUS_TEXT = {ok:"OK", error:"Could not be checked", baseline:"First check done", changed:"Page changed - please look",
+  "no-items":"No items read", off:"Not checked daily", "":"Not checked yet"};
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["updates","sources","settings"].forEach(t => $("#tab-" + t).hidden = t !== b.dataset.tab);
+  if (b.dataset.tab === "settings") loadSettings();
+});
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => b.closest(".dlg").classList.remove("open"));
+
+/* ---------- updates ---------- */
+async function loadUpdates() {
+  UPDATES = await api("/api/updates?days=" + $("#fDays").value);
+  renderUpdates();
+}
+function renderUpdates() {
+  const st = $("#fStatute").value, q = $("#fText").value.trim().toLowerCase();
+  const list = (Array.isArray(UPDATES) ? UPDATES : []).filter(u =>
+    (!st || u.statute_id === st) && (!q || (u.title + " " + u.source).toLowerCase().includes(q)));
+  if (!list.length) {
+    $("#updates").innerHTML = `<div class="empty">No new items in this period.</div>`;
+    return;
+  }
+  const groups = {};
+  list.forEach(u => (groups[u.statute] = groups[u.statute] || []).push(u));
+  $("#updates").innerHTML = Object.entries(groups).map(([name, items]) => `
+    <div class="group"><h3>${esc(name)} <span class="muted">(${items.length})</span></h3>
+    ${items.map(u => `<div class="item"><a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.title)}</a>
+      <div class="muted">${esc(u.source)}${u.date ? " &middot; date on page: " + esc(u.date) : ""} &middot; found ${esc(fmt(u.detected))}</div></div>`).join("")}
+    </div>`).join("");
+}
+["#fDays"].forEach(s => $(s).onchange = loadUpdates);
+$("#fStatute").onchange = renderUpdates;
+$("#fText").oninput = renderUpdates;
+
+function renderProblems(last) {
+  if (!last || !last.results) { $("#problems").innerHTML = ""; return; }
+  const p = last.results.filter(r => r.status !== "ok");
+  if (!p.length) { $("#problems").innerHTML = ""; return; }
+  const line = r => {
+    if (r.status === "error") return `<b>${esc(r.statute)} - ${esc(r.source)}</b>: could not be checked. ${esc(r.error)}`;
+    if (r.status === "baseline") return `<b>${esc(r.statute)} - ${esc(r.source)}</b>: first check; ${r.total_items} items now on the page were recorded. New items will be shown from the next check.`;
+    if (r.status === "changed") return `<b>${esc(r.statute)} - ${esc(r.source)}</b>: the page has changed but its items could not be read. <a href="${esc(r.url)}" target="_blank" rel="noopener">Open the page</a>.`;
+    return `<b>${esc(r.statute)} - ${esc(r.source)}</b>: no items could be read (the page may load its list with JavaScript). <a href="${esc(r.url)}" target="_blank" rel="noopener">Open the page</a>.`;
+  };
+  const errs = p.filter(r => r.status === "error").length;
+  $("#problems").innerHTML = `<details class="prob"${p.length <= 5 ? " open" : ""}><summary><b>Notes on the last check</b>
+    (${p.length} website${p.length === 1 ? "" : "s"}${errs ? ", " + errs + " could not be checked" : ""})</summary>
+    <ul>${p.map(r => "<li>" + line(r) + "</li>").join("")}</ul></details>`;
+}
+
+let polling = null;
+async function refreshStatus() {
+  const s = await api("/api/status");
+  STATUS = s.sources || {};
+  const j = s.job || {};
+  $("#checkNow").disabled = !!j.running;
+  if (j.running) {
+    const pct = j.total ? Math.round(100 * j.done / j.total) : 0;
+    $("#progress").innerHTML = `Checking ${j.total ? j.done + " of " + j.total : ""} <span class="bar"><i style="width:${pct}%"></i></span> ${esc(j.current)}`;
+  } else {
+    $("#progress").textContent = "";
+  }
+  if (j.error) msg($("#jobMsg"), j.error, false);
+  else if (j.message) msg($("#jobMsg"), j.message, true);
+  $("#lastRun").textContent = s.last_run ? "Last checked: " + fmt(s.last_run.finished) : "Not checked yet";
+  renderProblems(s.last_run);
+  if (j.running && !polling) polling = setInterval(refreshStatus, 1500);
+  if (!j.running && polling) { clearInterval(polling); polling = null; loadUpdates(); if (CONFIG) renderStatutes(); }
+}
+$("#checkNow").onclick = async () => {
+  msg($("#jobMsg"), "");
+  const r = await api("/api/check", {});
+  if (r.error) msg($("#jobMsg"), r.error, false);
+  refreshStatus();
+};
+
+/* ---------- statutes & websites ---------- */
+async function loadConfig() {
+  CONFIG = await api("/api/config");
+  renderStatutes();
+  const cur = $("#fStatute").value;
+  $("#fStatute").innerHTML = `<option value="">All statutes</option>` +
+    CONFIG.statutes.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+  $("#fStatute").value = cur;
+}
+function renderStatutes() {
+  $("#statutes").innerHTML = CONFIG.statutes.map((st, i) => `
+    <div class="card">
+      <div class="statute-head">
+        <h2>${esc(st.name)}</h2>
+        <button class="s" data-act="addsrc" data-i="${i}">+ Add website</button>
+        <button class="s" data-act="renst" data-i="${i}">Rename</button>
+        <button class="d" data-act="delst" data-i="${i}">Delete</button>
+      </div>
+      ${st.sources.length ? `<table><tr><th>Website</th><th class="url">Address</th><th>Last check</th><th></th></tr>
+      ${st.sources.map((s, j) => {
+        const info = STATUS[s.id] || {};
+        const code = !s.enabled ? "off" : (info.last_status || "");
+        return `<tr>
+          <td>${esc(s.name)}${s.keywords ? `<div class="muted">Only items with: ${esc(s.keywords)}</div>` : ""}
+            ${s.note ? `<div class="muted">${esc(s.note)}</div>` : ""}</td>
+          <td class="url"><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a></td>
+          <td><span class="stat st-${code || "off"}">${esc(STATUS_TEXT[code] ?? code)}</span>
+            ${info.last_error ? `<div class="muted">${esc(info.last_error)}</div>` : ""}
+            ${info.last_ok ? `<div class="muted">read ${esc(fmt(info.last_ok))}</div>` : ""}</td>
+          <td style="white-space:nowrap">
+            <button class="s" data-act="editsrc" data-i="${i}" data-j="${j}">Edit / Test</button>
+            <button class="d" data-act="delsrc" data-i="${i}" data-j="${j}">Delete</button></td></tr>`;
+      }).join("")}</table>` : `<div class="muted">No websites yet. Click "+ Add website".</div>`}
+    </div>`).join("") || `<div class="card empty">No statutes. Click "+ Add statute".</div>`;
+}
+async function saveConfig(newCfg) {
+  const r = await api("/api/config", newCfg);
+  if (r.errors) return r.errors.join(" ");
+  if (r.error) return r.error;
+  CONFIG = r;
+  await loadConfig();
+  return "";
+}
+const clone = o => JSON.parse(JSON.stringify(o));
+
+let editSt = null;
+$("#addStatute").onclick = () => { editSt = null; $("#dsTitle").textContent = "Add statute"; $("#dsName").value = ""; msg($("#dsMsg"), ""); $("#dlgStatute").classList.add("open"); $("#dsName").focus(); };
+$("#dsSave").onclick = async () => {
+  const name = $("#dsName").value.trim();
+  if (!name) return msg($("#dsMsg"), "Enter a name.", false);
+  const c = clone(CONFIG);
+  if (editSt === null) c.statutes.push({name, sources: []}); else c.statutes[editSt].name = name;
+  const err = await saveConfig(c);
+  if (err) return msg($("#dsMsg"), err, false);
+  $("#dlgStatute").classList.remove("open");
+  msg($("#saveMsg"), "Saved.", true);
+};
+
+let editSrc = null;
+function openSource(i, j) {
+  editSrc = {i, j};
+  const s = j === null ? {name:"", url:"", type:"auto", keywords:"", exclude:"", legacy_tls:false, enabled:true, note:""} : CONFIG.statutes[i].sources[j];
+  $("#drTitle").textContent = j === null ? "Add website" : "Edit website";
+  $("#drStatute").textContent = "Statute: " + CONFIG.statutes[i].name;
+  $("#drName").value = s.name; $("#drUrl").value = s.url; $("#drType").value = s.type;
+  $("#drKw").value = s.keywords; $("#drEx").value = s.exclude; $("#drTls").checked = s.legacy_tls;
+  $("#drOn").checked = s.enabled; $("#drNote").value = s.note;
+  msg($("#drMsg"), ""); $("#drOut").style.display = "none";
+  $("#dlgSource").classList.add("open"); $("#drName").focus();
+}
+function formSource() {
+  return {name: $("#drName").value.trim(), url: $("#drUrl").value.trim(), type: $("#drType").value,
+    keywords: $("#drKw").value.trim(), exclude: $("#drEx").value.trim(), legacy_tls: $("#drTls").checked,
+    enabled: $("#drOn").checked, note: $("#drNote").value.trim()};
+}
+$("#drSave").onclick = async () => {
+  const s = formSource(), c = clone(CONFIG), {i, j} = editSrc;
+  if (j === null) c.statutes[i].sources.push(s);
+  else c.statutes[i].sources[j] = Object.assign({}, c.statutes[i].sources[j], s);
+  const err = await saveConfig(c);
+  if (err) return msg($("#drMsg"), err, false);
+  $("#dlgSource").classList.remove("open");
+  msg($("#saveMsg"), "Saved. A new or changed website is first read to record the items already on it; new items are shown from the following check.", true);
+};
+$("#drTest").onclick = async () => {
+  const out = $("#drOut"), s = formSource();
+  if (!s.url) return msg($("#drMsg"), "Enter the address first.", false);
+  msg($("#drMsg"), "");
+  out.style.display = "block"; out.textContent = "Reading the page...";
+  $("#drTest").disabled = true;
+  const r = await api("/api/test", s);
+  $("#drTest").disabled = false;
+  if (!r.ok) { out.innerHTML = `<b style="color:var(--err)">Could not read the page.</b> ${esc(r.error)}`; return; }
+  out.innerHTML = `<b>${esc(r.page_title || r.final_url)}</b><div class="muted">${r.count} item(s) read` +
+    (r.found_before_filter !== r.count ? ` (${r.found_before_filter} before the keyword filters)` : "") +
+    `. ${r.count > 25 ? "First 25 shown." : ""}</div>` +
+    (r.count ? `<ol>${r.sample.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>${x.date ? ` <span class="muted">${esc(x.date)}</span>` : ""}</li>`).join("")}</ol>`
+      : `<p class="muted">No items could be read. The page may load its list with JavaScript, or the keywords may be too narrow. The tool will still report when the page changes.</p>`);
+};
+
+$("#statutes").onclick = async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const i = +b.dataset.i, j = b.dataset.j === undefined ? null : +b.dataset.j;
+  const act = b.dataset.act;
+  if (act === "addsrc") return openSource(i, null);
+  if (act === "editsrc") return openSource(i, j);
+  if (act === "renst") { editSt = i; $("#dsTitle").textContent = "Rename statute"; $("#dsName").value = CONFIG.statutes[i].name; msg($("#dsMsg"), ""); $("#dlgStatute").classList.add("open"); return; }
+  const c = clone(CONFIG);
+  if (act === "delst") {
+    if (!confirm(`Delete "${CONFIG.statutes[i].name}" and its ${CONFIG.statutes[i].sources.length} website(s)?`)) return;
+    c.statutes.splice(i, 1);
+  }
+  if (act === "delsrc") {
+    if (!confirm(`Delete the website "${CONFIG.statutes[i].sources[j].name}"?`)) return;
+    c.statutes[i].sources.splice(j, 1);
+  }
+  const err = await saveConfig(c);
+  msg($("#saveMsg"), err || "Deleted.", !err);
+};
+
+/* ---------- settings ---------- */
+async function loadSettings() {
+  $("#domains").value = CONFIG.allowed_domains.join("\n");
+  $("#checkOnOpen").checked = CONFIG.check_on_open;
+  const e = await api("/api/email");
+  $("#emEnabled").checked = e.enabled; $("#emAlways").checked = e.send_when_nothing_new;
+  $("#emHost").value = e.smtp_host; $("#emPort").value = e.smtp_port; $("#emUser").value = e.username;
+  $("#emPass").value = e.password; $("#emTo").value = e.to;
+}
+$("#saveDomains").onclick = async () => {
+  const c = clone(CONFIG);
+  c.allowed_domains = $("#domains").value.split(/\s+/).filter(Boolean);
+  c.check_on_open = $("#checkOnOpen").checked;
+  const err = await saveConfig(c);
+  msg($("#domMsg"), err || "Saved.", !err);
+};
+function emailForm() {
+  return {enabled: $("#emEnabled").checked, send_when_nothing_new: $("#emAlways").checked, smtp_host: $("#emHost").value,
+    smtp_port: $("#emPort").value, username: $("#emUser").value, password: $("#emPass").value, to: $("#emTo").value};
+}
+$("#emSave").onclick = async () => { const r = await api("/api/email", emailForm()); msg($("#emMsg"), r.error || "Saved.", !r.error); };
+$("#emTest").onclick = async () => {
+  msg($("#emMsg"), "Sending...", true);
+  const r = await api("/api/email/test", emailForm());
+  msg($("#emMsg"), r.error ? "Not sent: " + r.error : r.message, !r.error);
+};
+
+/* ---------- start ---------- */
+(async () => { await loadConfig(); await refreshStatus(); renderStatutes(); await loadUpdates(); })();
+</script>
+</body>
+</html>

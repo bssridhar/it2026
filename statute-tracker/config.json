@@ -1,0 +1,272 @@
+{
+  "allowed_domains": [
+    "gov.in",
+    "nic.in",
+    "rbi.org.in"
+  ],
+  "check_on_open": true,
+  "statutes": [
+    {
+      "id": "income-tax",
+      "name": "Income-tax",
+      "sources": [
+        {
+          "id": "income-tax-cbdt-circulars",
+          "name": "CBDT - Circulars",
+          "url": "https://incometaxindia.gov.in/Pages/communications/circulars.aspx",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address found on the official website through a web search on 04-11-2026. Click Test once on your computer to confirm."
+        },
+        {
+          "id": "income-tax-cbdt-notifications",
+          "name": "CBDT - Notifications",
+          "url": "https://incometaxindia.gov.in/Pages/communications/notifications.aspx",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "income-tax-income-tax-department-communi",
+          "name": "Income Tax Department - Communications (latest)",
+          "url": "https://incometaxindia.gov.in/Pages/communications/index.aspx",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address found on the official website through a web search on 04-11-2026. Click Test once on your computer to confirm."
+        },
+        {
+          "id": "income-tax-cbdt-press-releases",
+          "name": "CBDT - Press releases",
+          "url": "https://incometaxindia.gov.in/Pages/press-releases.aspx",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "income-tax-e-filing-portal-latest-update",
+          "name": "e-Filing portal - Latest updates",
+          "url": "https://www.incometax.gov.in/iec/foportal/latest-news",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here. This website may load its list with JavaScript; if Test reads no items, the tool will still tell you when the page changes."
+        }
+      ]
+    },
+    {
+      "id": "gst",
+      "name": "GST",
+      "sources": [
+        {
+          "id": "gst-cbic-central-tax-notifications",
+          "name": "CBIC - Central Tax notifications",
+          "url": "https://cbic-gst.gov.in/central-tax-notifications.html",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "gst-cbic-central-tax-rate-notifications",
+          "name": "CBIC - Central Tax (Rate) notifications",
+          "url": "https://cbic-gst.gov.in/central-tax-rate.html",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "The Hindi version of this page (cbic-gst.gov.in/hindi/central-tax-rate.html) was found through a web search on 04-11-2026; this English address is not yet confirmed. Click Test on your computer."
+        },
+        {
+          "id": "gst-cbic-home-page-what-s-new",
+          "name": "CBIC - Home page (What's new)",
+          "url": "https://www.cbic.gov.in/",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "gst-gst-portal-gstn-news-and-updates-adv",
+          "name": "GST portal (GSTN) - News and updates / advisories",
+          "url": "https://www.gst.gov.in/newsandupdates",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here. This website may load its list with JavaScript; if Test reads no items, the tool will still tell you when the page changes."
+        },
+        {
+          "id": "gst-gst-council",
+          "name": "GST Council",
+          "url": "https://gstcouncil.gov.in/",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        }
+      ]
+    },
+    {
+      "id": "company-law",
+      "name": "Company Law",
+      "sources": [
+        {
+          "id": "company-law-mca-home-page-what-s-new-not",
+          "name": "MCA - Home page (What's new, notifications, circulars)",
+          "url": "https://www.mca.gov.in/",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here. This website may load its list with JavaScript; if Test reads no items, the tool will still tell you when the page changes. For specific lists, open Acts & Rules > E-Books / Notifications on the MCA website and add each page's address as a separate website."
+        }
+      ]
+    },
+    {
+      "id": "esi",
+      "name": "ESI",
+      "sources": [
+        {
+          "id": "esi-esic-instructions-circulars-orders",
+          "name": "ESIC - Instructions / Circulars / Orders",
+          "url": "https://esic.gov.in/circulars",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address found on the official website through a web search on 04-11-2026. Click Test once on your computer to confirm."
+        },
+        {
+          "id": "esi-esic-home-page-what-s-new",
+          "name": "ESIC - Home page (What's new)",
+          "url": "https://esic.gov.in/",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        }
+      ]
+    },
+    {
+      "id": "pf",
+      "name": "PF",
+      "sources": [
+        {
+          "id": "pf-epfo-circulars",
+          "name": "EPFO - Circulars",
+          "url": "https://www.epfindia.gov.in/site_en/circulars.php",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "pf-epfo-home-page-what-s-new",
+          "name": "EPFO - Home page (What's new)",
+          "url": "https://www.epfindia.gov.in/site_en/index.php",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        }
+      ]
+    },
+    {
+      "id": "rbi",
+      "name": "RBI",
+      "sources": [
+        {
+          "id": "rbi-rbi-notifications-rss-feed",
+          "name": "RBI - Notifications (RSS feed)",
+          "url": "https://rbi.org.in/notifications_rss.xml",
+          "type": "rss",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "rbi-rbi-press-releases-rss-feed",
+          "name": "RBI - Press releases (RSS feed)",
+          "url": "https://rbi.org.in/pressreleases_rss.xml",
+          "type": "rss",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "rbi-rbi-notifications-page",
+          "name": "RBI - Notifications page",
+          "url": "https://rbi.org.in/Scripts/NotificationUser.aspx",
+          "type": "auto",
+          "keywords": "",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address found on the official website through a web search on 04-11-2026. Click Test once on your computer to confirm."
+        }
+      ]
+    },
+    {
+      "id": "fema",
+      "name": "FEMA",
+      "sources": [
+        {
+          "id": "fema-rbi-notifications-on-fema-a-p-dir-s",
+          "name": "RBI notifications on FEMA (A.P. (DIR Series) etc.)",
+          "url": "https://rbi.org.in/notifications_rss.xml",
+          "type": "rss",
+          "keywords": "FEMA, Foreign Exchange, A.P. (DIR Series), Foreign Investment, Overseas Investment, External Commercial, ECB, Liberalised Remittance, LRS, Non-resident, NRI, Export of Goods, Import of Goods, Remittance, Authorised Dealer",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Same RBI feed as under RBI, keeping only items whose title has one of the keywords. Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        },
+        {
+          "id": "fema-rbi-master-directions-fema",
+          "name": "RBI Master Directions (FEMA)",
+          "url": "https://rbi.org.in/Scripts/BS_ViewMasterDirections.aspx",
+          "type": "auto",
+          "keywords": "FEMA, Foreign Exchange, A.P. (DIR Series), Foreign Investment, Overseas Investment, External Commercial, ECB, Liberalised Remittance, LRS, Non-resident, NRI, Export of Goods, Import of Goods, Remittance, Authorised Dealer",
+          "exclude": "",
+          "legacy_tls": false,
+          "enabled": true,
+          "note": "Address not yet confirmed. Click Test on your computer; if it fails, open the department's website, go to the page that lists these items and paste that page's address here."
+        }
+      ]
+    }
+  ]
+}
