@@ -13,7 +13,10 @@ Fill in one form and get the standard LLP incorporation documents as Word (.docx
 
 1. Download or clone this folder (`llp-docs`) to your computer.
 2. Double-click `index.html`. It opens in Chrome, Edge or Firefox. You don't need internet access or a server.
-3. Fill in the LLP, partners, NOC and witness details, then click **Generate documents**.
+3. Enter the number of designated partners and other partners, and click **Set up partner forms**.
+4. For each partner, upload the **PAN**, **Aadhaar** and **bank statement** PDFs. The fields fill in
+   automatically (shaded fields came from a document). Check them and complete the rest.
+5. Fill in the LLP, NOC and witness details, then click **Generate documents**.
    A ZIP file with all the documents downloads, and you can also download each file on its own.
 4. **Save case file** stores the data entered as a `.json` file, and **Open case file** reloads it,
    for example to change a date or add a partner later.
@@ -41,6 +44,33 @@ NOC: `owner_name`, `owner_name_upper`, `property_address`, `noc_date`, `noc_plac
 
 Subscription sheet table rows: `{#partners}` … `{/partners}` with `name_upper`, `designation_upper`, `witness_details`
 
+## Reading PAN, Aadhaar and bank statement PDFs
+
+| Detail | Taken from |
+|---|---|
+| Name, PAN, date of birth, father's name | PAN (Aadhaar if not on PAN) |
+| S/o / D/o / W/o | Aadhaar |
+| Residential address | **Bank statement** (Aadhaar only if no bank address is found) |
+| E-mail, mobile | Bank statement, if shown unmasked |
+| Date of last transaction | Bank statement |
+
+* The PDFs are read inside the browser and are not uploaded or stored anywhere.
+* This works on PDFs that contain text: e-PAN, e-Aadhaar downloaded from UIDAI and statements downloaded
+  from net banking. **Scanned or photographed copies are only images**; they are flagged and the details
+  must be typed in.
+* e-Aadhaar PDFs are password protected. The form asks for the password (UIDAI format: first 4 letters
+  of the name in capitals followed by the year of birth).
+* The Aadhaar number is never read, stored or printed.
+* A field you have typed over is not overwritten by a later upload.
+* Bank statement layouts differ from bank to bank. If a bank's layout is not read correctly,
+  share a sample (with personal details masked) so the reading rules can be adjusted.
+
+The **Document checks** panel at the end of the screen shows:
+
+* a warning (in red) if the last transaction in a bank statement is more than 2 months before today
+* names, dates of birth and father's names that differ between PAN, Aadhaar and bank statement
+* scanned copies, missing PIN codes and documents not yet uploaded
+
 ## Checks built in
 
 * PAN format, duplicate PAN, e-mail and mobile number
@@ -54,7 +84,8 @@ against the current MCA (FiLLiP) requirements and the client's KYC before they a
 
 * `index.html` – the web form
 * `templates/` – the Word templates (editable)
-* `lib/` – docxtemplater and PizZip (MIT licence) and the embedded templates
+* `lib/` – docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0 licence), the embedded templates
+  and `extract.js` (reads the PAN, Aadhaar and bank statement PDFs)
 * `tools/build_templates.py` – one-time script that turned the firm's sample documents into templates
   (the samples contained client data and are not kept here)
 * `tools/embed_templates.py` – packs `templates/*.docx` into `lib/templates.js`
