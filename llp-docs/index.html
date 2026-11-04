@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLP Incorporation Documents</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+h1{font-size:1.45rem;margin:4px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+section.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+label .req{color:var(--err)}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+textarea{min-height:76px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.partner{border:1px dashed var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
+.partner h3{margin:0 0 10px;font-size:.98rem;display:flex;justify-content:space-between;align-items:center}
+button{font:inherit;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:4px 6px}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)}
+.check input{width:auto}
+#messages div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)}
+.m-warn{background:var(--warn-bg);color:var(--warn)}
+.m-ok{background:var(--ok-bg);color:var(--ok)}
+#outputs ul{padding-left:18px;margin:8px 0 0}
+#outputs li{margin:3px 0}
+#outputs a{color:var(--accent)}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line)}
+details summary{cursor:pointer;color:var(--muted)}
+.tpl-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.tpl-row span{min-width:220px}
+.footer{color:var(--muted);font-size:.82rem;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>LLP Incorporation Documents</h1>
+  <p class="sub">Enter the details once to generate the Form 9 consent, consent letter, subscription sheet and NOC for the registered office as Word files. Everything runs in this browser and nothing is uploaded.</p>
+
+  <form id="f" novalidate autocomplete="off">
+  <section class="card">
+    <h2>1. LLP details</h2>
+    <div class="grid">
+      <div class="full"><label>Proposed name of LLP <span class="req">*</span></label>
+        <input name="llp_name" required placeholder="e.g. ABC INTERIORS LLP">
+        <div class="hint">Section 15(1) of the LLP Act, 2008 requires the name to end with "LLP" or "Limited Liability Partnership".</div></div>
+      <div class="full"><label>Proposed registered office address <span class="req">*</span></label>
+        <textarea name="llp_address" required placeholder="Door no., street&#10;Area&#10;City PIN, State"></textarea>
+        <div class="hint">The line breaks you enter here are kept in the documents.</div></div>
+      <div><label>Place of signing <span class="req">*</span></label><input name="place" required value="Chennai"></div>
+      <div><label>Date of signing (consents &amp; subscription sheet) <span class="req">*</span></label><input type="date" name="date" required></div>
+      <div><label>Proof of identity (Form 9 enclosure)</label><input name="id_proof" value="PAN"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Partners <span class="bar"><button type="button" class="link" id="addPartner">+ Add partner</button></span></h2>
+    <div id="partners"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. NOC from owner of registered office premises</h2>
+    <div class="grid">
+      <div><label>Name of owner <span class="req">*</span></label><input name="owner_name" required></div>
+      <div><label>Date of NOC <span class="req">*</span></label><input type="date" name="noc_date" required></div>
+      <div><label>Place</label><input name="noc_place" placeholder="Same as place of signing"></div>
+      <div class="full"><label class="check"><input type="checkbox" name="prop_same" checked> Property address is the same as the proposed registered office address</label></div>
+      <div class="full" id="propWrap" hidden><label>Property address <span class="req">*</span></label><textarea name="property_address"></textarea></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. Witness (subscription sheet)</h2>
+    <div class="grid">
+      <div><label>Name of witness</label><input name="witness_name"></div>
+      <div><label>Profession, with professional membership no.</label><input name="witness_profession" placeholder="e.g. Chartered Accountant, M.No. 000000"></div>
+      <div class="full"><label>Address of witness</label><textarea name="witness_address"></textarea>
+        <div class="hint">If left blank, the witness column is left empty so it can be filled in by hand.</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Advanced: use your own edited Word template for this session</summary>
+      <p class="hint">Edit a file from the <code>templates</code> folder in Word (keep the <code>{placeholders}</code>) and choose it below. To make the change permanent, save it in the <code>templates</code> folder and run <code>tools/embed_templates.py</code>.</p>
+      <div id="tplOverrides"></div>
+    </details>
+  </section>
+  </form>
+
+  <div id="messages" aria-live="polite"></div>
+  <div id="outputs"></div>
+
+  <div class="sticky bar">
+    <button type="button" class="primary" id="gen">Generate documents</button>
+    <button type="button" id="saveCase">Save case file</button>
+    <button type="button" id="loadCase">Open case file</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button type="button" class="danger" id="clearAll">Clear form</button>
+  </div>
+  <p class="footer">Wording follows the firm's standard formats. Check each generated document against the current MCA requirements and the client's KYC documents before it is signed.</p>
+</main>
+
+<template id="partnerTpl">
+  <div class="partner">
+    <h3><span class="ptitle">Partner</span> <button type="button" class="link danger rm">Remove</button></h3>
+    <div class="grid">
+      <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
+      <div><label>Designation</label><select data-k="designation"><option>Designated Partner</option><option>Partner</option></select></div>
+      <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
+      <div><label>Father's name (in full) <span class="req">*</span></label><input data-k="father_name" required>
+      </div>
+      <div><label>Husband's name (only if W/o)</label><input data-k="relation_name" placeholder="Leave blank to use father's name">
+        <div class="hint">Printed after S/o / D/o / W/o in the consent letter.</div></div>
+      <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
+      <div><label>PAN <span class="req">*</span></label><input data-k="pan" required maxlength="10" style="text-transform:uppercase"></div>
+      <div><label>Mobile no. <span class="req">*</span></label><input data-k="mobile" required placeholder="+91 9xxxxxxxxx"></div>
+      <div><label>E-mail id <span class="req">*</span></label><input type="email" data-k="email" required></div>
+      <div class="full"><label>Residential address <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
+      <div><label>Occupation</label><input data-k="occupation" value="Business"></div>
+      <div><label>Nationality</label><input data-k="nationality" value="Indian"></div>
+      <div><label>DPIN / DIN</label><input data-k="dpin" placeholder="Leave blank if not yet allotted">
+        <div class="hint">If blank, "NA – NOW APPLIED" is printed.</div></div>
+      <div><label>Proof of address (Form 9 enclosure)</label><input data-k="address_proof" value="AADHAR" list="poa"></div>
+      <div class="full"><label>Body corporate / firm whose nominee the partner is (Form 9 item 11)</label><input data-k="nominee_of" value="NA"></div>
+      <div class="full"><label>Professional membership no. &amp; certificate of practice no. (Form 9 item 12)</label><input data-k="prof_membership" value="NA"></div>
+    </div>
+  </div>
+</template>
+<datalist id="poa"><option value="AADHAR"><option value="PASSPORT"><option value="VOTER ID"><option value="DRIVING LICENCE"><option value="BANK STATEMENT"><option value="ELECTRICITY BILL"></datalist>
+
+<script src="lib/pizzip.min.js"></script>
+<script src="lib/docxtemplater.js"></script>
+<script src="lib/templates.js"></script>
+<script>
+(function(){
+"use strict";
+const form = document.getElementById('f');
+const partnersEl = document.getElementById('partners');
+const tpl = document.getElementById('partnerTpl');
+const DRAFT_KEY = 'llp-docs-draft-v1';
+const TEMPLATE_NAMES = {
+  form9_consent: 'Form 9 – Consent (one per partner)',
+  consent_letter: 'Consent letter (one per partner)',
+  subscription_sheet: 'Subscription sheet',
+  noc_registered_office: 'NOC for registered office'
+};
+const overrides = {};
+
+/* ---------- partners ---------- */
+function addPartner(data){
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  if (data) for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
+  node.querySelector('.rm').addEventListener('click', () => { node.remove(); renumber(); saveDraft(); });
+  partnersEl.appendChild(node);
+  renumber();
+}
+function renumber(){
+  [...partnersEl.children].forEach((p,i)=> p.querySelector('.ptitle').textContent = 'Partner ' + (i+1));
+}
+document.getElementById('addPartner').addEventListener('click', () => addPartner());
+
+/* ---------- property address toggle ---------- */
+const propSame = form.elements.prop_same, propWrap = document.getElementById('propWrap');
+function syncProp(){ propWrap.hidden = propSame.checked; form.elements.property_address.required = !propSame.checked; }
+propSame.addEventListener('change', syncProp);
+
+/* ---------- collect / restore ---------- */
+function collect(){
+  const g = n => form.elements[n].value.trim();
+  return {
+    llp_name: g('llp_name'), llp_address: form.elements.llp_address.value.trim(), place: g('place'),
+    date: g('date'), id_proof: g('id_proof'),
+    owner_name: g('owner_name'), noc_date: g('noc_date'), noc_place: g('noc_place'),
+    prop_same: propSame.checked, property_address: form.elements.property_address.value.trim(),
+    witness_name: g('witness_name'), witness_profession: g('witness_profession'),
+    witness_address: form.elements.witness_address.value.trim(),
+    partners: [...partnersEl.children].map(p => {
+      const o = {}; p.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim()); return o;
+    })
+  };
+}
+function restore(d){
+  for (const [k,v] of Object.entries(d)){
+    if (k === 'partners') continue;
+    const el = form.elements[k]; if (!el) continue;
+    if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+  }
+  partnersEl.innerHTML = '';
+  (d.partners && d.partners.length ? d.partners : [null, null]).forEach(p => addPartner(p));
+  syncProp();
+}
+function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch(e){} }
+form.addEventListener('input', saveDraft);
+form.addEventListener('change', saveDraft);
+
+/* ---------- helpers ---------- */
+const up = s => (s||'').toUpperCase();
+function dmy(iso, sep){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return [d,m,y].join(sep); }
+function ageOn(dobIso, onIso){
+  const b = new Date(dobIso+'T00:00:00'), o = new Date(onIso+'T00:00:00');
+  let a = o.getFullYear() - b.getFullYear();
+  if (o.getMonth() < b.getMonth() || (o.getMonth() === b.getMonth() && o.getDate() < b.getDate())) a--;
+  return a;
+}
+const oneLine = s => (s||'').split(/\r?\n/).map(x=>x.trim().replace(/,$/,'')).filter(Boolean).join(', ');
+const safe = s => (s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+
+/* ---------- validation ---------- */
+function validate(d){
+  const errors = [], warns = [];
+  form.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));
+  form.querySelectorAll('[required]').forEach(el => { if (!el.value.trim()) el.classList.add('invalid'); });
+  if (form.querySelector('.invalid')) errors.push('Please fill in the fields marked in red.');
+  if (d.llp_name && !/(\bLLP|LIMITED LIABILITY PARTNERSHIP)$/i.test(d.llp_name))
+    warns.push('The LLP name does not end with "LLP" or "Limited Liability Partnership" (Section 15(1), LLP Act, 2008).');
+  if (d.partners.length < 2) warns.push('An LLP needs at least two partners (Section 6(1), LLP Act, 2008).');
+  const dps = d.partners.filter(p=>p.designation==='Designated Partner').length;
+  if (dps < 2) warns.push('An LLP needs at least two designated partners who are individuals, at least one of them resident in India (Section 7(1), LLP Act, 2008).');
+  const pans = new Set();
+  [...partnersEl.children].forEach((node,i) => {
+    const p = d.partners[i], n = 'Partner ' + (i+1);
+    const mark = k => node.querySelector(`[data-k="${k}"]`).classList.add('invalid');
+    if (p.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(up(p.pan))) { mark('pan'); errors.push(n + ': the PAN format looks wrong (expected AAAAA9999A).'); }
+    if (p.pan && pans.has(up(p.pan))) { mark('pan'); errors.push(n + ': the same PAN is entered twice.'); }
+    pans.add(up(p.pan));
+    if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
+    if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
+    if (p.dob && d.date) { const a = ageOn(p.dob, d.date); if (a < 18) warns.push(`${n} is ${a} years old on the date of signing.`); }
+  });
+  return {errors, warns};
+}
+
+/* ---------- generation ---------- */
+function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+function render(name, data){
+  const src = overrides[name] || b64ToBytes(window.LLP_TEMPLATES[name]);
+  const doc = new window.docxtemplater(new PizZip(src), { paragraphLoop:true, linebreaks:true, nullGetter: () => '' });
+  doc.render(data);
+  return doc.getZip().generate({ type:'uint8array', compression:'DEFLATE' });
+}
+function common(d){
+  return {
+    llp_name: d.llp_name, llp_name_upper: up(d.llp_name), llp_address: up(d.llp_address),
+    place: d.place, date: dmy(d.date,'/'), date_dash: dmy(d.date,'-'), id_proof: up(d.id_proof || 'PAN')
+  };
+}
+function partnerData(p, d){
+  return Object.assign(common(d), {
+    name: p.name, name_upper: up(p.name), relation: p.relation, father_name: p.father_name,
+    father_name_upper: up(p.father_name), relation_name_upper: up(p.relation_name || p.father_name), dob: dmy(p.dob,'/'), age: ageOn(p.dob, d.date),
+    address: up(p.address), address_inline: up(oneLine(p.address)), email: p.email, mobile: p.mobile,
+    pan: up(p.pan), occupation: p.occupation || 'Business', nationality: p.nationality || 'Indian',
+    dpin: p.dpin || 'NA – NOW APPLIED', nominee_of: p.nominee_of || 'NA', prof_membership: p.prof_membership || 'NA',
+    designation: p.designation, designation_upper: up(p.designation), address_proof: up(p.address_proof || 'AADHAR')
+  });
+}
+function buildAll(d){
+  const files = [];
+  const tag = safe(up(d.llp_name).replace(/\s*(LLP|LIMITED LIABILITY PARTNERSHIP)$/,'')) || 'LLP';
+  const witness = [d.witness_name && up(d.witness_name), d.witness_address && up(d.witness_address), d.witness_profession]
+                    .filter(Boolean).join('\n');
+  d.partners.forEach((p,i) => {
+    const pd = partnerData(p,d), who = safe(up(p.name));
+    files.push({ name:`${tag}_1_Form9_Consent_P${i+1}_${who}.docx`, bytes: render('form9_consent', pd) });
+    files.push({ name:`${tag}_2_Consent_Letter_P${i+1}_${who}.docx`, bytes: render('consent_letter', pd) });
+  });
+  files.push({ name:`${tag}_3_Subscription_Sheet.docx`, bytes: render('subscription_sheet', Object.assign(common(d), {
+    partners: d.partners.map(p => ({ name_upper: up(p.name), designation_upper: up(p.designation), witness_details: witness }))
+  }))});
+  files.push({ name:`${tag}_4_NOC_Registered_Office.docx`, bytes: render('noc_registered_office', Object.assign(common(d), {
+    owner_name: d.owner_name, owner_name_upper: up(d.owner_name),
+    property_address: up(d.prop_same ? d.llp_address : d.property_address),
+    noc_date: dmy(d.noc_date,'-'), noc_place_upper: up(d.noc_place || d.place)
+  }))});
+  return {files, tag};
+}
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+let lastUrls = [];
+function download(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function showMessages(list){
+  const box = document.getElementById('messages'); box.innerHTML = '';
+  list.forEach(([cls, text]) => { const div = document.createElement('div'); div.className = cls; div.textContent = text; box.appendChild(div); });
+}
+document.getElementById('gen').addEventListener('click', () => {
+  const d = collect();
+  const out = document.getElementById('outputs'); out.innerHTML = '';
+  lastUrls.forEach(u => URL.revokeObjectURL(u)); lastUrls = [];
+  const {errors, warns} = validate(d);
+  if (errors.length){ showMessages(errors.map(e=>['m-err',e]).concat(warns.map(w=>['m-warn',w]))); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  let result;
+  try { result = buildAll(d); }
+  catch(e){
+    const det = (e.properties && e.properties.errors) ? e.properties.errors.map(x=>x.properties.explanation).join('; ') : e.message;
+    showMessages([['m-err', 'Could not fill a template: ' + det]]); return;
+  }
+  const zip = new PizZip();
+  result.files.forEach(f => zip.file(f.name, f.bytes));
+  const zipName = `${result.tag}_LLP_Incorporation_Docs.zip`;
+  const zipBlob = zip.generate({ type:'blob', mimeType:'application/zip' });
+  showMessages([['m-ok', `${result.files.length} documents generated. The ZIP file has been downloaded; you can also download each file below.`]].concat(warns.map(w=>['m-warn',w])));
+  const ul = document.createElement('ul');
+  result.files.forEach(f => {
+    const li = document.createElement('li'), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([f.bytes], {type: DOCX})); a.download = f.name; a.textContent = f.name;
+    lastUrls.push(a.href); li.appendChild(a); ul.appendChild(li);
+  });
+  out.appendChild(ul);
+  download(zipName, zipBlob);
+});
+
+/* ---------- case file save / open / clear ---------- */
+document.getElementById('saveCase').addEventListener('click', () => {
+  const d = collect();
+  download((safe(d.llp_name)||'LLP') + '_case.json', new Blob([JSON.stringify(d, null, 2)], {type:'application/json'}));
+});
+const lf = document.getElementById('loadFile');
+document.getElementById('loadCase').addEventListener('click', () => lf.click());
+lf.addEventListener('change', async () => {
+  const file = lf.files[0]; if (!file) return;
+  try { restore(JSON.parse(await file.text())); saveDraft(); showMessages([['m-ok','Case file loaded.']]); }
+  catch(e){ showMessages([['m-err','That file could not be read as a case file.']]); }
+  lf.value = '';
+});
+document.getElementById('clearAll').addEventListener('click', () => {
+  if (!confirm('Clear all entered details?')) return;
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+  form.reset(); restore({}); document.getElementById('outputs').innerHTML=''; showMessages([]);
+  setDefaults();
+});
+
+/* ---------- template overrides ---------- */
+const tplBox = document.getElementById('tplOverrides');
+Object.entries(TEMPLATE_NAMES).forEach(([key,label]) => {
+  const row = document.createElement('div'); row.className = 'tpl-row';
+  const span = document.createElement('span'); span.textContent = label;
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.docx'; inp.style.width = 'auto';
+  const st = document.createElement('em'); st.className = 'hint'; st.textContent = 'built-in';
+  inp.addEventListener('change', async () => {
+    if (!inp.files[0]) { delete overrides[key]; st.textContent = 'built-in'; return; }
+    overrides[key] = new Uint8Array(await inp.files[0].arrayBuffer()); st.textContent = 'custom: ' + inp.files[0].name;
+  });
+  row.append(span, inp, st); tplBox.appendChild(row);
+});
+
+/* ---------- init ---------- */
+function setDefaults(){
+  const today = new Date(); const iso = new Date(today.getTime() - today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  if (!form.elements.date.value) form.elements.date.value = iso;
+  if (!form.elements.noc_date.value) form.elements.noc_date.value = iso;
+}
+let draft = null;
+try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch(e){}
+restore(draft || {});
+setDefaults();
+})();
+</script>
+</body>
+</html>
