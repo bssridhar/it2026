@@ -26,6 +26,7 @@ WRAP = Alignment(wrap_text=True, vertical="top")
 # key, heading, width, required, kind (text/date/list), list values, note
 PARTNER_COLS = [
     ("designation", "Designation", 20, True, "list", ["Designated Partner", "Partner"], ""),
+    ("title", "Title", 8, False, "list", ["Mr.", "Mrs.", "Ms.", "Dr."], ""),
     ("name", "Full name (as per PAN)", 28, True, "text", None, ""),
     ("relation", "Relation", 10, True, "list", ["S/o", "D/o", "W/o"], ""),
     ("father_name", "Father's name (in full)", 28, True, "text", None, ""),
@@ -39,6 +40,11 @@ PARTNER_COLS = [
     ("city", "City / District", 18, True, "text", None, ""),
     ("pin", "PIN code", 10, True, "text", None, ""),
     ("state", "State", 16, False, "text", None, ""),
+    ("gender", "Gender", 12, False, "list", ["Male", "Female", "Transgender"], ""),
+    ("resident", "Resident in India", 10, False, "list", ["Yes", "No"], ""),
+    ("religion", "Religion (LLP Agreement, optional)", 14, False, "text", None, ""),
+    ("contribution", "Contribution (Rs.)", 14, True, "number", None, ""),
+    ("profit_pct", "Profit share % (blank = contribution %)", 14, False, "number", None, ""),
     ("address_proof", "Proof of address", 18, False, "list", ["BANK STATEMENT", "AADHAR", "PASSPORT", "VOTER ID", "DRIVING LICENCE", "ELECTRICITY BILL"], ""),
     ("bank_last_txn", "Date of last transaction in bank statement (DD/MM/YYYY)", 22, False, "date", None, ""),
     ("occupation", "Occupation", 16, False, "text", None, ""),
@@ -65,10 +71,18 @@ LLP_ROWS = [
     ("noc_place", "Place of NOC (blank = place of signing)", False, "text"),
     ("prop_same", "Property address same as registered office? (Yes/No)", False, "yesno"),
     ("prop_addr", "Property address, if different (use Alt+Enter for new lines)", False, "text"),
+    ("llp_email", "E-mail id of LLP (for the data sheet)", False, "text"),
     ("#", "WITNESS (SUBSCRIPTION SHEET)"),
     ("witness_name", "Name of witness", False, "text"),
     ("witness_profession", "Profession, with professional membership no.", False, "text"),
     ("witness_address", "Address of witness", False, "text"),
+    ("#", "LLP AGREEMENT"),
+    ("agreement_date", "Date of agreement (DD/MM/YYYY; blank = fill in by hand)", False, "date"),
+    ("jurisdiction", "Courts at (blank = place of signing)", False, "text"),
+    ("remuneration", "Remuneration to designated partner (Rs. per month)", True, "number"),
+    ("incoming_min", "Minimum contribution of an incoming partner (Rs.)", False, "number"),
+    ("main_business", "Main business (one object per line; Alt+Enter for a new line)", True, "text"),
+    ("other_business", "Other business – Schedule 1 part B (one object per line)", False, "text"),
 ]
 
 N_PARTNER_ROWS = 25
@@ -124,13 +138,19 @@ def build():
             vc.fill = REQ_FILL
         if kind == "date":
             vc.number_format = "DD/MM/YYYY"
+        elif kind == "number":
+            vc.number_format = "#,##,##0"
         else:
             vc.number_format = "@"
+        if key in ("main_business", "other_business"):
+            ws.row_dimensions[r].height = 90
         if kind == "yesno":
             vc.value = "Yes"
             yesno.add(vc)
         if key == "id_proof":
             vc.value = "PAN"
+        if key == "incoming_min":
+            vc.value = 50000
         r += 1
     ws.column_dimensions["A"].hidden = True
     ws.column_dimensions["B"].width = 58
@@ -153,7 +173,7 @@ def build():
         for rr in range(3, N_PARTNER_ROWS + 3):
             c = ps.cell(row=rr, column=i)
             c.border = BOX
-            c.number_format = "DD/MM/YYYY" if kind == "date" else "@"
+            c.number_format = "DD/MM/YYYY" if kind == "date" else ("#,##,##0.##" if kind == "number" else "@")
             if req:
                 c.fill = REQ_FILL
             if key == "designation":

@@ -4,10 +4,16 @@ Fill in one form and get the standard LLP incorporation documents as Word (.docx
 
 | # | Document | Copies |
 |---|----------|--------|
+| 0 | **Print set** – all documents below (except the data sheet) in one Word file, in signing order | one |
 | 1 | Form 9 – Consent to act as designated partner/partner | one per partner |
 | 2 | Consent letter to act as designated partner | one per partner |
 | 3 | Subscription sheet | one, all partners |
 | 4 | NOC from owner of registered office premises | one |
+| 5 | LLP Agreement (firm's standard format) | one |
+| 6 | Data sheet for filing (internal) | one |
+
+Also available from the **Checklist** section: a **request list** of pending documents for the client
+(Word file, or text to paste into an e-mail or message).
 
 ## How to use
 
@@ -43,6 +49,29 @@ Partner: `name`, `name_upper`, `relation`, `relation_name_upper`, `father_name`,
 NOC: `owner_name`, `owner_name_upper`, `property_address`, `noc_date`, `noc_place_upper`
 
 Subscription sheet table rows: `{#partners}` … `{/partners}` with `name_upper`, `designation_upper`, `witness_details`
+
+## LLP Agreement
+
+Section 6 of the form takes the agreement details: date (or blank, to fill in by hand), courts for the
+dispute clause, remuneration to the designated partner, the minimum contribution of an incoming partner,
+the main business (clause 6) and the other business (Schedule 1 part B), one object per line.
+Each partner's **contribution** and **profit share** are entered in section 3; the profit share defaults
+to the contribution percentage and must add up to 100%. Amounts are written in words in the Indian
+system (lakh / crore). The parties, contribution table, profit-sharing table, designated partners
+clause and signature lines grow with the number of partners.
+
+## Print set
+
+`0_PRINT_SET_All_Documents.docx` holds every document to be signed, each starting on a new page with its own
+page size (the subscription sheet stays landscape) and the agreement's "Page x of y" footer counting
+only the agreement's pages. Print this one file instead of opening each document.
+
+## Checklist and request list
+
+Section 7 lists, for each partner, PAN, Aadhaar, bank statement, photograph, mobile/e-mail, DSC and the signed
+consents, and for the LLP the proposed names, proof of registered office, rent agreement, NOC, subscription
+sheet and LLP Agreement. Items received through an upload (or a complete mobile/e-mail) tick themselves.
+Unticked items appear in the data sheet as pending, and the client-facing items go into the request list.
 
 ## Loading the details from Excel (for scanned KYC copies)
 
@@ -103,9 +132,11 @@ against the current MCA (FiLLiP) requirements and the client's KYC before they a
 ## Folder contents
 
 * `index.html` – the web form
-* `templates/` – the Word templates (editable)
+* `templates/` – the Word templates (editable): Form 9, consent letter, subscription sheet, NOC, LLP Agreement,
+  data sheet, request list, and the Excel data template
 * `lib/` – docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0 licence), the embedded templates
-  `extract.js` (reads the PAN, Aadhaar and bank statement PDFs) and `xlsxread.js` (reads the Excel template)
+  `extract.js` (reads the PAN, Aadhaar and bank statement PDFs), `xlsxread.js` (reads the Excel template)
+  and `merge.js` (builds the print set)
 * `tools/build_templates.py` – one-time script that turned the firm's sample documents into templates
   (the samples contained client data and are not kept here)
 * `tools/build_excel_template.py` – builds the Excel data template

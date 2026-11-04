@@ -225,6 +225,8 @@ window.LLPExtract = (function () {
     }
     const mob = doc.text.match(/Mobile\s*(?:No\.?)?\s*[:\-]?\s*(\d{10})\b/i);
     if (mob) f.mobile = mob[1];
+    const g = doc.text.match(/\b(FEMALE|MALE|TRANSGENDER)\b/i);
+    if (g) f.gender = g[1][0].toUpperCase() + g[1].slice(1).toLowerCase();
     if (!f.name && !f.dob) notes.push("This does not look like an e-Aadhaar PDF.");
     return { fields: f, notes };
   }
