@@ -19,6 +19,15 @@ Also from the **Checklist** section: a **request list** of pending documents for
    Shaded fields came from a document; check every field. The address is taken from the bank statement.
 4. Enter the company details, share capital and main objects, the NOC details, and click **Generate documents**.
 
+## Checklist
+
+For each director and subscriber: PAN, Aadhaar, bank statement, photograph, mobile/e-mail, DSC, and two
+information-only items needed for SPICe+ – **educational qualification** and **number of years at the present
+residential address** (no document is asked for; the item ticks itself once the detail is entered). For an OPC
+nominee: PAN, Aadhaar, bank statement, photograph, mobile/e-mail and the signed nominee consent (INC-3).
+For the company: proposed names and main objects, proof of registered office, rent agreement, signed NOC, and
+e-MoA / e-AoA reviewed. Unticked items go into the data sheet and the client request list.
+
 ## Main objects
 
 The **Suggest draft objects** button drafts a main objects clause from standard clause wording (type of activity,

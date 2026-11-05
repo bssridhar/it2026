@@ -207,7 +207,8 @@ button.danger{color:var(--err)}
       <div><label>E-mail id <span class="req">*</span></label><input type="email" data-k="email" required></div>
       <div class="full"><label>Residential address (as per bank statement) <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
       <div><label>Occupation</label><input data-k="occupation" value="Business"></div>
-      <div><label>Educational qualification</label><input data-k="education"></div>
+      <div data-show="ds"><label>Educational qualification</label><input data-k="education" placeholder="e.g. B.Com"></div>
+      <div data-show="ds"><label>Years at present residential address</label><input data-k="years_residence" placeholder="e.g. 5, or 2 years 6 months"></div>
       <div><label>Proof of address</label><input data-k="address_proof" value="BANK STATEMENT" list="poa"></div>
       <div data-show="sub"><label>Number of shares subscribed <span class="req">*</span></label><input type="number" min="1" step="1" data-k="shares" required></div>
       <div data-show="nom"><label>Relationship with member</label><input data-k="nominee_relation" placeholder="e.g. Spouse"></div>
@@ -294,7 +295,7 @@ function makeCard(data){
 function syncRole(node){
   const r = roleOf(node);
   node.querySelectorAll('[data-show]').forEach(w => {
-    const show = w.dataset.show === 'dir' ? isDir(r) : w.dataset.show === 'sub' ? isSub(r) : r === ROLE.N;
+    const show = w.dataset.show === 'dir' ? isDir(r) : w.dataset.show === 'sub' ? isSub(r) : w.dataset.show === 'ds' ? r !== ROLE.N : r === ROLE.N;
     w.hidden = !show;
   });
 }
@@ -550,6 +551,10 @@ const P_ITEMS = [
       const m = n.querySelector('[data-k=mobile]').value, e = n.querySelector('[data-k=email]').value;
       return m.replace(/\D/g,'').length >= 10 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); } },
   { key:'dsc', label:'Digital signature certificate (DSC)', when: r => r !== ROLE.N },
+  { key:'education', label:'Educational qualification (information only, no document)', ask:'Educational qualification (details only; no document needed)',
+    when: r => r !== ROLE.N, auto: n => !!n.querySelector('[data-k=education]').value.trim() },
+  { key:'years', label:'Number of years at present residential address (information only, no document)', ask:'Number of years at the present residential address (details only; no document needed)',
+    when: r => r !== ROLE.N, auto: n => !!n.querySelector('[data-k=years_residence]').value.trim() },
   { key:'inc3', label:'Nominee consent (Form INC-3) signed', when: r => r === ROLE.N },
 ];
 const C_ITEMS = [
@@ -650,7 +655,8 @@ function dataSheetData(d){
         relation: p.relation, relation_name_upper: up(p.relation_name || p.father_name), dob: dmy(p.dob, '/'), age: ageOn(p.dob, today),
         gender: p.gender || '–', nationality: p.nationality || 'Indian', resident: p.resident || 'Yes', pan: up(p.pan),
         din: isDir(p.role) ? (p.din || 'Not allotted') : '–', mobile: p.mobile, email: p.email, address: up(p.address),
-        occupation: p.occupation || '–', education: p.education || '–', id_proof: up(d.id_proof || 'PAN'), address_proof: up(p.address_proof || 'BANK STATEMENT'),
+        occupation: p.occupation || '–', education: p.role !== ROLE.N ? (p.education || '–') : '–',
+        years_residence: p.role !== ROLE.N ? (p.years_residence || '–') : '–', id_proof: up(d.id_proof || 'PAN'), address_proof: up(p.address_proof || 'BANK STATEMENT'),
         shares_text: isSub(p.role) && sh ? `${inr(sh)} equity shares of Rs. ${inr(c.fv)} each = Rs. ${inr(sh * c.fv)}` + (c.subShares ? ` (${pct(sh * 100 / c.subShares)}%)` : '') : '–',
         nominee_relation: p.role === ROLE.N ? (p.nominee_relation || '–') : '–',
         bank_last_txn: (p._docs && p._docs.bank && p._docs.bank.lastTxn) ? fmt(p._docs.bank.lastTxn) : '–'
@@ -817,7 +823,7 @@ function excelToCase(sheets, fname){
       mobile: S(g('mobile')), email: S(g('email')),
       address: addr(g('addr1'), g('addr2'), g('city'), g('pin'), g('state')).toUpperCase(),
       address_proof: S(g('address_proof')) || 'BANK STATEMENT', occupation: S(g('occupation')) || 'Business',
-      education: S(g('education')), nationality: S(g('nationality')) || 'Indian',
+      education: S(g('education')), years_residence: S(g('years_residence')), nationality: S(g('nationality')) || 'Indian',
       resident: /^n/i.test(S(g('resident'))) ? 'No' : 'Yes',
       title: ['Mr.','Mrs.','Ms.','Dr.'].find(t => t.toLowerCase() === S(g('title')).toLowerCase().replace(/\.?$/, '.')) || (rel === 'W/o' ? 'Mrs.' : rel === 'D/o' ? 'Ms.' : 'Mr.'),
       gender: ['Male','Female','Transgender'].find(x => x.toLowerCase() === S(g('gender')).toLowerCase()) || '',

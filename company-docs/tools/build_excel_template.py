@@ -46,6 +46,7 @@ PERSON_COLS = [
     ("city", "City / District", 18, True, "text", None),
     ("pin", "PIN code", 10, True, "text", None),
     ("state", "State", 16, False, "text", None),
+    ("years_residence", "Years at present address (e.g. 5)", 14, False, "text", None),
     ("address_proof", "Proof of address", 18, False, "list", ["BANK STATEMENT", "AADHAR", "PASSPORT", "VOTER ID", "DRIVING LICENCE", "ELECTRICITY BILL"]),
     ("bank_last_txn", "Date of last transaction in bank statement (DD/MM/YYYY)", 22, False, "date", None),
     ("occupation", "Occupation", 16, False, "text", None),

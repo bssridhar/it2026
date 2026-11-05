@@ -105,6 +105,7 @@ def build_datasheet():
         ("DIN", "{din}"),
         ("Mobile no. / e-mail id", "{mobile} / {email}"),
         ("Residential address", "{address}"),
+        ("Years at present residential address", "{years_residence}"),
         ("Occupation / educational qualification", "{occupation} / {education}"),
         ("Proof of identity / address", "{id_proof} / {address_proof}"),
         ("Shares subscribed", "{shares_text}"),
