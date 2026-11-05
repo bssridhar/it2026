@@ -17,7 +17,7 @@ Also available from the **Checklist** section: a **request list** of pending doc
 
 ## How to use
 
-1. Download or clone this folder (`llp-docs`) to your computer.
+1. Download or clone the repository. Keep the `llp-docs` and `shared` folders side by side; the tool uses both.
 2. Double-click `index.html`. It opens in Chrome, Edge or Firefox. You don't need internet access or a server.
 3. Enter the number of designated partners and other partners, and click **Set up partner forms**.
 4. For each partner, upload the **PAN**, **Aadhaar** and **bank statement** PDFs. The fields fill in
@@ -148,9 +148,10 @@ against the current MCA (FiLLiP) requirements and the client's KYC before they a
 * `index.html` – the web form
 * `templates/` – the Word templates (editable): Form 9, consent letter, subscription sheet, NOC, LLP Agreement,
   data sheet, request list, and the Excel data template
-* `lib/` – docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0 licence), the embedded templates
-  `extract.js` (reads the PAN, Aadhaar and bank statement PDFs), `xlsxread.js` (reads the Excel template)
-  `merge.js` (builds the print set) and `objects.js` (suggests the draft objects clause)
+* `lib/templates.js` – the templates, embedded so the page works when opened from disk
+* `../shared/` – code shared with the company tool: docxtemplater, PizZip (MIT licence), pdf.js (Apache 2.0
+  licence), `extract.js` (reads the PAN, Aadhaar and bank statement PDFs), `xlsxread.js` (reads the Excel
+  template), `merge.js` (builds the print set) and `objects.js` (suggests the draft objects clause)
 * `tools/build_templates.py` – one-time script that turned the firm's sample documents into templates
   (the samples contained client data and are not kept here)
 * `tools/build_excel_template.py` – builds the Excel data template
