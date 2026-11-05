@@ -9,15 +9,11 @@ window.HOME_CONFIG = {
   // Shown at the top of the page. Replace with your firm's name.
   firmName: "B S Sridhar & Co., Chartered Accountants",
   // A short line under the firm name.
-  // Web-app link of the DSC Register on Google (see dsc-register/SETUP.md). Paste it between the quotes.
-  dscAppUrl: "",
-
   tagline: "Practice tool kit – for internal use",
 
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
-    "New: DSC Register – expiry report, reminders, renewals and DSC movement.",
     "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
     "New: Company Registration Tool Kit – Private Limited and One Person Company.",
     "LLP Registration Tool Kit now includes the LLP Agreement, print set, checklist and client request list.",
@@ -25,7 +21,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Practice management"],
+  categories: ["Registration", "Agreements"],
 
   tools: [
     {
@@ -53,15 +49,6 @@ window.HOME_CONFIG = {
       path: "partnership-docs/index.html",
       status: "available",
       description: "Partnership deed in the firm's format, NOC for the place of business, data sheet, checklist and client request list. Reads PAN, Aadhaar and bank statement PDFs or an Excel sheet.",
-      added: "2026-11-05"
-    },
-    {
-      id: "dsc",
-      title: "DSC Register",
-      category: "Practice management",
-      path: "dsc-register/index.html",
-      status: "available",
-      description: "Clients' digital signatures: expiry report (expired / due in 15 days), WhatsApp and e-mail reminders, renewals, and movement in and out of the office with acknowledgement slips. Live register kept in the firm's Google Sheet.",
       added: "2026-11-05"
     }
   ]
