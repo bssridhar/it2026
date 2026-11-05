@@ -14,7 +14,6 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
-    "New: Financial Projections – statements, loan schedules, MPBF and ratio analysis, with Excel output.",
     "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
     "New: Company Registration Tool Kit – Private Limited and One Person Company.",
     "LLP Registration Tool Kit now includes the LLP Agreement, print set, checklist and client request list.",
@@ -22,7 +21,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Finance"],
+  categories: ["Registration", "Agreements"],
 
   tools: [
     {
@@ -50,15 +49,6 @@ window.HOME_CONFIG = {
       path: "partnership-docs/index.html",
       status: "available",
       description: "Partnership deed in the firm's format, NOC for the place of business, data sheet, checklist and client request list. Reads PAN, Aadhaar and bank statement PDFs or an Excel sheet.",
-      added: "2026-11-05"
-    },
-    {
-      id: "projections",
-      title: "Financial Projections",
-      category: "Finance",
-      path: "projections/index.html",
-      status: "available",
-      description: "Projected P&L, balance sheet, cash flow, depreciation, term loan and CC interest schedules, MPBF assessment, ratio analysis and DSCR – exported to Excel.",
       added: "2026-11-05"
     }
   ]
