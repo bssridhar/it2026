@@ -7,7 +7,7 @@
  */
 window.HOME_CONFIG = {
   // Shown at the top of the page. Replace with your firm's name.
-  firmName: "Your Firm Name",
+  firmName: "B S Sridhar & Co., Chartered Accountants",
   // A short line under the firm name.
   tagline: "Practice tool kit – for internal use",
 
