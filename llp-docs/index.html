@@ -236,8 +236,8 @@ details summary{cursor:pointer;color:var(--muted)}
       <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
       <div><label>Designation</label><select data-k="designation"><option>Designated Partner</option><option>Partner</option></select></div>
       <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
-      <div><label>Father's name (in full) <span class="req">*</span></label><input data-k="father_name" required></div>
-      <div><label>Husband's name (only if W/o)</label><input data-k="relation_name" placeholder="Leave blank to use father's name">
+      <div><label>Father's name (in full) <span class="req" data-req="father">*</span></label><input data-k="father_name" required></div>
+      <div><label>Husband's name (only if W/o) <span class="req" data-req="husband" hidden>*</span></label><input data-k="relation_name" placeholder="Required if W/o">
         <div class="hint">Printed after S/o / D/o / W/o in the consent letter.</div></div>
       <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
       <div><label>PAN <span class="req">*</span></label><input data-k="pan" required maxlength="10" style="text-transform:uppercase"></div>
@@ -291,6 +291,15 @@ const overrides = {};
 const X = window.LLPExtract;
 
 /* ================= partner cards ================= */
+/** W/o: husband's name is required and father's name is optional; otherwise the reverse. */
+function syncRelation(node){
+  const w = node.querySelector('[data-k=relation]').value === 'W/o';
+  const f = node.querySelector('[data-k=father_name]'), h = node.querySelector('[data-k=relation_name]');
+  f.required = !w; h.required = w;
+  node.querySelector('[data-req=father]').hidden = w; node.querySelector('[data-req=husband]').hidden = !w;
+  (w ? f : h).classList.remove('invalid');
+}
+document.getElementById('partners').addEventListener('change', e => { if (e.target.dataset.k === 'relation') syncRelation(e.target.closest('.partner')); });
 function makeCard(data){
   const node = tpl.content.firstElementChild.cloneNode(true);
   node._docs = {};
@@ -313,6 +322,7 @@ function makeCard(data){
     if (prev) setStatus(node, kind, prev.statusCls, prev.status);
   });
   node.addEventListener('input', e => { if (e.target.dataset.k && node._auto[e.target.dataset.k] !== e.target.value) e.target.classList.remove('auto'); });
+  syncRelation(node);
   return node;
 }
 function renumber(){
@@ -406,6 +416,7 @@ function applyDocs(node){
     const untouched = !el.value.trim() || el.value === node._auto[k] || el.value === dflt;
     if (untouched){ el.value = v; node._auto[k] = v; el.classList.add('auto'); el.classList.remove('invalid'); }
   }
+  syncRelation(node);
 }
 
 /* ================= checks (shown at the end of the screen) ================= */
@@ -577,6 +588,7 @@ function validate(d){
     if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
     if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
     if (p.address && !/\b\d{3}\s?\d{3}\b/.test(p.address)) warns.push(n + ': the address has no 6-digit PIN code.');
+    if (p.relation === 'W/o' && !p.father_name) warns.push(n + `: father's name not entered. Form 9 (item 3) asks for the father's name, so it will be left blank there. MCA forms ask for the father's name for married women too.`);
     if (p.dob && d.date) { const a = ageOn(p.dob, d.date); if (a < 18) warns.push(`${n} is ${a} years old on the date of signing.`); }
     if (p.contribution !== '' && !(Number(p.contribution) > 0)) { mark('contribution'); errors.push(n + ': the contribution must be more than zero.'); }
   });

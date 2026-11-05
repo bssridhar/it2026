@@ -198,8 +198,8 @@ button.danger{color:var(--err)}
       <div><label>Title</label><select data-k="title"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option></select></div>
       <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
       <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
-      <div><label>Father's name (in full) <span class="req">*</span></label><input data-k="father_name" required></div>
-      <div><label>Husband's name (only if W/o)</label><input data-k="relation_name"></div>
+      <div><label>Father's name (in full) <span class="req" data-req="father">*</span></label><input data-k="father_name" required></div>
+      <div><label>Husband's name (only if W/o) <span class="req" data-req="husband" hidden>*</span></label><input data-k="relation_name"></div>
       <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
       <div><label>Gender</label><select data-k="gender"><option value="">–</option><option>Male</option><option>Female</option><option>Transgender</option></select></div>
       <div><label>Nationality</label><input data-k="nationality" value="Indian"></div>
@@ -278,6 +278,15 @@ const inr = n => (Math.round(Number(n) || 0)).toLocaleString('en-IN');
 const pct = x => String(Math.round(x * 100) / 100);
 
 /* ================= person cards ================= */
+/** W/o: husband's name is required and father's name is optional; otherwise the reverse. */
+function syncRelation(node){
+  const w = node.querySelector('[data-k=relation]').value === 'W/o';
+  const f = node.querySelector('[data-k=father_name]'), h = node.querySelector('[data-k=relation_name]');
+  f.required = !w; h.required = w;
+  node.querySelector('[data-req=father]').hidden = w; node.querySelector('[data-req=husband]').hidden = !w;
+  (w ? f : h).classList.remove('invalid');
+}
+document.getElementById('partners').addEventListener('change', e => { if (e.target.dataset.k === 'relation') syncRelation(e.target.closest('.partner')); });
 function makeCard(data){
   const node = tpl.content.firstElementChild.cloneNode(true);
   data = data || {};
@@ -293,6 +302,7 @@ function makeCard(data){
   });
   node.addEventListener('input', e => { if (e.target.dataset.k && node._auto[e.target.dataset.k] !== e.target.value) e.target.classList.remove('auto'); });
   syncRole(node);
+  syncRelation(node);
   return node;
 }
 function syncRole(node){
@@ -398,6 +408,7 @@ function applyDocs(node){
     const dflt = el.tagName === 'SELECT' ? el.options[0].value : el.defaultValue;
     if (!el.value.trim() || el.value === node._auto[k] || el.value === dflt){ el.value = v; node._auto[k] = v; el.classList.add('auto'); el.classList.remove('invalid'); }
   }
+  syncRelation(node);
 }
 function bankFresh(n){
   const b = n._docs && n._docs.bank;
@@ -539,6 +550,7 @@ function validate(d){
     if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
     if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
     if (p.address && !/\b\d{3}\s?\d{3}\b/.test(p.address)) warns.push(n + ': the address has no 6-digit PIN code.');
+    if (p.relation === 'W/o' && !p.father_name) warns.push(n + `: father's name not entered. MCA forms (SPICe+ / DIN) ask for the father's name for married women too; it will be blank in the data sheet.`);
     if (p.dob) { const a = ageOn(p.dob, todayIso()); if (a < 18) warns.push(`${n} is ${a} years old.`); }
   });
   return {errors, warns};
