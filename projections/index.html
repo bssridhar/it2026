@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financial Projections</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff; --head:#eef1f6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --head:#232833;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --head:#232833;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
+h1{font-size:1.45rem;margin:4px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+section.card h2{font-size:1.05rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox],input[type=radio]{width:auto}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)}
+.radio{display:flex;gap:16px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.9rem;margin:0}
+.u{font-size:.78rem;color:var(--muted)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.yr{border-collapse:collapse;min-width:100%;font-size:.88rem}
+table.yr th,table.yr td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.yr th:first-child,table.yr td:first-child{text-align:left;white-space:normal;min-width:170px}
+table.yr thead th{background:var(--head);font-weight:600}
+table.yr input{width:96px;padding:5px 6px;text-align:right}
+table.yr input.name{width:170px;text-align:left}
+.sub-card{border:1px dashed var(--line);border-radius:8px;padding:12px;margin:10px 0}
+.sub-card h3{margin:0 0 8px;font-size:.95rem;display:flex;justify-content:space-between;align-items:center}
+button{font:inherit;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)}
+.m-warn{background:var(--warn-bg);color:var(--warn)}
+.m-ok{background:var(--ok-bg);color:var(--ok)}
+.msgs button{margin-left:8px;padding:3px 10px;font-size:.85rem}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 10px}
+.tabs button{padding:6px 10px;font-size:.86rem}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+table.st{border-collapse:collapse;width:100%;font-size:.88rem}
+table.st th,table.st td{padding:4px 8px;text-align:right;white-space:nowrap}
+table.st th:first-child,table.st td:first-child{text-align:left;white-space:normal;min-width:240px}
+table.st thead th{background:var(--head);border-bottom:1px solid var(--line)}
+table.st tr.head td{font-weight:700;padding-top:10px}
+table.st tr.total td{font-weight:700;border-top:1px solid var(--line)}
+table.st td.bad{background:var(--err-bg);color:var(--err);font-weight:700}
+table.st td.bench{color:var(--muted);font-size:.8rem}
+.stnote{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+.st-title{font-weight:700;margin:4px 0 2px}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line);z-index:2}
+details summary{cursor:pointer;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 12px}
+.kpi{background:var(--bg);border-radius:8px;padding:10px 12px}
+.kpi b{display:block;font-size:1.1rem}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.kpi.bad b{color:var(--err)}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  main > *:not(#printArea){display:none!important}
+  #printArea{display:block}
+  .pst{page-break-after:always}
+  table.st{font-size:9pt} table.st td.bad{background:#fde2e2;color:#a32020}
+  table.st thead th{background:#e3e8f0}
+}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Financial Projections</h1>
+  <p class="sub">Projected profitability statement, balance sheet (cash & bank as the balancing figure), cash flow, fixed assets, loan and interest schedules, working capital and MPBF assessment, ratio analysis and DSCR. Results update as you type. Everything runs in this browser.</p>
+
+  <form id="f" novalidate autocomplete="off">
+  <section class="card">
+    <h2>1. General</h2>
+    <div class="grid">
+      <div class="full"><label>Name of the concern</label><input name="name" placeholder="e.g. ABC AGRO PRODUCTS LLP"></div>
+      <div><label>Constitution</label><select name="constitution"><option>Proprietorship</option><option>Partnership firm</option><option>LLP</option><option>Company</option></select></div>
+      <div><label>First year of projection (FY)</label><select name="fy"></select></div>
+      <div><label>Number of years</label><select name="N"><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+      <div><label>Enter and show amounts in</label>
+        <div class="radio"><label><input type="radio" name="unit" value="thousands" checked> Rs. '000s</label><label><input type="radio" name="unit" value="lakhs"> Rs. lakhs</label></div>
+        <div class="hint">Switching converts the amounts already entered.</div></div>
+      <div><label>Tax rate (% of profit before tax)</label><input type="number" step="0.01" name="taxRate" value="31.2">
+        <div class="hint" id="taxHint"></div></div>
+      <div><label>Minimum cash & bank balance <span class="u unit"></span></label><input type="number" step="0.01" name="minCash" value="0"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Opening position (start of the first year)</h2>
+    <label class="check"><input type="checkbox" name="newBusiness"> New business – no opening balance sheet</label>
+    <div class="grid" id="openingGrid" style="margin-top:10px">
+      <div><label>Capital <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.capital"></div>
+      <div><label>Unsecured loans <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.unsecured"></div>
+      <div><label>Interest on unsecured loans (% p.a.)</label><input type="number" step="0.01" name="unsecuredRate" value="0"></div>
+      <div><label>Trade creditors <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.creditors"></div>
+      <div><label>Other current liabilities & provisions <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.otherCL"></div>
+      <div><label>Stock <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.stock"></div>
+      <div><label>Trade debtors <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.debtors"></div>
+      <div><label>Loans, advances & other current assets <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.otherCA"></div>
+      <div><label>Investments / other non-current assets <span class="u unit"></span></label><input type="number" step="0.01" data-p="opening.investments"></div>
+      <div class="full hint" id="openCashNote"></div>
+    </div>
+    <p class="hint">Fixed assets, existing term loans and the existing cash credit balance are entered in sections 5 and 6. Opening cash & bank is worked out as the balancing figure.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Turnover and costs</h2>
+    <div class="grid">
+      <div><label>Turnover – first year <span class="u unit"></span></label><input type="number" step="0.01" name="sales1"></div>
+      <div><label>Increase in turnover every year (%)</label><input type="number" step="0.01" name="growthAll" value="10">
+        <div class="hint">Applied to every year; change single years in section 7.</div></div>
+      <div><label>Cost of purchases (% of turnover)</label><input type="number" step="0.01" name="purchasePct"></div>
+      <div><label>Other direct expenses (% of turnover)</label><input type="number" step="0.01" name="directPct" value="0"></div>
+      <div><label>Other income (% of turnover)</label><input type="number" step="0.01" name="otherIncomePct" value="0"></div>
+      <div><label>Salaries & wages – first year <span class="u unit"></span></label><input type="number" step="0.01" name="salaries1" value="0"></div>
+      <div><label>Increase in salaries every year (%)</label><input type="number" step="0.01" name="salaryGrowth" value="10"></div>
+      <div><label>Administrative & selling expenses (% of turnover)</label><input type="number" step="0.01" name="adminPct" value="0"></div>
+      <div><label>Rent & other fixed expenses – first year <span class="u unit"></span></label><input type="number" step="0.01" name="fixedExp1" value="0"></div>
+      <div><label>Increase in fixed expenses every year (%)</label><input type="number" step="0.01" name="fixedGrowth" value="5"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. Working capital</h2>
+    <div class="grid">
+      <div><label>Debtors outstanding (days of turnover)</label><input type="number" step="1" name="debtorDays" value="60"></div>
+      <div><label>Creditors outstanding (days of purchases)</label><input type="number" step="1" name="creditorDays" value="30"></div>
+      <div><label>Stock in trade (days of purchases)</label><input type="number" step="1" name="stockDays" value="60"></div>
+      <div><label>Loans, advances & other current assets each year <span class="u unit"></span></label><input type="number" step="0.01" name="otherCA" value="0"></div>
+      <div><label>Other current liabilities & provisions each year <span class="u unit"></span></label><input type="number" step="0.01" name="otherCL" value="0"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Fixed assets (written down value method)</h2>
+    <div class="tw"><table class="yr" id="faTable"></table></div>
+    <div class="bar" style="margin-top:8px"><button type="button" class="link" id="addBlock">+ Add block of assets</button></div>
+    <label class="check" style="margin-top:6px"><input type="checkbox" name="halfOnAdditions"> Charge half the rate on additions in the year of addition</label>
+  </section>
+
+  <section class="card">
+    <h2>6. Bank finance</h2>
+    <div class="radio" id="loanType">
+      <label><input type="radio" name="loanType" value="none" checked> No bank loan</label>
+      <label><input type="radio" name="loanType" value="cc"> Working capital loan (cash credit)</label>
+      <label><input type="radio" name="loanType" value="tl"> Term loan</label>
+      <label><input type="radio" name="loanType" value="both"> Both</label>
+    </div>
+    <div class="sub-card" id="ccBox" hidden>
+      <h3>Cash credit</h3>
+      <div class="grid">
+        <div><label>MPBF assessment method</label><select name="ccMethod"><option value="turnover">Turnover method (20% of turnover)</option><option value="tandon2">Second method of lending (Tandon)</option></select></div>
+        <div><label>Cash credit limit</label><select name="ccMode"><option value="amount">Enter the limit</option><option value="mpbf">Equal to MPBF each year</option></select></div>
+        <div id="ccLimitWrap"><label>Limit <span class="u unit"></span></label><input type="number" step="0.01" name="ccLimit"></div>
+        <div><label>Interest rate (% p.a.)</label><input type="number" step="0.01" name="ccRate" value="10.5"></div>
+        <div><label>Average utilisation (%)</label><input type="number" step="1" name="ccUtil" value="100"></div>
+        <div><label>Existing cash credit balance at start <span class="u unit"></span></label><input type="number" step="0.01" name="ccOpenBal" value="0"></div>
+      </div>
+      <p class="hint">Interest = limit × utilisation × rate. The turnover method is commonly used for limits up to Rs. 5 crore; the second method of lending keeps the borrower's margin at 25% of current assets.</p>
+    </div>
+    <div class="sub-card" id="tlBox" hidden>
+      <h3>Term loans <button type="button" class="link" id="addLoan">+ Add loan</button></h3>
+      <div id="loans"></div>
+      <p class="hint">Interest is calculated monthly on the reducing balance. A new loan is disbursed in the first month of the chosen year; interest during the moratorium is paid as it falls due.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>7. Year-wise inputs</h2>
+    <div class="tw"><table class="yr" id="yearTable"></table></div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Ratio benchmarks (typical lender norms – edit to suit the lender)</summary>
+      <div class="grid" style="margin-top:10px">
+        <div><label>Current ratio – minimum</label><input type="number" step="0.01" data-b="currentRatio" value="1.33"></div>
+        <div><label>NWC to current assets – minimum (%)</label><input type="number" step="1" data-b="nwcToCa" data-pct="1" value="25"></div>
+        <div><label>Debt-equity – maximum</label><input type="number" step="0.01" data-b="debtEquity" value="2"></div>
+        <div><label>TOL / TNW – maximum</label><input type="number" step="0.01" data-b="tolTnw" value="3"></div>
+        <div><label>DSCR – minimum in any year</label><input type="number" step="0.01" data-b="dscrYear" value="1.25"></div>
+        <div><label>DSCR – minimum average</label><input type="number" step="0.01" data-b="dscrAvg" value="1.5"></div>
+        <div><label>Interest coverage – minimum</label><input type="number" step="0.01" data-b="icr" value="2"></div>
+        <div><label>Fixed asset coverage – minimum</label><input type="number" step="0.01" data-b="facr" value="1.25"></div>
+        <div><label>Break-even sales – maximum (% of turnover)</label><input type="number" step="1" data-b="bepPct" data-pct="1" value="80"></div>
+      </div>
+    </details>
+  </section>
+  </form>
+
+  <section class="card" id="results">
+    <h2>Results</h2>
+    <div class="kpis" id="kpis"></div>
+    <div id="checks" class="msgs"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="tabBody"></div>
+  </section>
+
+  <div id="printArea"></div>
+
+  <div class="sticky bar">
+    <button type="button" class="primary" id="dlXlsx">Download Excel</button>
+    <button type="button" id="printBtn">Print / save as PDF</button>
+    <button type="button" id="saveCase">Save case file</button>
+    <button type="button" id="loadCase">Open case file</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button type="button" class="danger" id="clearAll">Clear</button>
+  </div>
+  <p class="hint">Projections are estimates based on the assumptions entered; review them with the client before they are given to a lender.</p>
+</main>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/xlsxwrite.js"></script>
+<script src="lib/engine.js"></script>
+<script src="lib/report.js"></script>
+<script>
+(function(){
+"use strict";
+const form = document.getElementById('f');
+const DRAFT_KEY = 'projections-draft-v1';
+const E = window.FPEngine, REP = window.FPReport;
+const $ = s => document.querySelector(s);
+const num = v => Number(v) || 0;
+const fmtN = v => (v === null || v === undefined || !isFinite(v)) ? '–' : Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const unitLabel = () => form.elements.unit.value === 'lakhs' ? 'Rs. in lakhs' : "Rs. in '000s";
+
+/* ---------- state for repeating parts ---------- */
+let blocks = [], loans = [], growth = [], capitalIn = [], drawings = [];
+const N = () => Number(form.elements.N.value) || 5;
+function fyLabels(){ const y0 = Number(form.elements.fy.value); return Array.from({ length: N() }, (_, i) => `${y0 + i}-${String((y0 + i + 1) % 100).padStart(2, '0')}`); }
+function fit(arr, fill){ const n = N(); arr.length = Math.min(arr.length, n); while (arr.length < n) arr.push(fill); return arr; }
+
+// FY choices around today
+(function(){
+  const now = new Date(); const cur = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+  for (let y = cur - 2; y <= cur + 5; y++) form.elements.fy.add(new Option(`${y}-${String((y + 1) % 100).padStart(2, '0')}`, y));
+  form.elements.fy.value = cur;
+})();
+
+/* ---------- fixed asset table ---------- */
+function renderFA(){
+  const t = $('#faTable'), L = fyLabels();
+  blocks.forEach(b => fit(b.add, 0));
+  t.innerHTML = `<thead><tr><th>Block of assets</th><th>Dep. rate %</th><th>Opening WDV</th>${L.map(l => `<th>Additions ${l}</th>`).join('')}<th></th></tr></thead>`;
+  const tb = document.createElement('tbody');
+  blocks.forEach((b, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><input class="name" data-b-i="${i}" data-f="name"></td><td><input type="number" step="0.01" data-b-i="${i}" data-f="rate"></td>` +
+      `<td><input type="number" step="0.01" data-b-i="${i}" data-f="open"></td>` + L.map((_, y) => `<td><input type="number" step="0.01" data-b-i="${i}" data-f="add" data-y="${y}"></td>`).join('') +
+      `<td><button type="button" class="link danger" data-rm-block="${i}">Remove</button></td>`;
+    tr.querySelectorAll('input').forEach(inp => { const f = inp.dataset.f; inp.value = f === 'add' ? (b.add[inp.dataset.y] || '') : (b[f] ?? ''); });
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+$('#faTable').addEventListener('input', e => {
+  const el = e.target; if (el.dataset.bI === undefined) return;
+  const b = blocks[el.dataset.bI];
+  if (el.dataset.f === 'add') b.add[el.dataset.y] = el.value; else b[el.dataset.f] = el.value;
+  update();
+});
+$('#faTable').addEventListener('click', e => { const i = e.target.dataset.rmBlock; if (i !== undefined) { blocks.splice(i, 1); renderFA(); update(); } });
+$('#addBlock').addEventListener('click', () => { blocks.push({ name: 'New block', rate: 15, open: 0, add: [] }); renderFA(); update(); });
+
+/* ---------- loans ---------- */
+function renderLoans(){
+  const box = $('#loans'); box.innerHTML = '';
+  loans.forEach((l, i) => {
+    const d = document.createElement('div'); d.className = 'sub-card';
+    d.innerHTML = `<h3><span>Loan ${i + 1}</span><button type="button" class="link danger" data-rm-loan="${i}">Remove</button></h3>
+      <div class="grid">
+        <div><label>Name</label><input data-l="${i}" data-f="name"></div>
+        <div><label>Type</label><select data-l="${i}" data-f="existing"><option value="">New loan</option><option value="1">Existing loan</option></select></div>
+        <div><label>${l.existing ? 'Outstanding at start' : 'Loan amount'} <span class="u unit"></span></label><input type="number" step="0.01" data-l="${i}" data-f="amount"></div>
+        <div ${l.existing ? 'hidden' : ''}><label>Disbursed in year</label><select data-l="${i}" data-f="startYear">${fyLabels().map((lb, y) => `<option value="${y + 1}">Year ${y + 1} (${lb})</option>`).join('')}</select></div>
+        <div><label>Interest rate (% p.a.)</label><input type="number" step="0.01" data-l="${i}" data-f="rate"></div>
+        <div ${l.existing ? 'hidden' : ''}><label>Moratorium (months)</label><input type="number" step="1" data-l="${i}" data-f="morat"></div>
+        <div><label>${l.existing ? 'Remaining repayment (months)' : 'Repayment period after moratorium (months)'}</label><input type="number" step="1" data-l="${i}" data-f="repay"></div>
+        <div><label>Repayment</label><select data-l="${i}" data-f="method"><option value="epi">Equal monthly principal + interest</option><option value="emi">Equated monthly instalments (EMI)</option></select></div>
+      </div>`;
+    d.querySelectorAll('[data-f]').forEach(el => { const v = l[el.dataset.f]; el.value = el.dataset.f === 'existing' ? (v ? '1' : '') : (v ?? ''); });
+    box.appendChild(d);
+  });
+  unitTags();
+}
+$('#loans').addEventListener('input', e => { loanField(e.target); });
+$('#loans').addEventListener('change', e => { if (loanField(e.target) === 'existing') renderLoans(); });
+function loanField(el){
+  if (el.dataset.l === undefined) return;
+  const l = loans[el.dataset.l], f = el.dataset.f;
+  l[f] = f === 'existing' ? !!el.value : el.value;
+  update(); return f;
+}
+$('#loans').addEventListener('click', e => { const i = e.target.dataset.rmLoan; if (i !== undefined) { loans.splice(i, 1); renderLoans(); update(); } });
+$('#addLoan').addEventListener('click', () => { loans.push({ name: `Term loan ${loans.length + 1}`, existing: false, amount: '', startYear: 1, rate: 10.5, morat: 6, repay: 60, method: 'epi' }); renderLoans(); update(); });
+
+/* ---------- year-wise table ---------- */
+function renderYears(){
+  const L = fyLabels();
+  fit(growth, form.elements.growthAll.value); fit(capitalIn, ''); fit(drawings, '');
+  const row = (label, key, arr, first) => `<tr><td>${label}</td>${L.map((_, y) => y === 0 && first ? '<td>–</td>' : `<td><input type="number" step="0.01" data-arr="${key}" data-y="${y}" value="${arr[y] ?? ''}"></td>`).join('')}</tr>`;
+  $('#yearTable').innerHTML = `<thead><tr><th>Particulars</th>${L.map(l => `<th>${l}</th>`).join('')}</tr></thead><tbody>` +
+    row('Increase in turnover (%)', 'growth', growth, true) +
+    row(`Capital introduced <span class="u unit"></span>`, 'capitalIn', capitalIn) +
+    row(`Drawings / withdrawals / dividend <span class="u unit"></span>`, 'drawings', drawings) + '</tbody>';
+  unitTags();
+}
+$('#yearTable').addEventListener('input', e => {
+  const el = e.target; if (!el.dataset.arr) return;
+  ({ growth, capitalIn, drawings })[el.dataset.arr][el.dataset.y] = el.value; update();
+});
+form.elements.growthAll.addEventListener('input', () => { growth = growth.map(() => form.elements.growthAll.value); renderYears(); });
+
+/* ---------- show / hide ---------- */
+function syncVisibility(){
+  const lt = form.elements.loanType.value;
+  $('#ccBox').hidden = !(lt === 'cc' || lt === 'both');
+  $('#tlBox').hidden = !(lt === 'tl' || lt === 'both');
+  $('#ccLimitWrap').hidden = form.elements.ccMode.value === 'mpbf';
+  const nb = form.elements.newBusiness.checked;
+  $('#openingGrid').querySelectorAll('input').forEach(i => i.disabled = nb);
+  if ((lt === 'tl' || lt === 'both') && !loans.length) { loans.push({ name: 'Term loan 1', existing: false, amount: '', startYear: 1, rate: 10.5, morat: 6, repay: 60, method: 'epi' }); renderLoans(); }
+}
+const TAX = { 'Company': [25.17, 'Company opting for Section 115BAA: 22% + 10% surcharge + 4% cess = 25.17%. Change if another rate applies.'],
+  'LLP': [31.2, '30% + 4% cess = 31.2%; surcharge of 12% applies if income exceeds Rs. 1 crore.'],
+  'Partnership firm': [31.2, '30% + 4% cess = 31.2%; surcharge of 12% applies if income exceeds Rs. 1 crore.'],
+  'Proprietorship': [31.2, 'Enter the proprietor\'s effective slab rate.'] };
+form.elements.constitution.addEventListener('change', () => { const t = TAX[form.elements.constitution.value]; form.elements.taxRate.value = t[0]; $('#taxHint').textContent = t[1]; update(); });
+function unitTags(){ document.querySelectorAll('.unit').forEach(s => s.textContent = form.elements.unit.value === 'lakhs' ? '(Rs. lakhs)' : "(Rs. '000s)"); }
+
+/* ---------- unit conversion ---------- */
+let lastUnit = 'thousands';
+const AMOUNT_NAMES = ['minCash','sales1','salaries1','fixedExp1','otherCA','otherCL','ccLimit','ccOpenBal'];
+function convertUnits(){
+  const to = form.elements.unit.value; if (to === lastUnit) return;
+  const k = to === 'lakhs' ? 0.01 : 100;
+  const c = v => (v === '' || v === undefined || v === null) ? v : String(Math.round(num(v) * k * 100) / 100);
+  AMOUNT_NAMES.forEach(n => form.elements[n].value = c(form.elements[n].value));
+  document.querySelectorAll('[data-p^="opening."]').forEach(i => i.value = c(i.value));
+  blocks.forEach(b => { b.open = c(b.open); b.add = b.add.map(c); });
+  loans.forEach(l => l.amount = c(l.amount));
+  capitalIn = capitalIn.map(c); drawings = drawings.map(c);
+  lastUnit = to; renderFA(); renderLoans(); renderYears(); update();
+}
+
+/* ---------- collect ---------- */
+function collect(){
+  const g = n => form.elements[n].value;
+  const inp = {
+    name: g('name'), constitution: g('constitution'), fy: g('fy'), N: N(), unit: g('unit'),
+    taxRate: g('taxRate'), minCash: g('minCash'), newBusiness: form.elements.newBusiness.checked, unsecuredRate: g('unsecuredRate'),
+    sales1: g('sales1'), growthAll: g('growthAll'), purchasePct: g('purchasePct'), directPct: g('directPct'), otherIncomePct: g('otherIncomePct'),
+    salaries1: g('salaries1'), salaryGrowth: g('salaryGrowth'), adminPct: g('adminPct'), fixedExp1: g('fixedExp1'), fixedGrowth: g('fixedGrowth'),
+    debtorDays: g('debtorDays'), creditorDays: g('creditorDays'), stockDays: g('stockDays'), otherCA: g('otherCA'), otherCL: g('otherCL'),
+    halfOnAdditions: form.elements.halfOnAdditions.checked, loanType: g('loanType'),
+    cc: { method: g('ccMethod'), mode: g('ccMode'), limit: g('ccLimit'), rate: g('ccRate'), util: g('ccUtil'), openBal: g('ccOpenBal') },
+    opening: {}, bench: {},
+    blocks: JSON.parse(JSON.stringify(blocks)), loans: JSON.parse(JSON.stringify(loans)),
+    growth: growth.slice(), capitalIn: capitalIn.slice(), drawings: drawings.slice(), yearLabels: fyLabels(),
+  };
+  document.querySelectorAll('[data-p^="opening."]').forEach(i => inp.opening[i.dataset.p.slice(8)] = i.value);
+  document.querySelectorAll('[data-b]').forEach(i => inp.bench[i.dataset.b] = i.dataset.pct ? num(i.value) / 100 : num(i.value));
+  return inp;
+}
+function engineInput(inp){
+  const x = JSON.parse(JSON.stringify(inp));
+  if (x.newBusiness) { x.opening = {}; x.cc.openBal = 0; x.loans = x.loans.filter(l => !l.existing); x.blocks.forEach(b => b.open = 0); }
+  x.loans.forEach(l => l.startYear = Number(l.startYear) || 1);
+  return x;
+}
+
+/* ---------- results ---------- */
+let model = null, stmts = [], activeTab = 'summary';
+function update(){
+  const inp = collect();
+  saveDraft(inp);
+  if (!num(inp.sales1)) { $('#kpis').innerHTML = ''; $('#checks').innerHTML = '<div class="m-warn">Enter the first year turnover and cost of purchases to see the projections.</div>'; $('#tabs').innerHTML = ''; $('#tabBody').innerHTML = ''; model = null; return; }
+  const x = engineInput(inp);
+  model = E.compute(x);
+  stmts = REP.statements(model, x);
+  $('#openCashNote').textContent = x.newBusiness ? '' : `Opening cash & bank (balancing figure): ${fmtN(model.openCash)}`;
+  renderKpis(); renderChecks(x); renderTabs();
+}
+function renderKpis(){
+  const Y = model.years, last = Y[Y.length - 1];
+  const k = [
+    ['Turnover – last year', fmtN(last.sales), false],
+    ['Profit after tax – last year', fmtN(last.pat), last.pat < 0],
+    ['Lowest cash & bank', fmtN(Math.min(...Y.map(y => y.cash))), Y.some(y => y.cashShort)],
+    ['Average DSCR', model.avgDscr === null ? '–' : model.avgDscr.toFixed(2), model.avgDscr !== null && model.avgDscr < model.bench.dscrAvg],
+    ['Lowest current ratio', Math.min(...Y.map(y => y.ratios.currentRatio ?? Infinity)).toFixed(2), Y.some(y => y.bad.currentRatio)],
+  ];
+  $('#kpis').innerHTML = k.map(([l, v, bad]) => `<div class="kpi${bad ? ' bad' : ''}"><b>${v}</b><span>${l}</span></div>`).join('');
+}
+function renderChecks(x){
+  const box = $('#checks'); box.innerHTML = '';
+  const add = (cls, text, btn) => { const d = document.createElement('div'); d.className = cls; d.textContent = text; if (btn) { const b = document.createElement('button'); b.type = 'button'; b.textContent = btn[0]; b.onclick = btn[1]; d.appendChild(b); } box.appendChild(d); };
+  model.errors.forEach(e => {
+    if (e.code === 'cash') add('m-err', '⚠ ' + e.text, ['Add the capital needed', fixCash]);
+    else if (e.code === 'mpbf') add('m-err', '⚠ ' + e.text, x.cc.mode === 'amount' ? ['Set the limit equal to MPBF each year', () => { form.elements.ccMode.value = 'mpbf'; syncVisibility(); update(); }] : null);
+    else add('m-err', '⚠ ' + e.text);
+  });
+  model.warnings.forEach(w => add('m-warn', w.text));
+  const badCount = model.years.reduce((a, y) => a + Object.keys(y.bad).length, 0);
+  if (badCount) add('m-warn', `${badCount} ratio figure(s) fall outside the benchmarks – highlighted in the Ratios tab.`);
+  if (!model.errors.length) add('m-ok', `Cash & bank balance stays at or above ${fmtN(num(x.minCash))} in every year${model.hasCC ? ', the cash credit limit is within the MPBF' : ''}, and the balance sheet and cash flow agree.`);
+}
+function fixCash(){
+  const r = E.capitalNeeded(engineInput(collect()));
+  capitalIn = r.capitalIn.map(v => v ? String(Math.round(v * 100) / 100) : '');
+  renderYears(); update();
+  const added = r.added.map((v, i) => v ? `${fyLabels()[i]}: ${fmtN(v)}` : null).filter(Boolean).join(', ');
+  const d = document.createElement('div'); d.className = 'm-ok'; d.textContent = `Capital introduced added in section 7 – ${added}. Review it with the client (it could also come as an unsecured loan or a higher limit).`;
+  $('#checks').prepend(d);
+}
+function stTable(st, L){
+  const benchCol = !!st.benchCol;
+  let h = `<div class="st-title">${st.title}</div><div class="hint">${unitLabel()}</div><div class="tw"><table class="st"><thead><tr><th>Particulars</th>${L.map(l => `<th>${l}</th>`).join('')}${benchCol ? '<th>Benchmark</th>' : ''}</tr></thead><tbody>`;
+  st.rows.forEach(r => {
+    if (r.kind === 'blank') { h += `<tr><td colspan="${L.length + 1 + (benchCol ? 1 : 0)}">&nbsp;</td></tr>`; return; }
+    if (r.kind === 'head') { h += `<tr class="head"><td colspan="${L.length + 1 + (benchCol ? 1 : 0)}">${r.label}</td></tr>`; return; }
+    const cells = r.values.map((v, i) => {
+      const bad = r.bad && r.bad[i];
+      let t;
+      if (v === null || v === undefined) t = '';
+      else if (r.kind === 'text') t = v;
+      else if (r.kind === 'pct') t = isFinite(v) ? (v * 100).toFixed(2) + '%' : '–';
+      else if (r.kind === 'ratio') t = isFinite(v) ? v.toFixed(2) : '–';
+      else if (r.kind === 'days') t = isFinite(v) ? Math.round(v) : '–';
+      else t = fmtN(v);
+      return `<td${bad ? ' class="bad"' : ''}>${t}</td>`;
+    }).join('');
+    h += `<tr class="${r.kind === 'total' ? 'total' : ''}"><td>${r.label}</td>${cells}${benchCol ? `<td class="bench">${r.bench || ''}</td>` : ''}</tr>`;
+  });
+  h += '</tbody></table></div>';
+  if (st.note) h += `<p class="stnote">${st.note}</p>`;
+  return h;
+}
+function extraTabs(){
+  const x = engineInput(collect());
+  const cp = REP.costOfProject(model);
+  const cpHtml = `<div class="st-title">COST OF PROJECT AND MEANS OF FINANCE – ${fyLabels()[0]}</div><div class="hint">${unitLabel()}</div><table class="st"><tbody>
+    <tr class="head"><td>COST OF PROJECT</td><td></td></tr>
+    <tr><td>Fixed assets to be acquired</td><td>${fmtN(cp.capex)}</td></tr>
+    <tr><td>Margin money for working capital (working capital gap less cash credit)</td><td>${fmtN(cp.wcMargin)}</td></tr>
+    <tr class="total"><td>Total cost of project</td><td>${fmtN(cp.cost)}</td></tr>
+    <tr class="head"><td>MEANS OF FINANCE</td><td></td></tr>
+    <tr><td>Term loan</td><td>${fmtN(cp.tl)}</td></tr>
+    <tr><td>Promoters' contribution / own funds</td><td>${fmtN(cp.own)}</td></tr>
+    <tr class="total"><td>Total</td><td>${fmtN(cp.tl + cp.own)}</td></tr>
+    <tr class="head"><td>WORKING CAPITAL</td><td></td></tr>
+    <tr><td>Working capital gap</td><td>${fmtN(cp.wcGap)}</td></tr>
+    <tr><td>Cash credit from bank</td><td>${fmtN(cp.cc)}</td></tr></tbody></table>`;
+  const asHtml = `<div class="st-title">ASSUMPTIONS UNDERLYING THE PROJECTIONS</div><ol>${REP.assumptions(x, model, unitLabel()).map(a => `<li>${a.replace(/</g,'&lt;')}</li>`).join('')}</ol>`;
+  return { cp: cpHtml, as: asHtml };
+}
+function renderTabs(){
+  const L = model.years.map(y => y.label);
+  const tabs = [['summary','Summary']].concat(stmts.map(s => [s.key, s.name])).concat([['cp','Cost of project'],['as','Assumptions']]);
+  if (!tabs.some(t => t[0] === activeTab)) activeTab = 'summary';
+  $('#tabs').innerHTML = tabs.map(([k, n]) => `<button type="button" data-tab="${k}" class="${k === activeTab ? 'on' : ''}">${n}</button>`).join('');
+  const ex = extraTabs();
+  let body;
+  if (activeTab === 'summary') {
+    const pick = ['pl', 'bs', 'ratios'].map(k => stmts.find(s => s.key === k));
+    const sm = { title: 'SUMMARY', rows: [
+      pick[0].rows.find(r => r.label === 'Gross sales / turnover'), pick[0].rows.find(r => r.label === 'PROFIT BEFORE TAX'), pick[0].rows.find(r => r.label === 'PROFIT AFTER TAX'),
+      pick[1].rows.find(r => r.label === 'Capital – closing'), pick[1].rows.find(r => r.label && r.label.startsWith('Cash & bank')),
+      ...pick[2].rows.filter(r => ['Current ratio', 'Debt service coverage ratio (DSCR)', 'Total outside liabilities / tangible net worth', 'Net profit margin'].includes(r.label))
+    ].filter(Boolean) };
+    body = stTable(sm, L);
+  } else if (activeTab === 'cp') body = ex.cp;
+  else if (activeTab === 'as') body = ex.as;
+  else body = stTable(stmts.find(s => s.key === activeTab), L);
+  $('#tabBody').innerHTML = body;
+}
+$('#tabs').addEventListener('click', e => { const k = e.target.dataset.tab; if (k) { activeTab = k; renderTabs(); } });
+
+/* ---------- Excel ---------- */
+function xlsxSheets(){
+  const L = model.years.map(y => y.label), name = form.elements.name.value || 'Financial projections';
+  const top = (title, extra) => [[{ v: name.toUpperCase(), s: 'title' }], [{ v: title, s: 'bold' }], [{ v: unitLabel(), s: 'note' }], []];
+  const sheets = stmts.map(st => {
+    const rows = top(st.title);
+    rows.push([{ v: 'Particulars', s: 'head' }, ...L.map(l => ({ v: l, s: 'headRight' })), ...(st.benchCol ? [{ v: 'Benchmark', s: 'head' }] : [])]);
+    st.rows.forEach(r => {
+      if (r.kind === 'blank') { rows.push([]); return; }
+      if (r.kind === 'head') { rows.push([{ v: r.label, s: 'bold' }]); return; }
+      const cells = r.values.map((v, i) => {
+        const bad = r.bad && r.bad[i];
+        if (v === null || v === undefined || (typeof v === 'number' && !isFinite(v))) return { v: '', s: bad ? 'bad' : undefined };
+        if (r.kind === 'text') return { v, s: bad ? 'bad' : 'text' };
+        if (r.kind === 'pct') return { v: Math.round(v * 10000) / 10000, s: bad ? 'pctBad' : 'pct' };
+        if (r.kind === 'ratio') return { v: Math.round(v * 100) / 100, s: bad ? 'ratioBad' : 'ratio' };
+        if (r.kind === 'days') return { v: Math.round(v), s: 'int' };
+        return { v: Math.round(v * 100) / 100, s: bad ? 'numBad' : (r.kind === 'total' ? 'numTotal' : 'num') };
+      });
+      rows.push([{ v: r.label, s: r.kind === 'total' ? 'bold' : 'text' }, ...cells, ...(st.benchCol ? [{ v: r.bench || '', s: 'note' }] : [])]);
+    });
+    if (st.note) { rows.push([]); rows.push([{ v: st.note, s: 'note' }]); }
+    return { name: st.name, widths: [52, ...L.map(() => 14), ...(st.benchCol ? [22] : [])], rows, freeze: 'B6', landscape: L.length > 6 };
+  });
+  // monthly term loan schedules
+  if (model.hasTL && model.loans.length) {
+    const rows = top('TERM LOAN REPAYMENT SCHEDULE (MONTHLY)');
+    model.loans.forEach(l => {
+      rows.push([{ v: `${l.name || 'Term loan'} – ${l.amount} @ ${l.rate}% p.a.`, s: 'bold' }]);
+      rows.push(['Month', 'Year', 'Opening', 'Disbursement', 'Interest', 'Principal', 'Instalment', 'Closing'].map(h => ({ v: h, s: 'head' })));
+      l.sched.months.forEach(r => rows.push([{ v: r.m, s: 'int' }, { v: L[r.year - 1], s: 'text' }, ...[r.open, r.disb, r.interest, r.principal, r.instalment, r.close].map(v => ({ v: Math.round(v * 100) / 100, s: 'num' }))]));
+      rows.push([]);
+    });
+    sheets.splice(5, 0, { name: 'Loan Schedule (monthly)', widths: [9, 12, 14, 14, 14, 14, 14, 14], rows, freeze: 'A5' });
+  }
+  const cp = REP.costOfProject(model), x = engineInput(collect());
+  const cpRows = top(`COST OF PROJECT AND MEANS OF FINANCE – ${L[0]}`);
+  [['COST OF PROJECT', null, 'bold'], ['Fixed assets to be acquired', cp.capex], ['Margin money for working capital', cp.wcMargin], ['Total cost of project', cp.cost, 'tot'], [],
+   ['MEANS OF FINANCE', null, 'bold'], ['Term loan', cp.tl], ["Promoters' contribution / own funds", cp.own], ['Total', cp.tl + cp.own, 'tot'], [],
+   ['WORKING CAPITAL', null, 'bold'], ['Working capital gap', cp.wcGap], ['Cash credit from bank', cp.cc]].forEach(r => {
+    if (!r.length) cpRows.push([]); else if (r[2] === 'bold') cpRows.push([{ v: r[0], s: 'bold' }]);
+    else cpRows.push([{ v: r[0], s: r[2] ? 'bold' : 'text' }, { v: Math.round(r[1] * 100) / 100, s: r[2] ? 'numTotal' : 'num' }]);
+  });
+  sheets.push({ name: 'Cost of Project', widths: [52, 16], rows: cpRows });
+  const asRows = top('ASSUMPTIONS UNDERLYING THE PROJECTIONS');
+  REP.assumptions(x, model, unitLabel()).forEach((a, i) => asRows.push([{ v: `${i + 1}) ${a}`, s: 'wrap' }]));
+  sheets.push({ name: 'Assumptions', widths: [120], rows: asRows });
+  // checks sheet
+  const ck = top('CHECKS');
+  model.errors.forEach(e => ck.push([{ v: e.text, s: 'bad' }]));
+  model.warnings.forEach(w => ck.push([{ v: w.text, s: 'text' }]));
+  if (!model.errors.length) ck.push([{ v: 'Cash & bank balance is not negative in any year; balance sheet and cash flow agree' + (model.hasCC ? '; cash credit limit is within the MPBF.' : '.'), s: 'ok' }]);
+  sheets.push({ name: 'Checks', widths: [140], rows: ck });
+  return sheets;
+}
+const safe = s => (s || '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+function download(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+$('#dlXlsx').addEventListener('click', () => {
+  if (!model) { alert('Enter the turnover and costs first.'); return; }
+  if (model.errors.length && !confirm('There are unresolved checks (shown in red). Download anyway?')) return;
+  const bytes = LLPXlsxWrite.build(xlsxSheets());
+  download(`${safe(form.elements.name.value) || 'Projections'}_Financial_Projections.xlsx`, new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+});
+$('#printBtn').addEventListener('click', () => {
+  if (!model) { alert('Enter the turnover and costs first.'); return; }
+  const L = model.years.map(y => y.label), ex = extraTabs(), nm = (form.elements.name.value || '').toUpperCase();
+  const pages = [`<div class="pst"><h2 style="text-align:center;margin-top:30vh">FINANCIAL PROJECTIONS<br>OF<br>${nm}</h2><p style="text-align:center">${L[0]} to ${L[L.length - 1]}</p></div>`]
+    .concat(stmts.map(st => `<div class="pst"><p><b>${nm}</b></p>${stTable(st, L)}</div>`))
+    .concat([`<div class="pst"><p><b>${nm}</b></p>${ex.cp}</div>`, `<div class="pst"><p><b>${nm}</b></p>${ex.as}</div>`]);
+  $('#printArea').innerHTML = pages.join('');
+  window.print();
+});
+
+/* ---------- case file / draft ---------- */
+function saveDraft(inp){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(inp || collect())); } catch(e){} }
+function restore(d){
+  const set = (n, v) => { if (v === undefined) return; const el = form.elements[n]; if (!el) return; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; };
+  ['name','constitution','fy','N','taxRate','minCash','unsecuredRate','sales1','growthAll','purchasePct','directPct','otherIncomePct','salaries1','salaryGrowth','adminPct','fixedExp1','fixedGrowth',
+   'debtorDays','creditorDays','stockDays','otherCA','otherCL','newBusiness','halfOnAdditions'].forEach(n => set(n, d[n]));
+  if (d.unit) { form.elements.unit.value = d.unit; lastUnit = d.unit; }
+  if (d.loanType) form.elements.loanType.value = d.loanType;
+  if (d.cc) { set('ccMethod', d.cc.method); set('ccMode', d.cc.mode); set('ccLimit', d.cc.limit); set('ccRate', d.cc.rate); set('ccUtil', d.cc.util); set('ccOpenBal', d.cc.openBal); }
+  document.querySelectorAll('[data-p^="opening."]').forEach(i => i.value = (d.opening || {})[i.dataset.p.slice(8)] ?? '');
+  document.querySelectorAll('[data-b]').forEach(i => { const v = (d.bench || {})[i.dataset.b]; if (v !== undefined) i.value = i.dataset.pct ? Math.round(v * 10000) / 100 : v; });
+  blocks = d.blocks || [{ name: 'Plant & machinery', rate: 15, open: '', add: [] }, { name: 'Furniture & fixtures', rate: 10, open: '', add: [] }, { name: 'Computers', rate: 40, open: '', add: [] }];
+  loans = d.loans || []; growth = d.growth || []; capitalIn = d.capitalIn || []; drawings = d.drawings || [];
+  if (d.constitution && TAX[d.constitution]) $('#taxHint').textContent = TAX[d.constitution][1];
+  renderFA(); renderLoans(); renderYears(); syncVisibility(); unitTags(); update();
+}
+$('#saveCase').addEventListener('click', () => { const d = collect(); download(`${safe(d.name) || 'Projections'}_case.json`, new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' })); });
+const lf = $('#loadFile');
+$('#loadCase').addEventListener('click', () => lf.click());
+lf.addEventListener('change', async () => { const f = lf.files[0]; if (!f) return; try { restore(JSON.parse(await f.text())); } catch(e){ alert('That file could not be read as a case file.'); } lf.value = ''; });
+$('#clearAll').addEventListener('click', () => { if (!confirm('Clear all inputs?')) return; try { localStorage.removeItem(DRAFT_KEY); } catch(e){} form.reset(); lastUnit = 'thousands'; restore({ constitution: form.elements.constitution.value }); });
+
+/* ---------- events ---------- */
+form.addEventListener('input', e => {
+  if (e.target.closest('#faTable,#loans,#yearTable')) return;
+  if (e.target.name === 'unit') return;
+  if (e.target.name === 'N' || e.target.name === 'fy') { renderFA(); renderLoans(); renderYears(); }
+  update();
+});
+form.addEventListener('change', e => {
+  if (e.target.name === 'unit') { convertUnits(); return; }
+  if (['loanType','ccMode','newBusiness'].includes(e.target.name)) { syncVisibility(); update(); }
+  if (e.target.name === 'N' || e.target.name === 'fy') { renderFA(); renderLoans(); renderYears(); update(); }
+});
+
+let draft = null;
+try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch(e){}
+restore(draft || { constitution: 'Proprietorship' });
+})();
+</script>
+</body>
+</html>
