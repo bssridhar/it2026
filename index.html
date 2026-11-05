@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice Tool Kit</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-soft:#e8f0fb; --band:#1f3b63; --band-ink:#ffffff; --soon:#8a5a00; --soon-bg:#fff6e0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-soft:#1a2433; --band:#0f1d31; --band-ink:#e7e9ee; --soon:#f2c46b; --soon-bg:#3a2f12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-soft:#1a2433; --band:#0f1d31; --band-ink:#e7e9ee; --soon:#f2c46b; --soon-bg:#3a2f12;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--band);color:var(--band-ink)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.wrap.top{padding:22px 16px 18px}
+.firm{font-size:1.5rem;font-weight:700;margin:0;letter-spacing:.2px}
+.tagline{margin:2px 0 0;opacity:.8;font-size:.92rem}
+.today{font-size:.88rem;opacity:.85;text-align:right}
+.ticker{background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.12);overflow:hidden;white-space:nowrap;position:relative}
+.ticker .label{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding:0 12px;background:var(--band);font-size:.78rem;font-weight:700;letter-spacing:.6px;z-index:1}
+.ticker .track{display:inline-block;padding:9px 0 9px 110px;animation:scroll var(--dur,40s) linear infinite;font-size:.9rem}
+.ticker:hover .track{animation-play-state:paused}
+.ticker .track span{margin-right:60px}
+.ticker .track span::before{content:"•";margin-right:10px;opacity:.6}
+@keyframes scroll{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){
+  .ticker .track{animation:none;padding-left:110px;white-space:normal}
+  .ticker .track span{display:block;margin:2px 0}
+  .ticker .track span.dup{display:none}
+}
+main.wrap{padding-top:22px;padding-bottom:40px}
+.search{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.search input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.search input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.kbd{font-size:.78rem;color:var(--muted);white-space:nowrap}
+@media (max-width:600px){.kbd{display:none}}
+h2{font-size:1rem;margin:22px 0 10px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tool{display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;color:inherit;text-decoration:none;min-height:150px;transition:border-color .15s, box-shadow .15s}
+a.tool:hover,a.tool:focus-visible{border-color:var(--accent);box-shadow:0 2px 10px rgba(31,95,174,.12);outline:none}
+.tool h3{margin:0;font-size:1.05rem;color:var(--accent)}
+.tool p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+.tool .meta{display:flex;gap:8px;align-items:center;font-size:.78rem;color:var(--muted)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.74rem;font-weight:600}
+.badge.new{background:var(--accent-soft);color:var(--accent)}
+.badge.soon{background:var(--soon-bg);color:var(--soon)}
+.tool.planned{opacity:.75;cursor:default}
+.tool.planned h3{color:var(--ink)}
+.recent .tool{min-height:auto}
+.empty{color:var(--muted);font-size:.92rem}
+footer.wrap{border-top:1px solid var(--line);color:var(--muted);font-size:.82rem;padding:16px 16px 30px}
+footer p{margin:4px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div>
+      <p class="firm" id="firm"></p>
+      <p class="tagline" id="tagline"></p>
+    </div>
+    <div class="today" id="today"></div>
+  </div>
+  <div class="ticker" id="ticker" hidden><div class="label">NOTICES</div><div class="track" id="track"></div></div>
+</header>
+
+<main class="wrap">
+  <div class="search">
+    <input id="q" type="search" placeholder="Search tools (e.g. LLP, company, deed)" aria-label="Search tools">
+    <span class="kbd">Press / to search</span>
+  </div>
+  <section id="recentWrap" class="recent" hidden>
+    <h2>Recently used</h2>
+    <div class="grid" id="recent"></div>
+  </section>
+  <div id="cats"></div>
+  <p class="empty" id="none" hidden>No tool matches your search.</p>
+</main>
+
+<footer class="wrap">
+  <p>For internal use. Documents produced by these tools are drafts and must be checked before they are signed or filed.</p>
+  <p>All tools run in this browser; client data is not uploaded anywhere.</p>
+</footer>
+
+<script src="home-config.js"></script>
+<script>
+(function(){
+"use strict";
+const C = window.HOME_CONFIG || { tools: [] };
+const RECENT_KEY = 'home-recent-v1';
+document.getElementById('firm').textContent = C.firmName || '';
+document.getElementById('tagline').textContent = C.tagline || '';
+document.title = (C.firmName ? C.firmName + ' – ' : '') + 'Practice Tool Kit';
+document.getElementById('today').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// ticker
+if (C.ticker && C.ticker.length) {
+  const track = document.getElementById('track');
+  // the messages are written twice so the loop runs on without a gap
+  [false, true].forEach(dup => C.ticker.forEach(t => {
+    const s = document.createElement('span'); s.textContent = t; if (dup) { s.className = 'dup'; s.setAttribute('aria-hidden', 'true'); }
+    track.appendChild(s);
+  }));
+  track.style.setProperty('--dur', Math.max(20, C.ticker.join(' ').length / 6) + 's');
+  document.getElementById('ticker').hidden = false;
+}
+
+// recently used (this browser only)
+let recent = [];
+try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) {}
+function remember(id){
+  recent = [id].concat(recent.filter(x => x !== id)).slice(0, 3);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch(e) {}
+}
+
+const isNew = t => t.added && (Date.now() - new Date(t.added + 'T00:00:00')) < 30 * 864e5;
+function card(t){
+  const el = document.createElement(t.status === 'available' ? 'a' : 'div');
+  el.className = 'tool' + (t.status === 'available' ? '' : ' planned');
+  if (t.status === 'available') { el.href = t.path; el.addEventListener('click', () => remember(t.id)); }
+  const h = document.createElement('h3'); h.textContent = t.title;
+  const p = document.createElement('p'); p.textContent = t.description || '';
+  const m = document.createElement('div'); m.className = 'meta';
+  const cat = document.createElement('span'); cat.textContent = t.category || '';
+  m.appendChild(cat);
+  if (t.status !== 'available') { const b = document.createElement('span'); b.className = 'badge soon'; b.textContent = 'Coming soon'; m.appendChild(b); }
+  else if (isNew(t)) { const b = document.createElement('span'); b.className = 'badge new'; b.textContent = 'New'; m.appendChild(b); }
+  el.append(h, p, m);
+  return el;
+}
+
+function render(){
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const match = t => !q || [t.title, t.description, t.category].join(' ').toLowerCase().includes(q);
+  const cats = document.getElementById('cats'); cats.innerHTML = '';
+  const order = (C.categories || []).concat([...new Set(C.tools.map(t => t.category))].filter(c => !(C.categories || []).includes(c)));
+  let shown = 0;
+  order.forEach(cat => {
+    const list = C.tools.filter(t => t.category === cat && match(t))
+      .sort((a, b) => (a.status === 'available' ? 0 : 1) - (b.status === 'available' ? 0 : 1));
+    if (!list.length) return;
+    const sec = document.createElement('section');
+    const h = document.createElement('h2'); h.textContent = cat;
+    const g = document.createElement('div'); g.className = 'grid';
+    list.forEach(t => g.appendChild(card(t)));
+    sec.append(h, g); cats.appendChild(sec); shown += list.length;
+  });
+  document.getElementById('none').hidden = shown > 0;
+  const rw = document.getElementById('recentWrap'), rg = document.getElementById('recent');
+  const rt = recent.map(id => C.tools.find(t => t.id === id && t.status === 'available')).filter(Boolean);
+  rw.hidden = !!q || !rt.length; rg.innerHTML = '';
+  rt.forEach(t => rg.appendChild(card(t)));
+}
+document.getElementById('q').addEventListener('input', render);
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('q').focus(); }
+});
+render();
+})();
+</script>
+</body>
+</html>

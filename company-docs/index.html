@@ -25,6 +25,8 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
 h1{font-size:1.45rem;margin:4px 0 4px}
 .sub{color:var(--muted);margin:0 0 18px}
 section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
@@ -78,6 +80,7 @@ button.danger{color:var(--err)}
 </head>
 <body>
 <main>
+  <a class="home" href="../index.html">&larr; All tools</a>
   <h1>Company Incorporation Documents</h1>
   <p class="sub">For a Private Limited Company or a One Person Company. Generates the NOC for the registered office and a data sheet for SPICe+ (with e-MoA and e-AoA). Details can be read from PAN, Aadhaar and bank statement PDFs, or loaded from Excel. Everything runs in this browser and nothing is uploaded.</p>
 

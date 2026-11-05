@@ -1,0 +1,61 @@
+/*
+ * Settings for the home page (index.html). Edit this file to change the firm name,
+ * the ticker messages or the list of tools. Keep the quotes and commas as they are.
+ *
+ * To add a tool: copy one entry in "tools", change the values, and set status to
+ * "available" (opens the tool) or "planned" (shown as "Coming soon").
+ */
+window.HOME_CONFIG = {
+  // Shown at the top of the page. Replace with your firm's name.
+  firmName: "Your Firm Name",
+  // A short line under the firm name.
+  tagline: "Practice tool kit – for internal use",
+
+  // Messages that scroll across the top (internal notices, what's new, reminders).
+  // Leave the list empty ([]) to hide the ticker.
+  ticker: [
+    "New: Company Registration Tool Kit – Private Limited and One Person Company.",
+    "LLP Registration Tool Kit now includes the LLP Agreement, print set, checklist and client request list.",
+    "Reminder: check every generated document against the original KYC documents before it is signed."
+  ],
+
+  // Tool categories, in the order they are shown.
+  categories: ["Registration", "Agreements", "Finance"],
+
+  tools: [
+    {
+      id: "llp",
+      title: "LLP Registration Tool Kit",
+      category: "Registration",
+      path: "llp-docs/index.html",
+      status: "available",
+      description: "Form 9, consent letter, subscription sheet, NOC, LLP Agreement, data sheet and print set. Reads PAN, Aadhaar and bank statement PDFs or an Excel sheet.",
+      added: "2026-11-04"
+    },
+    {
+      id: "company",
+      title: "Company Registration Tool Kit",
+      category: "Registration",
+      path: "company-docs/index.html",
+      status: "available",
+      description: "Private Limited Company and One Person Company: NOC, data sheet for SPICe+ (e-MoA / e-AoA), checklist and client request list.",
+      added: "2026-11-05"
+    },
+    {
+      id: "partnership",
+      title: "Partnership Deed",
+      category: "Agreements",
+      path: "",
+      status: "planned",
+      description: "Partnership deed preparation from the firm's standard format."
+    },
+    {
+      id: "projections",
+      title: "Financial Projections",
+      category: "Finance",
+      path: "",
+      status: "planned",
+      description: "Projected financial statements for loan and project reports."
+    }
+  ]
+};
