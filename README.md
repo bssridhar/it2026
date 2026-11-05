@@ -9,7 +9,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `llp-docs/` | LLP Registration Tool Kit: Form 9, consent letter, subscription sheet, NOC, LLP Agreement, data sheet, print set |
 | `company-docs/` | Company Registration Tool Kit (Private Limited and OPC): NOC, data sheet for SPICe+ (e-MoA / e-AoA) |
 | `partnership-docs/` | Partnership Deed: deed, NOC for the place of business, data sheet, checklist |
-| `dsc-register/` | DSC Register: clients' digital signatures – expiry report, reminders, renewals, movement (Excel file kept in Zoho Sheet) |
+| `dsc-register/` | DSC Register: clients' digital signatures on a shared Google Sheet – expiry report, reminders, renewals, movement (setup: `dsc-register/SETUP.md`) |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

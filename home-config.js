@@ -9,6 +9,9 @@ window.HOME_CONFIG = {
   // Shown at the top of the page. Replace with your firm's name.
   firmName: "B S Sridhar & Co., Chartered Accountants",
   // A short line under the firm name.
+  // Web-app link of the DSC Register on Google (see dsc-register/SETUP.md). Paste it between the quotes.
+  dscAppUrl: "",
+
   tagline: "Practice tool kit – for internal use",
 
   // Messages that scroll across the top (internal notices, what's new, reminders).
@@ -58,7 +61,7 @@ window.HOME_CONFIG = {
       category: "Practice management",
       path: "dsc-register/index.html",
       status: "available",
-      description: "Clients' digital signatures: expiry report (expired / due in 15 days), WhatsApp and e-mail reminders, renewals, and movement in and out of the office with acknowledgement slips. Kept in an Excel file in Zoho Sheet.",
+      description: "Clients' digital signatures: expiry report (expired / due in 15 days), WhatsApp and e-mail reminders, renewals, and movement in and out of the office with acknowledgement slips. Live register kept in the firm's Google Sheet.",
       added: "2026-11-05"
     }
   ]

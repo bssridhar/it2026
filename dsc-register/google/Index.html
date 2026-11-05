@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base target="_top">
+<title>DSC Register</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff; --head:#eef1f6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --head:#232833;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --head:#232833;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1150px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
+h1{font-size:1.45rem;margin:4px 0 4px}
+.sub{color:var(--muted);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.req{color:var(--err)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.fileinfo{font-size:.85rem;color:var(--muted)}
+.fileinfo b{color:var(--ink)}
+.dirty{color:var(--warn);font-weight:600}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)}
+.m-warn{background:var(--warn-bg);color:var(--warn)}
+.m-ok{background:var(--ok-bg);color:var(--ok)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 14px}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer}
+.kpi b{display:block;font-size:1.5rem}
+.kpi span{font-size:.82rem;color:var(--muted)}
+.kpi.red b{color:var(--err)} .kpi.amber b{color:var(--warn)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:.88rem}
+table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600;white-space:nowrap;cursor:pointer}
+table.t td.n{text-align:right;white-space:nowrap}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.76rem;font-weight:600;white-space:nowrap}
+.b-exp{background:var(--err-bg);color:var(--err)} .b-soon{background:var(--warn-bg);color:var(--warn)} .b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-out{background:var(--head);color:var(--accent)} .b-in{background:var(--head);color:var(--muted)}
+.actions{display:flex;gap:2px;flex-wrap:wrap}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.filters input{flex:1;min-width:200px}
+.filters select{width:auto}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:760px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.9rem}
+.empty{color:var(--muted);padding:10px 0}
+.hist h4{margin:12px 0 6px;font-size:.92rem}
+a.btnlink{display:inline-block;padding:3px 8px;font-size:.82rem;border:1px solid var(--line);border-radius:6px;color:var(--accent);text-decoration:none}
+#remBody textarea{min-height:150px;font-size:.88rem}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  main,dialog{display:none!important}
+  #printArea{display:block;font:11pt Arial,sans-serif}
+  #printArea table{border-collapse:collapse;width:100%;font-size:10pt}
+  #printArea th,#printArea td{border:1px solid #888;padding:4px 6px;text-align:left}
+  #printArea th{background:#eee}
+  #printArea .pfirm{font-weight:bold;font-size:13pt;margin-bottom:10px}
+  #printArea .sig{display:flex;justify-content:space-between;margin-top:60px}
+  #printArea .sig div{width:45%;border-top:1px solid #000;padding-top:4px;text-align:center}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>DSC Register</h1>
+  <p class="sub">Digital signature certificates held for clients: expiry, reminders, renewals and movement. Every change is saved straight to the firm's Google Sheet, so all staff see the same register.</p>
+
+  <div class="card">
+    <div class="filebar">
+      <p class="fileinfo" id="fileInfo">Loading the register…</p>
+      <div class="bar"><button type="button" id="refreshBtn">Refresh</button><a id="sheetLink" target="_blank" rel="noopener" style="display:none">Open the Google Sheet</a></div>
+    </div>
+    <div id="topMsgs" class="msgs"></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button type="button" data-tab="dash" class="on">Dashboard</button>
+    <button type="button" data-tab="reg">Register</button>
+    <button type="button" data-tab="exp">Expiry report</button>
+    <button type="button" data-tab="mov">Movements</button>
+    <button type="button" data-tab="ren">Renewals</button>
+    <button type="button" data-tab="rem">Reminders sent</button>
+    <button type="button" data-tab="set">Settings</button>
+  </div>
+  <div id="view"></div>
+</main>
+<div id="printArea"></div>
+
+<dialog id="dscDlg"><form method="dialog" id="dscForm" novalidate>
+  <div class="dh"><span id="dscDlgTitle">DSC</span><button type="button" class="link" data-close>✕</button></div>
+  <div class="db"><div class="grid">
+    <div><label>DSC No. <span class="req">*</span></label><input name="no" type="number" min="1" step="1" required></div>
+    <div class="full"><label>Name of the holder (as in the DSC) <span class="req">*</span></label><input name="name" required></div>
+    <div class="full"><label>Associated company / firm / client group</label><input name="company"></div>
+    <div><label>Designation</label><input name="designation"></div>
+    <div><label>PAN</label><input name="pan" maxlength="10" style="text-transform:uppercase"></div>
+    <div><label>Mobile no.</label><input name="mobile"></div>
+    <div><label>E-mail id</label><input name="email" type="email"></div>
+    <div><label>Class</label><select name="cls"><option>Class 3</option><option>DGFT</option><option>Other</option></select></div>
+    <div><label>Type</label><select name="type"><option>Signing</option><option>Signing & Encryption</option><option>Encryption</option></select></div>
+    <div><label>Issued by (certifying authority)</label><input name="issuer" list="issuers"></div>
+    <div><label>Token make / serial</label><input name="token"></div>
+    <div><label>Date of issue</label><input name="issueDate" type="date"></div>
+    <div><label>Date of expiry <span class="req">*</span></label><input name="expiry" type="date" required></div>
+    <div><label>Kept at (cabinet / box no.)</label><input name="location"></div>
+    <div><label>Current status</label><select name="status"><option>In office</option><option>With client</option><option>With staff / others</option><option>Inactive</option></select></div>
+    <div><label>With whom (if out)</label><input name="withWhom"></div>
+    <div class="full"><label>Remarks</label><input name="remarks"></div>
+  </div><p class="hint">Do not record DSC passwords or PINs here.</p><div class="msgs" data-err></div></div>
+  <div class="df"><button type="button" data-close>Cancel</button><button type="submit" class="primary">Save</button></div>
+</form></dialog>
+<datalist id="issuers"><option>eMudhra</option><option>Capricorn</option><option>Sify (SafeScrypt)</option><option>Vsign</option><option>XtraTrust</option><option>Pantasign</option><option>IDSign</option></datalist>
+
+<dialog id="movDlg"><form method="dialog" id="movForm" novalidate>
+  <div class="dh"><span id="movTitle">Movement</span><button type="button" class="link" data-close>✕</button></div>
+  <div class="db"><div class="grid">
+    <div><label>Movement</label><select name="kind">
+      <option value="OUT_CLIENT">Given to client</option><option value="IN_CLIENT">Received from client</option>
+      <option value="OUT_OTHER">Given to staff / others</option><option value="IN_OTHER">Returned to office</option></select></div>
+    <div><label>Date and time</label><input name="at" type="datetime-local"></div>
+    <div><label>Person (given to / received from)</label><input name="person"></div>
+    <div><label>Purpose</label><input name="purpose" placeholder="e.g. filing ITR, GST return, ROC form"></div>
+    <div class="full"><label>Remarks</label><input name="remarks"></div>
+    <div class="full"><label><input type="checkbox" name="slip" checked> Print an acknowledgement slip after saving</label></div>
+  </div><div class="msgs" data-err></div></div>
+  <div class="df"><button type="button" data-close>Cancel</button><button type="submit" class="primary">Save</button></div>
+</form></dialog>
+
+<dialog id="renDlg"><form method="dialog" id="renForm" novalidate>
+  <div class="dh"><span id="renTitle">Renewal</span><button type="button" class="link" data-close>✕</button></div>
+  <div class="db"><div class="grid">
+    <div><label>Date of renewal <span class="req">*</span></label><input name="date" type="date" required></div>
+    <div><label>Validity</label><select name="validity"><option value="1">1 year</option><option value="2" selected>2 years</option><option value="3">3 years</option></select></div>
+    <div><label>New date of expiry <span class="req">*</span></label><input name="newExpiry" type="date" required></div>
+    <div><label>Issued by</label><input name="issuer" list="issuers"></div>
+    <div><label>Class</label><select name="cls"><option>Class 3</option><option>DGFT</option><option>Other</option></select></div>
+    <div><label>Token</label><select name="tokenNote"><option>Same token</option><option>New token</option></select></div>
+    <div><label>Fee charged (Rs.)</label><input name="fee" type="number" min="0" step="1"></div>
+    <div><label>Invoice no.</label><input name="invoice"></div>
+    <div><label>Payment</label><select name="paid"><option>Pending</option><option>Received</option></select></div>
+    <div class="full"><label>Remarks</label><input name="remarks"></div>
+  </div><p class="hint">Saving updates the DSC's date of expiry.</p><div class="msgs" data-err></div></div>
+  <div class="df"><button type="button" data-close>Cancel</button><button type="submit" class="primary">Save</button></div>
+</form></dialog>
+
+<dialog id="remDlg">
+  <div class="dh"><span id="remTitle">Reminder</span><button type="button" class="link" data-close>✕</button></div>
+  <div class="db" id="remBody"></div>
+  <div class="df"><button type="button" data-close>Close</button></div>
+</dialog>
+
+<dialog id="histDlg">
+  <div class="dh"><span id="histTitle">History</span><button type="button" class="link" data-close>✕</button></div>
+  <div class="db hist" id="histBody"></div>
+  <div class="df"><button type="button" data-close>Close</button></div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const pad = n => String(n).padStart(2, '0');
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => isoDate(new Date());
+const fmtD = iso => iso ? String(iso).slice(0,10).split('-').reverse().join('/') : '';
+const fmtDT = s => s ? `${fmtD(s.slice(0,10))} ${String(s).slice(11,16)}` : '';
+const daysTo = iso => iso ? Math.round((new Date(String(iso).slice(0,10) + 'T00:00:00') - new Date(today() + 'T00:00:00')) / 864e5) : null;
+const nowLocal = () => { const d = new Date(); return `${isoDate(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const KIND = { OUT_CLIENT: 'Given to client', IN_CLIENT: 'Received from client', OUT_OTHER: 'Given to staff / others', IN_OTHER: 'Returned to office' };
+const local = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+
+/* ---------- talking to the Google Sheet ---------- */
+function call(fn, ...args){
+  return new Promise((resolve, reject) => {
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(e && e.message ? e : new Error(String(e))))[fn](...args);
+  });
+}
+let db = { dscs: [], moves: [], renewals: [], reminders: [], settings: { days: 15 }, user: '' };
+let busy = false;
+function msg(cls, text){ const d = document.createElement('div'); d.className = cls; d.textContent = text; $('#topMsgs').replaceChildren(d); }
+function setData(d){ db = d; render(); }
+async function run(fn, args, okText){
+  if (busy) return null;
+  busy = true; document.body.style.cursor = 'progress';
+  try { const d = await call(fn, ...args); setData(d); if (okText) msg('m-ok', okText); return d; }
+  catch(e){ msg('m-err', e.message); try { setData(await call('getAll')); } catch(e2){} throw e; }
+  finally { busy = false; document.body.style.cursor = ''; }
+}
+async function load(){ try { setData(await call('getAll')); } catch(e){ msg('m-err', 'Could not read the register: ' + e.message); } }
+$('#refreshBtn').addEventListener('click', () => load().then(() => msg('m-ok', 'Register refreshed.')));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !busy && !document.querySelector('dialog[open]')) load(); });
+
+/* ---------- helpers ---------- */
+const S = () => db.settings || {};
+const dueDays = () => Number(S().days) || 15;
+function expiryState(d){
+  if (d.status === 'Inactive') return { cls: 'b-in', text: 'Inactive', key: 'inactive' };
+  const n = daysTo(d.expiry);
+  if (n === null) return { cls: 'b-in', text: 'No expiry date', key: 'none' };
+  if (n < 0) return { cls: 'b-exp', text: `Expired ${-n} day${n === -1 ? '' : 's'} ago`, key: 'expired' };
+  if (n <= dueDays()) return { cls: 'b-soon', text: n === 0 ? 'Expires today' : `Expires in ${n} day${n === 1 ? '' : 's'}`, key: 'soon' };
+  return { cls: 'b-ok', text: `Valid – ${n} days`, key: 'ok' };
+}
+const byNo = no => db.dscs.find(d => Number(d.no) === Number(no));
+const isOut = d => d.status === 'With client' || d.status === 'With staff / others';
+
+/* ---------- views ---------- */
+let tab = local.get('dsc-tab', 'dash'), sortKey = 'no', sortDir = 1, regFilter = { q: '', st: 'all' };
+$('#tabs').addEventListener('click', e => { const t = e.target.dataset.tab; if (t) { tab = t; local.set('dsc-tab', t); render(); } });
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#fileInfo').innerHTML = `Signed in as <b>${esc(db.user)}</b> · ${db.dscs.length} DSC(s) in the register`;
+  if (db.sheetUrl) { const a = $('#sheetLink'); a.href = db.sheetUrl; a.style.display = ''; }
+  ({ dash: vDash, reg: vReg, exp: vExp, mov: vMov, ren: vRen, rem: vRem, set: vSet })[tab]();
+}
+function counts(){
+  const c = { total: 0, expired: 0, soon: 0, out: 0, in: 0 };
+  db.dscs.forEach(d => { if (d.status === 'Inactive') return; c.total++; const k = expiryState(d).key;
+    if (k === 'expired') c.expired++; if (k === 'soon') c.soon++; if (isOut(d)) c.out++; else c.in++; });
+  return c;
+}
+function vDash(){
+  const c = counts(), v = $('#view');
+  v.innerHTML = `<div class="kpis">
+    <div class="kpi" data-go="reg" data-st="all"><b>${c.total}</b><span>Active DSCs</span></div>
+    <div class="kpi red" data-go="exp"><b>${c.expired}</b><span>Expired</span></div>
+    <div class="kpi amber" data-go="exp"><b>${c.soon}</b><span>Expiring in ${dueDays()} days</span></div>
+    <div class="kpi" data-go="reg" data-st="out"><b>${c.out}</b><span>With clients / others</span></div>
+    <div class="kpi" data-go="reg" data-st="in"><b>${c.in}</b><span>In office</span></div></div>
+  <div class="card"><h2>Needs attention</h2>${attentionTable()}</div>
+  <div class="card"><h2>Out of the office</h2>${outTable()}</div>`;
+  v.querySelectorAll('[data-go]').forEach(k => k.addEventListener('click', () => { if (k.dataset.st) regFilter.st = k.dataset.st; tab = k.dataset.go; render(); }));
+  wireRowActions(v);
+}
+function dueList(){ return db.dscs.filter(d => ['expired', 'soon'].includes(expiryState(d).key)).sort((a, b) => String(a.expiry).localeCompare(String(b.expiry))); }
+function lastReminder(no){ const r = db.reminders.filter(x => Number(x.no) === Number(no)).sort((a, b) => String(b.at).localeCompare(String(a.at)))[0]; return r ? `${fmtD(r.at)} (${esc(r.channel)})` : '–'; }
+function attentionTable(){
+  const L = dueList();
+  if (!L.length) return `<p class="empty">No DSC has expired or expires in the next ${dueDays()} days.</p>`;
+  return `<div class="tw"><table class="t"><thead><tr><th>No.</th><th>Name</th><th>Company</th><th>Expiry</th><th>Status</th><th>Last reminder</th><th></th></tr></thead><tbody>` +
+    L.map(d => { const e = expiryState(d); return `<tr><td class="n">${d.no}</td><td>${esc(d.name)}</td><td>${esc(d.company)}</td><td>${fmtD(d.expiry)} <span class="badge ${e.cls}">${e.text}</span></td><td>${esc(d.status)}</td><td>${lastReminder(d.no)}</td>
+      <td class="actions"><button class="sm" data-act="remind" data-no="${d.no}">Reminder</button><button class="sm" data-act="renew" data-no="${d.no}">Record renewal</button></td></tr>`; }).join('') + '</tbody></table></div>';
+}
+function lastMove(no){ return db.moves.filter(m => Number(m.no) === Number(no)).sort((a, b) => String(b.at).localeCompare(String(a.at)))[0]; }
+function outTable(){
+  const L = db.dscs.filter(isOut).sort((a, b) => a.no - b.no);
+  if (!L.length) return '<p class="empty">All active DSCs are in the office.</p>';
+  return `<div class="tw"><table class="t"><thead><tr><th>No.</th><th>Name</th><th>With</th><th>Since</th><th>Purpose</th><th></th></tr></thead><tbody>` +
+    L.map(d => { const m = lastMove(d.no), since = m ? m.at : '', days = since ? -daysTo(since) : null;
+      return `<tr><td class="n">${d.no}</td><td>${esc(d.name)}</td><td>${esc(d.withWhom || d.status)}</td><td>${fmtDT(since)}${days !== null ? ` (${days} day${days === 1 ? '' : 's'})` : ''}</td><td>${esc(m ? m.purpose : '')}</td>
+        <td><button class="sm" data-act="move" data-no="${d.no}" data-kind="${d.status === 'With client' ? 'IN_CLIENT' : 'IN_OTHER'}">Record return</button></td></tr>`; }).join('') + '</tbody></table></div>';
+}
+function vReg(){
+  const v = $('#view');
+  v.innerHTML = `<div class="card"><div class="filters">
+      <input id="q" placeholder="Search name, company, PAN, mobile, DSC no." value="${esc(regFilter.q)}">
+      <select id="st"><option value="all">All active</option><option value="soon">Expiring / expired</option><option value="out">Out of office</option><option value="in">In office</option><option value="inactive">Inactive</option><option value="every">Everything</option></select>
+      <button class="primary" id="addDsc">+ Add DSC</button></div><div id="regTable"></div></div>`;
+  $('#st').value = regFilter.st;
+  $('#q').addEventListener('input', e => { regFilter.q = e.target.value; drawReg(); });
+  $('#st').addEventListener('change', e => { regFilter.st = e.target.value; drawReg(); });
+  $('#addDsc').addEventListener('click', () => openDsc(null));
+  drawReg();
+}
+function drawReg(){
+  const q = regFilter.q.toLowerCase().trim(), st = regFilter.st;
+  let L = db.dscs.filter(d => {
+    const k = expiryState(d).key, out = isOut(d);
+    if (st === 'all' && d.status === 'Inactive') return false;
+    if (st === 'soon' && !['expired', 'soon'].includes(k)) return false;
+    if (st === 'out' && !out) return false;
+    if (st === 'in' && (out || d.status === 'Inactive')) return false;
+    if (st === 'inactive' && d.status !== 'Inactive') return false;
+    return !q || [d.no, d.name, d.company, d.pan, d.mobile, d.email, d.withWhom].join(' ').toLowerCase().includes(q);
+  });
+  L.sort((a, b) => { const x = a[sortKey] ?? '', y = b[sortKey] ?? ''; return (sortKey === 'no' ? (x - y) : String(x).localeCompare(String(y))) * sortDir; });
+  const th = (k, l) => `<th data-sort="${k}">${l}${sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</th>`;
+  $('#regTable').innerHTML = !L.length ? '<p class="empty">No DSC matches. Use "+ Add DSC" to add one.</p>' :
+    `<div class="tw"><table class="t"><thead><tr>${th('no','No.')}${th('name','Name')}${th('company','Company / firm')}${th('expiry','Expiry')}${th('status','Status')}<th>Mobile / e-mail</th><th></th></tr></thead><tbody>` +
+    L.map(d => { const e = expiryState(d), out = isOut(d);
+      return `<tr><td class="n">${d.no}</td><td>${esc(d.name)}${d.designation ? `<div class="hint">${esc(d.designation)}</div>` : ''}</td><td>${esc(d.company)}</td>
+        <td>${fmtD(d.expiry)}<div><span class="badge ${e.cls}">${e.text}</span></div></td>
+        <td><span class="badge ${out ? 'b-out' : 'b-in'}">${esc(d.status)}</span>${d.withWhom && out ? `<div class="hint">${esc(d.withWhom)}</div>` : ''}${d.location ? `<div class="hint">Kept at ${esc(d.location)}</div>` : ''}</td>
+        <td>${esc(d.mobile)}<div class="hint">${esc(d.email)}</div></td>
+        <td class="actions"><button class="sm" data-act="edit" data-no="${d.no}">Edit</button>
+          <button class="sm" data-act="move" data-no="${d.no}" data-kind="${out ? (d.status === 'With client' ? 'IN_CLIENT' : 'IN_OTHER') : 'OUT_CLIENT'}">${out ? 'Received back' : 'Hand over'}</button>
+          <button class="sm" data-act="renew" data-no="${d.no}">Renewal</button><button class="sm" data-act="remind" data-no="${d.no}">Reminder</button>
+          <button class="sm" data-act="hist" data-no="${d.no}">History</button></td></tr>`; }).join('') + '</tbody></table></div>';
+  $('#regTable').querySelectorAll('[data-sort]').forEach(h => h.addEventListener('click', () => { const k = h.dataset.sort; sortDir = sortKey === k ? -sortDir : 1; sortKey = k; drawReg(); }));
+  wireRowActions($('#regTable'));
+}
+function wireRowActions(root){
+  root.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => {
+    const d = byNo(b.dataset.no); if (!d) return;
+    ({ edit: () => openDsc(d), move: () => openMove(d, b.dataset.kind), renew: () => openRenew(d), remind: () => openRemind([d]), hist: () => openHist(d) })[b.dataset.act]();
+  }));
+}
+function vExp(){
+  const L = dueList(), v = $('#view');
+  v.innerHTML = `<div class="card"><h2>DSCs expired or expiring in the next ${dueDays()} days (as on ${fmtD(today())})</h2>
+    <div class="bar" style="margin-bottom:10px"><button class="primary" id="bulkRem" ${L.length ? '' : 'disabled'}>Reminders for all listed</button>
+      <button id="expPrint" ${L.length ? '' : 'disabled'}>Print report</button></div>
+    ${attentionTable()}<p class="hint">The number of days can be changed in Settings. To work on the list in a spreadsheet, open the Google Sheet and filter the "DSC Register" tab.</p></div>`;
+  wireRowActions(v);
+  if (!L.length) return;
+  $('#bulkRem').addEventListener('click', () => openRemind(L));
+  $('#expPrint').addEventListener('click', () => printHtml(`<h2>DSC expiry report</h2><p>Expired or expiring within ${dueDays()} days, as on ${fmtD(today())}</p>
+    <table><thead><tr><th>No.</th><th>Name</th><th>Company / firm</th><th>Mobile</th><th>Expiry</th><th>Days</th><th>Status</th><th>Last reminder</th></tr></thead><tbody>` +
+    L.map(d => { const n = daysTo(d.expiry); return `<tr><td>${d.no}</td><td>${esc(d.name)}</td><td>${esc(d.company)}</td><td>${esc(d.mobile)}</td><td>${fmtD(d.expiry)}</td><td>${n}</td><td>${n < 0 ? 'Expired' : 'Expiring'}</td><td>${lastReminder(d.no)}</td></tr>`; }).join('') + '</tbody></table>'));
+}
+function logTable(rows, cols, empty){
+  if (!rows.length) return `<p class="empty">${empty}</p>`;
+  return `<div class="tw"><table class="t"><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>` +
+    rows.map(r => `<tr>${cols.map(c => `<td>${c[1](r)}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>';
+}
+const nameOf = no => { const d = byNo(no); return d ? esc(d.name) : ''; };
+function vMov(){
+  const L = db.moves.slice().sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  $('#view').innerHTML = `<div class="card"><h2>Movement register</h2>` + logTable(L, [
+    ['Date & time', r => fmtDT(r.at)], ['DSC No.', r => r.no], ['Holder', r => nameOf(r.no)], ['Movement', r => esc(KIND[r.kind])],
+    ['Person', r => esc(r.person)], ['Purpose', r => esc(r.purpose)], ['Recorded by', r => esc(r.by)], ['', r => `<button class="sm" data-slip="${esc(r.id)}">Slip</button>`]
+  ], 'No movement recorded yet. Use "Hand over" or "Received back" in the Register.') + '</div>';
+  $('#view').querySelectorAll('[data-slip]').forEach(b => b.addEventListener('click', () => printSlip(db.moves.find(m => m.id === b.dataset.slip))));
+}
+function vRen(){
+  const L = db.renewals.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const pending = L.filter(r => r.paid === 'Pending' && Number(r.fee));
+  $('#view').innerHTML = `<div class="card"><h2>Renewals</h2>${pending.length ? `<div class="msgs"><div class="m-warn">Payment pending for ${pending.length} renewal(s): Rs. ${pending.reduce((a, r) => a + Number(r.fee), 0).toLocaleString('en-IN')}.</div></div>` : ''}` + logTable(L, [
+    ['Date', r => fmtD(r.date)], ['DSC No.', r => r.no], ['Holder', r => nameOf(r.no)], ['Old expiry', r => fmtD(r.oldExpiry)], ['New expiry', r => fmtD(r.newExpiry)],
+    ['Issued by', r => esc(r.issuer)], ['Fee', r => r.fee ? Number(r.fee).toLocaleString('en-IN') : ''], ['Invoice', r => esc(r.invoice)],
+    ['Payment', r => r.paid === 'Pending' && Number(r.fee) ? `<span class="badge b-soon">Pending</span> <button class="sm link" data-paid="${esc(r.id)}">Mark received</button>` : esc(r.paid)], ['By', r => esc(r.by)]
+  ], 'No renewal recorded yet. Use "Renewal" in the Register.') + '</div>';
+  $('#view').querySelectorAll('[data-paid]').forEach(b => b.addEventListener('click', () => run('markPaid', [b.dataset.paid], 'Payment marked as received.').catch(() => {})));
+}
+function vRem(){
+  const L = db.reminders.slice().sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  $('#view').innerHTML = `<div class="card"><h2>Reminders sent</h2>` + logTable(L, [
+    ['Date & time', r => fmtDT(r.at)], ['DSC No.', r => r.no], ['Holder', r => nameOf(r.no)], ['Sent by', r => esc(r.channel)], ['Staff', r => esc(r.by)], ['Expiry then', r => fmtD(r.expiry)]
+  ], 'No reminder recorded yet.') + '</div>';
+}
+function vSet(){
+  const s = S();
+  $('#view').innerHTML = `<div class="card"><h2>Settings (shared by all staff)</h2><div class="grid">
+      <div><label>Expiry report: days ahead</label><input id="sDays" type="number" min="1" max="365" value="${esc(s.days)}"></div>
+      <div><label>Daily e-mail: flag DSCs out for (days)</label><input id="sOut" type="number" min="1" value="${esc(s.outDaysAlert)}"></div>
+      <div class="full"><label>Daily e-mail goes to (comma-separated; blank = the owner of the sheet)</label><input id="sTo" value="${esc(s.digestTo)}"></div>
+      <div class="full"><label>Firm name used in messages</label><input id="sFirm" value="${esc(s.firm)}"></div>
+      <div class="full"><label>E-mail subject</label><input id="sSubj" value="${esc(s.emailSubject)}"></div>
+      <div class="full"><label>Message (used for both e-mail and WhatsApp)</label><textarea id="sMsg" rows="9">${esc(s.message)}</textarea>
+        <div class="hint">Placeholders: {name}, {dsc_no}, {company}, {company_text}, {expiry}, {status_text} ("expires" / "expired"), {days}, {firm}. Keep the message informational.</div></div>
+    </div><div class="bar" style="margin-top:10px"><button class="primary" id="sSave">Save settings</button></div>
+    <p class="hint">The daily e-mail is switched on from the Google Sheet: menu <b>DSC Register → Turn on the daily e-mail</b>.</p></div>`;
+  $('#sSave').addEventListener('click', () => run('saveSettings', [{ days: $('#sDays').value, outDaysAlert: $('#sOut').value, digestTo: $('#sTo').value,
+    firm: $('#sFirm').value, emailSubject: $('#sSubj').value, message: $('#sMsg').value }], 'Settings saved.').catch(() => {}));
+}
+
+/* ---------- dialogs ---------- */
+document.querySelectorAll('dialog').forEach(dl => dl.addEventListener('click', e => { if (e.target.closest('[data-close]')) dl.close(); }));
+function formError(form, text){ const box = form.querySelector('[data-err]'); box.innerHTML = text ? `<div class="m-err">${esc(text)}</div>` : ''; }
+let editing = null;
+function openDsc(d){
+  editing = d;
+  const f = $('#dscForm'); f.reset(); formError(f, '');
+  $('#dscDlgTitle').textContent = d ? `Edit DSC No. ${d.no}` : 'Add DSC';
+  const next = db.dscs.reduce((m, x) => Math.max(m, Number(x.no) || 0), 0) + 1;
+  [...f.elements].forEach(el => { if (el.name) { el.style.borderColor = ''; el.value = d ? (d[el.name] ?? '') : (el.name === 'no' ? next : el.tagName === 'SELECT' ? el.options[0].value : ''); } });
+  $('#dscDlg').showModal();
+}
+$('#dscForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, o = {};
+  [...f.elements].forEach(el => { if (el.name) o[el.name] = el.value.trim(); });
+  o.pan = o.pan.toUpperCase();
+  const bad = ['no', 'name', 'expiry'].filter(n => !o[n] || (n === 'no' && Number(o.no) < 1));
+  bad.forEach(n => f.elements[n].style.borderColor = 'var(--err)');
+  if (bad.length) { formError(f, 'Fill in the DSC number, name and date of expiry.'); return; }
+  try { await run('saveDsc', [o, editing ? editing.no : null, editing ? Number(editing.rev || 0) : 0], editing ? `DSC No. ${o.no} updated.` : `DSC No. ${o.no} added.`); $('#dscDlg').close(); }
+  catch(err){ formError(f, err.message); }
+});
+let movFor = null;
+function openMove(d, kind){
+  movFor = d;
+  const f = $('#movForm'); f.reset(); formError(f, '');
+  $('#movTitle').textContent = `DSC No. ${d.no} – ${d.name}`;
+  f.elements.kind.value = kind || 'OUT_CLIENT';
+  f.elements.at.value = nowLocal();
+  f.elements.person.value = kind && kind.startsWith('IN') ? (d.withWhom || '') : (kind === 'OUT_CLIENT' ? d.name : '');
+  $('#movDlg').showModal();
+}
+$('#movForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target;
+  const m = { no: movFor.no, kind: f.elements.kind.value, at: f.elements.at.value ? f.elements.at.value + ':00' : '', person: f.elements.person.value.trim(),
+              purpose: f.elements.purpose.value.trim(), remarks: f.elements.remarks.value.trim() };
+  try { const d = await run('addMove', [m], `Movement recorded for DSC No. ${m.no}.`); $('#movDlg').close();
+        if (f.elements.slip.checked && d) printSlip(d.moves.find(x => x.id === d.lastMoveId)); }
+  catch(err){ formError(f, err.message); }
+});
+let renFor = null;
+function addYears(iso, y){ const d = new Date(iso + 'T00:00:00'); d.setFullYear(d.getFullYear() + y); d.setDate(d.getDate() - 1); return isoDate(d); }
+function openRenew(d){
+  renFor = d;
+  const f = $('#renForm'); f.reset(); formError(f, '');
+  $('#renTitle').textContent = `Renewal – DSC No. ${d.no}, ${d.name}`;
+  f.elements.date.value = today(); f.elements.issuer.value = d.issuer || ''; f.elements.cls.value = d.cls || 'Class 3';
+  const setExp = () => { if (f.elements.date.value) f.elements.newExpiry.value = addYears(f.elements.date.value, Number(f.elements.validity.value)); };
+  f.elements.date.onchange = setExp; f.elements.validity.onchange = setExp; setExp();
+  $('#renDlg').showModal();
+}
+$('#renForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target;
+  if (!f.elements.date.value || !f.elements.newExpiry.value) { formError(f, 'Enter the date of renewal and the new date of expiry.'); return; }
+  const r = { no: renFor.no, date: f.elements.date.value, newExpiry: f.elements.newExpiry.value, validity: Number(f.elements.validity.value),
+    issuer: f.elements.issuer.value.trim(), cls: f.elements.cls.value, tokenNote: f.elements.tokenNote.value, fee: f.elements.fee.value,
+    invoice: f.elements.invoice.value.trim(), paid: f.elements.paid.value, remarks: f.elements.remarks.value.trim() };
+  try { await run('addRenewal', [r], `Renewal recorded; DSC No. ${r.no} now expires on ${fmtD(r.newExpiry)}.`); $('#renDlg').close(); }
+  catch(err){ formError(f, err.message); }
+});
+
+/* ---------- reminders ---------- */
+function fill(tpl, d){
+  const n = daysTo(d.expiry), expired = n !== null && n < 0;
+  const vals = { name: d.name || '', dsc_no: d.no, company: d.company || '', company_text: d.company ? ` (${d.company})` : '', expiry: fmtD(d.expiry),
+    status_text: expired ? 'expired' : 'expires', days: n === null ? '' : Math.abs(n), firm: S().firm || '' };
+  return String(tpl || '').replace(/\{(\w+)\}/g, (m, k) => (k in vals ? vals[k] : m));
+}
+const waNumber = m => { const dg = String(m || '').replace(/\D/g, ''); return dg.length === 10 ? '91' + dg : dg; };
+function openRemind(list){
+  $('#remTitle').textContent = list.length === 1 ? `Reminder – DSC No. ${list[0].no}, ${list[0].name}` : `Reminders for ${list.length} DSCs`;
+  const body = $('#remBody'); body.innerHTML = '';
+  list.forEach(d => {
+    const text = fill(S().message, d), subj = fill(S().emailSubject, d).replace(/\bexpires\b/, 'expiring');
+    const box = document.createElement('div'); box.style.marginBottom = '18px';
+    const wa = d.mobile ? `https://wa.me/${waNumber(d.mobile)}?text=${encodeURIComponent(text)}` : '';
+    const gm = d.email ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(d.email)}&su=${encodeURIComponent(subj)}&body=${encodeURIComponent(text)}` : '';
+    box.innerHTML = `<p><b>${esc(d.no)}. ${esc(d.name)}</b> <span class="hint">${esc(d.mobile || 'no mobile')} · ${esc(d.email || 'no e-mail')}</span></p>
+      <textarea readonly rows="8">${esc(text)}</textarea>
+      <div class="bar" style="margin-top:8px">
+        <button class="sm" data-c="copy">Copy text</button>
+        ${wa ? `<a class="btnlink" data-c="wa" href="${wa}" target="_blank" rel="noopener">Open in WhatsApp</a>` : '<span class="hint">No mobile no.</span>'}
+        ${gm ? `<a class="btnlink" data-c="gmail" href="${gm}" target="_blank" rel="noopener">Open in Gmail</a>` : '<span class="hint">No e-mail id</span>'}
+        <button class="sm" data-c="mark">Mark as sent</button>
+        <span class="hint" data-done></span></div>`;
+    const note = t => { box.querySelector('[data-done]').textContent = t; };
+    const log = ch => run('addReminder', [{ no: d.no, channel: ch }]).then(() => note(`Recorded as sent (${ch}).`)).catch(() => {});
+    box.querySelector('[data-c=copy]').addEventListener('click', () => {
+      const ta = box.querySelector('textarea'); ta.focus(); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch(e) {}
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => note('Copied. Click "Mark as sent" after sending.')).catch(() => note(ok ? 'Copied. Click "Mark as sent" after sending.' : 'Text selected – press Ctrl+C to copy.'));
+      else note(ok ? 'Copied. Click "Mark as sent" after sending.' : 'Text selected – press Ctrl+C to copy.');
+    });
+    const waBtn = box.querySelector('[data-c=wa]'); if (waBtn) waBtn.addEventListener('click', () => log('WhatsApp'));
+    const gmBtn = box.querySelector('[data-c=gmail]'); if (gmBtn) gmBtn.addEventListener('click', () => log('E-mail'));
+    box.querySelector('[data-c=mark]').addEventListener('click', () => log('Copied text'));
+    body.appendChild(box);
+  });
+  $('#remDlg').showModal();
+}
+function openHist(d){
+  $('#histTitle').textContent = `History – DSC No. ${d.no}, ${d.name}`;
+  const f = (arr, key) => arr.filter(m => Number(m.no) === Number(d.no)).sort((a, b) => String(b[key]).localeCompare(String(a[key])));
+  $('#histBody').innerHTML = `<p>${esc(d.company)} · expiry ${fmtD(d.expiry)} · ${esc(d.status)}${d.updatedBy ? ` · last updated by ${esc(d.updatedBy)} on ${fmtDT(d.updatedAt)}` : ''}</p>
+    <h4>Movements</h4>${logTable(f(db.moves, 'at'), [['Date & time', r => fmtDT(r.at)], ['Movement', r => esc(KIND[r.kind])], ['Person', r => esc(r.person)], ['Purpose', r => esc(r.purpose)], ['By', r => esc(r.by)]], 'None.')}
+    <h4>Renewals</h4>${logTable(f(db.renewals, 'date'), [['Date', r => fmtD(r.date)], ['Old expiry', r => fmtD(r.oldExpiry)], ['New expiry', r => fmtD(r.newExpiry)], ['Fee', r => esc(r.fee)], ['Payment', r => esc(r.paid)]], 'None.')}
+    <h4>Reminders</h4>${logTable(f(db.reminders, 'at'), [['Date & time', r => fmtDT(r.at)], ['Sent by', r => esc(r.channel)], ['Staff', r => esc(r.by)]], 'None.')}`;
+  $('#histDlg').showModal();
+}
+
+/* ---------- printing (in the page, so it works inside Google's frame) ---------- */
+function printHtml(inner){
+  $('#printArea').innerHTML = `${S().firm ? `<div class="pfirm">${esc(S().firm)}</div>` : ''}${inner}`;
+  document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  setTimeout(() => window.print(), 50);
+}
+function printSlip(m){
+  if (!m) return;
+  const d = byNo(m.no) || {}, out = String(m.kind).startsWith('OUT');
+  printHtml(`<h2>Acknowledgement – ${out ? 'DSC handed over' : 'DSC received'}</h2>
+    <table><tbody>
+      <tr><th>DSC No.</th><td>${esc(m.no)}</td></tr><tr><th>Name of the holder</th><td>${esc(d.name)}</td></tr>
+      <tr><th>Company / firm</th><td>${esc(d.company)}</td></tr><tr><th>Date of expiry</th><td>${fmtD(d.expiry)}</td></tr>
+      <tr><th>Token</th><td>${esc(d.token)}</td></tr><tr><th>Movement</th><td>${esc(KIND[m.kind])}</td></tr>
+      <tr><th>${out ? 'Handed over to' : 'Received from'}</th><td>${esc(m.person)}</td></tr><tr><th>Date and time</th><td>${fmtDT(m.at)}</td></tr>
+      <tr><th>Purpose</th><td>${esc(m.purpose)}</td></tr><tr><th>Remarks</th><td>${esc(m.remarks)}</td></tr></tbody></table>
+    <p>${out ? 'Received the above digital signature certificate (USB token) in good condition.' : 'Received back the above digital signature certificate (USB token) in good condition.'}</p>
+    <div class="sig"><div>${out ? 'Signature of the person receiving' : 'Signature of the person returning'}<br>${esc(m.person)}</div><div>For ${esc(S().firm || 'the office')}<br>${esc(m.by || '')}</div></div>`);
+}
+
+load();
+})();
+</script>
+</body>
+</html>
