@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
     "New: Company Registration Tool Kit – Private Limited and One Person Company.",
     "LLP Registration Tool Kit now includes the LLP Agreement, print set, checklist and client request list.",
     "Reminder: check every generated document against the original KYC documents before it is signed."
@@ -45,9 +46,10 @@ window.HOME_CONFIG = {
       id: "partnership",
       title: "Partnership Deed",
       category: "Agreements",
-      path: "",
-      status: "planned",
-      description: "Partnership deed preparation from the firm's standard format."
+      path: "partnership-docs/index.html",
+      status: "available",
+      description: "Partnership deed in the firm's format, NOC for the place of business, data sheet, checklist and client request list. Reads PAN, Aadhaar and bank statement PDFs or an Excel sheet.",
+      added: "2026-11-05"
     },
     {
       id: "projections",

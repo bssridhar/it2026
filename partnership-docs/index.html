@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partnership Deed</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff; --auto:#eef4fc;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
+h1{font-size:1.45rem;margin:4px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+section.card h2{font-size:1.05rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+label .req{color:var(--err)}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+textarea{min-height:76px;resize:vertical}
+textarea[readonly]{opacity:.75}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.auto{background:var(--auto)}
+.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.counts{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.counts > div{width:200px}
+.excel,.objbox{margin-top:14px;padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px 16px}
+.acts label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.88rem;margin:0}
+.acts input{width:auto}
+.partner{border:1px dashed var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
+.partner h3{margin:0 0 10px;font-size:.98rem}
+.uploads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 14px;padding:12px;border-radius:8px;background:var(--bg)}
+.up label.btn{display:inline-block;cursor:pointer;padding:7px 12px;border:1px solid var(--accent);color:var(--accent);border-radius:6px;font-size:.88rem;margin:0}
+.up input[type=file]{display:none}
+.up .st{font-size:.8rem;margin-top:5px;color:var(--muted);word-break:break-word}
+.up .st.ok{color:var(--ok)} .up .st.err{color:var(--err)} .up .st.warn{color:var(--warn)}
+button{font:inherit;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)}
+.check input{width:auto}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)}
+.m-warn{background:var(--warn-bg);color:var(--warn)}
+.m-ok{background:var(--ok-bg);color:var(--ok)}
+#checks .none{color:var(--muted);font-size:.9rem}
+.cl-block{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px}
+.cl-block h3{font-size:.92rem;margin:0 0 6px}
+.cl-block label{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:.88rem;margin:3px 0}
+.cl-block input{width:auto;margin-top:3px}
+.cl-auto{color:var(--ok);font-size:.78rem}
+#capSummary{font-size:.88rem;color:var(--muted)}
+#outputs ul{padding-left:18px;margin:8px 0 0}
+#outputs a{color:var(--accent)}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line)}
+.footer{color:var(--muted);font-size:.82rem;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Partnership Deed</h1>
+  <p class="sub">Prepares the partnership deed in the firm's format, an NOC for the place of business, a data sheet and a request list. Partner details can be read from PAN, Aadhaar and bank statement PDFs, or loaded from Excel. Everything runs in this browser and nothing is uploaded.</p>
+
+  <form id="f" novalidate autocomplete="off">
+  <section class="card">
+    <h2>1. Partners</h2>
+    <div class="counts">
+      <div><label>Number of partners <span class="req">*</span></label><input type="number" min="2" max="50" name="p_count" value="2"></div>
+      <button type="button" class="primary" id="setCounts">Set up partner forms</button>
+    </div>
+    <div class="hint">A partnership needs at least two partners. A firm can have at most 50 partners (Section 464 of the Companies Act, 2013 read with Rule 10 of the Companies (Miscellaneous) Rules, 2014).</div>
+    <div class="excel">
+      <strong>Have the details in Excel instead?</strong>
+      <span class="hint">Useful when the KYC copies are scanned. Download the template, fill it in and upload it.</span>
+      <div class="bar">
+        <button type="button" id="dlExcel">Download Excel template</button>
+        <button type="button" id="upExcel">Upload filled Excel</button>
+        <input type="file" id="excelFile" accept=".xlsx" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Firm and deed details</h2>
+    <div class="grid">
+      <div class="full"><label>Name of the firm <span class="req">*</span></label><input name="firm_name" required placeholder="e.g. ABC CONSULTING"></div>
+      <div class="full"><label>Principal place of business <span class="req">*</span></label>
+        <textarea name="place_of_business" required placeholder="Door no., street&#10;Area&#10;City PIN"></textarea></div>
+      <div><label>E-mail id of firm (data sheet)</label><input type="email" name="firm_email"></div>
+      <div><label>Place of execution <span class="req">*</span></label><input name="place" required value="Chennai"></div>
+      <div><label>Date of deed <span class="req">*</span></label><input type="date" name="deed_date" required></div>
+      <div><label>Date of commencement</label><input type="date" name="commencement">
+        <div class="hint">Blank = same as the date of deed.</div></div>
+      <div><label>Duration</label><input name="duration" placeholder="Blank = at will">
+        <div class="hint">e.g. "for a period of five years from the date of commencement"</div></div>
+      <div><label>Accounts closed on</label><input name="year_end" value="31st day of March"></div>
+      <div><label>Interest on capital (% per annum)</label><input type="number" min="0" max="100" step="0.5" name="interest_rate" value="12">
+        <div class="hint">0 = no interest.</div></div>
+      <div><label>Notice for retirement</label><select name="notice_months"><option value="1">One month</option><option value="2">Two months</option><option value="3">Three months</option></select></div>
+      <div><label>Managing partner</label><select name="managing_partner"><option value="">None</option></select>
+        <div class="hint">Used in the clause on raising loans.</div></div>
+      <div class="full"><label class="check"><input type="checkbox" name="stamp_space" checked> Leave space at the top of page 1 for printing on stamp paper</label></div>
+    </div>
+    <div class="objbox">
+      <strong>Business of the firm (object clause)</strong>
+      <span class="hint">Describe the business and the tool suggests a draft from standard clause wording; edit it as needed.</span>
+      <div class="grid" style="margin-top:6px">
+        <div class="full"><label>Type of activity</label><div id="objActs" class="acts"></div></div>
+        <div class="full"><label>Services provided</label><input name="obj_services" placeholder="e.g. business consultancy and IT services"></div>
+        <div class="full"><label>Goods dealt in / made</label><input name="obj_products"></div>
+        <div class="full"><label>Customers / sectors (optional)</label><input name="obj_customers"></div>
+        <div class="full"><label class="check"><input type="checkbox" name="obj_abroad"> Business in India and abroad</label></div>
+      </div>
+      <div class="bar" style="margin:6px 0"><button type="button" id="objSuggest">Suggest draft objects</button></div>
+      <div id="objNotes" class="msgs"></div>
+      <label>Object clause (one object per line; each line becomes a paragraph) <span class="req">*</span></label>
+      <textarea name="objects" rows="8" required></textarea>
+    </div>
+    <div class="hint" id="capSummary" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Partner details</h2>
+    <p class="hint" style="margin-top:-6px">For each partner, upload the PAN, Aadhaar and bank statement PDFs and the fields fill in automatically (shaded fields came from a document). Check every field. The address is taken from the bank statement. Scanned copies can't be read, so key those details in by hand.</p>
+    <div id="partners"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. NOC from owner of business premises</h2>
+    <div class="grid">
+      <div><label>Name of owner <span class="req">*</span></label><input name="owner_name" required></div>
+      <div><label>Date of NOC <span class="req">*</span></label><input type="date" name="noc_date" required></div>
+      <div><label>Place</label><input name="noc_place" placeholder="Same as place of execution"></div>
+      <div class="full"><label class="check"><input type="checkbox" name="prop_same" checked> Property address is the same as the principal place of business</label></div>
+      <div class="full" id="propWrap" hidden><label>Property address <span class="req">*</span></label><textarea name="property_address"></textarea></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Witnesses</h2>
+    <div class="grid">
+      <div class="full"><label>Witness 1 – name, address, occupation, relationship</label><textarea name="w1_details" placeholder="Leave blank to fill in by hand"></textarea></div>
+      <div class="full"><label>Witness 2 – name, address, occupation, relationship</label><textarea name="w2_details" placeholder="Leave blank to fill in by hand"></textarea></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. Checklist</h2>
+    <p class="hint" style="margin-top:-6px">Items received from an upload or entered details tick themselves; tick the rest as they come in. Unticked items go into the data sheet and the request list for the client.</p>
+    <div id="checklist"></div>
+    <div class="bar" style="margin-top:10px">
+      <button type="button" id="dlRequest">Download request list (Word)</button>
+      <button type="button" id="copyRequest">Copy request list as text</button>
+    </div>
+  </section>
+  </form>
+
+  <section class="card" id="checks" aria-live="polite">
+    <h2>Document checks</h2>
+    <div id="checkList" class="msgs"><p class="none">Upload documents to see the checks here.</p></div>
+  </section>
+
+  <div id="messages" class="msgs" aria-live="polite"></div>
+  <div id="outputs"></div>
+
+  <div class="sticky bar">
+    <button type="button" class="primary" id="gen">Generate documents</button>
+    <button type="button" id="saveCase">Save case file</button>
+    <button type="button" id="loadCase">Open case file</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button type="button" class="danger" id="clearAll">Clear form</button>
+  </div>
+  <p class="footer">The deed follows the firm's format. Stamp duty and the value of the stamp paper depend on the State's stamp law. Check each generated document against the original KYC documents before it is signed. The Aadhaar number is never read or stored.</p>
+</main>
+
+<template id="partnerTpl">
+  <div class="partner">
+    <h3 class="ptitle">Partner</h3>
+    <div class="uploads">
+      <div class="up" data-doc="pan"><label class="btn">PAN (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="aadhaar"><label class="btn">Aadhaar (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="bank"><label class="btn">Bank statement (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+    </div>
+    <div class="grid">
+      <div><label>Title</label><select data-k="title"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option></select></div>
+      <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
+      <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
+      <div><label>Father's name (in full) <span class="req">*</span></label><input data-k="father_name" required></div>
+      <div><label>Husband's name (only if W/o)</label><input data-k="relation_name"></div>
+      <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
+      <div><label>Gender</label><select data-k="gender"><option value="">–</option><option>Male</option><option>Female</option><option>Transgender</option></select></div>
+      <div><label>Religion (optional)</label><input data-k="religion" placeholder="e.g. Hindu"></div>
+      <div><label>PAN <span class="req">*</span></label><input data-k="pan" required maxlength="10" style="text-transform:uppercase"></div>
+      <div><label>Mobile no. <span class="req">*</span></label><input data-k="mobile" required placeholder="+91 9xxxxxxxxx"></div>
+      <div><label>E-mail id <span class="req">*</span></label><input type="email" data-k="email" required></div>
+      <div class="full"><label>Residential address (as per bank statement) <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
+      <div><label>Capital (Rs.) <span class="req">*</span></label><input type="number" min="0" step="1" data-k="capital" required></div>
+      <div><label>Profit share (%) <span class="req">*</span></label><input type="number" min="0" max="100" step="0.01" data-k="profit_pct" required></div>
+      <div><label>Working partner</label><select data-k="working"><option>Yes</option><option>No</option></select></div>
+      <div data-show="working"><label>Salary per month (Rs.)</label><input type="number" min="0" step="1" data-k="salary" placeholder="Blank = no salary"></div>
+    </div>
+  </div>
+</template>
+
+<script src="../shared/pdf.worker.min.js"></script>
+<script src="../shared/pdf.min.js"></script>
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
+<script src="lib/templates.js"></script>
+<script src="../shared/extract.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/merge.js"></script>
+<script src="../shared/objects.js"></script>
+<script>
+(function(){
+"use strict";
+const form = document.getElementById('f');
+const partnersEl = document.getElementById('partners');
+const tpl = document.getElementById('partnerTpl');
+const DRAFT_KEY = 'partnership-docs-draft-v1';
+const DOC_LABEL = { pan: 'PAN', aadhaar: 'Aadhaar', bank: 'Bank statement' };
+const X = window.LLPExtract;
+const ARBITRATION_ACT = 'Arbitration and Conciliation Act, 1996';
+
+/* ================= helpers ================= */
+const up = s => (s||'').toUpperCase();
+const fmt = isoD => isoD ? isoD.split('-').reverse().join('/') : '';
+function dmy(iso, sep){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return [d,m,y].join(sep); }
+function ageOn(dobIso, onIso){
+  if (!dobIso || !onIso) return '';
+  const b = new Date(dobIso+'T00:00:00'), o = new Date(onIso+'T00:00:00');
+  let a = o.getFullYear() - b.getFullYear();
+  if (o.getMonth() < b.getMonth() || (o.getMonth() === b.getMonth() && o.getDate() < b.getDate())) a--;
+  return a;
+}
+const todayIso = () => X.iso(new Date());
+const safe = s => (s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const lines = s => (s || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+const oneLine = s => (s||'').split(/\r?\n/).map(x=>x.trim().replace(/,$/,'')).filter(Boolean).join(', ');
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+function inWords(n){
+  n = Math.round(Number(n) || 0);
+  if (n === 0) return 'Zero';
+  const two = x => x < 20 ? ONES[x] : TENS[Math.floor(x/10)] + (x % 10 ? ' ' + ONES[x % 10] : '');
+  const three = x => x >= 100 ? ONES[Math.floor(x/100)] + ' Hundred' + (x % 100 ? ' ' + two(x % 100) : '') : two(x);
+  const out = [];
+  const crore = Math.floor(n / 1e7); n %= 1e7;
+  const lakh = Math.floor(n / 1e5); n %= 1e5;
+  const th = Math.floor(n / 1000); n %= 1000;
+  if (crore) out.push(inWords(crore) + ' Crore');
+  if (lakh) out.push(two(lakh) + ' Lakh');
+  if (th) out.push(two(th) + ' Thousand');
+  if (n) out.push(three(n));
+  return out.join(' ');
+}
+const inr = n => (Math.round(Number(n) || 0)).toLocaleString('en-IN');
+const pct = x => String(Math.round(x * 100) / 100);
+const ORD = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth','Eleventh','Twelfth','Thirteenth','Fourteenth','Fifteenth','Sixteenth','Seventeenth','Eighteenth','Nineteenth','Twentieth'];
+const ordinal = i => ORD[i] || ((i + 1) + 'th');
+const joinAnd = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_WORDS = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth','Eleventh','Twelfth','Thirteenth','Fourteenth','Fifteenth','Sixteenth','Seventeenth','Eighteenth','Nineteenth','Twentieth','Twenty-First','Twenty-Second','Twenty-Third','Twenty-Fourth','Twenty-Fifth','Twenty-Sixth','Twenty-Seventh','Twenty-Eighth','Twenty-Ninth','Thirtieth','Thirty-First'];
+/** 2025 -> "Two Thousand and Twenty-Five" */
+function yearWords(y){
+  const th = Math.floor(y / 1000), rest = y % 1000;
+  let s = ONES[th] + ' Thousand';
+  if (rest >= 100) s += ' ' + ONES[Math.floor(rest/100)] + ' Hundred';
+  const r = rest % 100;
+  if (r) s += ' and ' + (r < 20 ? ONES[r] : TENS[Math.floor(r/10)] + (r % 10 ? '-' + ONES[r % 10] : ''));
+  return s;
+}
+function dateWords(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const sfx = (d % 100 >= 11 && d % 100 <= 13) ? 'th' : ({1:'st',2:'nd',3:'rd'}[d % 10] || 'th');
+  return { short: `${d}${sfx} of ${MONTHS[m-1]}, ${yearWords(y)}`, long: `${DAY_WORDS[d-1]} day of ${MONTHS[m-1]} ${yearWords(y)}` };
+}
+
+/* ================= partner cards ================= */
+function makeCard(data){
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  data = data || {};
+  for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
+  node._docs = data._docs || {}; node._auto = data._auto || {}; node._check = data._check || {}; node._excel = !!data._excel;
+  for (const [k,v] of Object.entries(node._auto)){
+    const el = node.querySelector(`[data-k="${k}"]`); if (el && el.value === v) el.classList.add('auto');
+  }
+  node.querySelectorAll('.up').forEach(upEl => {
+    const kind = upEl.dataset.doc, inp = upEl.querySelector('input');
+    inp.addEventListener('change', () => { if (inp.files[0]) handleUpload(node, kind, inp.files[0]); inp.value = ''; });
+    if (node._docs[kind]) setStatus(node, kind, node._docs[kind].statusCls, node._docs[kind].status);
+  });
+  node.addEventListener('input', e => { if (e.target.dataset.k && node._auto[e.target.dataset.k] !== e.target.value) e.target.classList.remove('auto'); });
+  syncWorking(node);
+  return node;
+}
+function syncWorking(node){
+  const w = node.querySelector('[data-k=working]').value === 'Yes';
+  node.querySelectorAll('[data-show=working]').forEach(el => el.hidden = !w);
+}
+function renumber(){
+  [...partnersEl.children].forEach((n, i) => { n.querySelector('.ptitle').textContent = `Partner ${i + 1} (Party of the ${ordinal(i)} Part)`; syncWorking(n); });
+  form.elements.p_count.value = partnersEl.children.length;
+  syncManaging();
+}
+function syncManaging(){
+  const sel = form.elements.managing_partner, cur = sel.dataset.want !== undefined ? sel.dataset.want : sel.value;
+  delete sel.dataset.want;
+  const names = [...partnersEl.children].map(n => n.querySelector('[data-k=name]').value.trim()).filter(Boolean);
+  sel.replaceChildren(new Option('None', ''), ...names.map(n => new Option(n, n)));
+  sel.value = names.includes(cur) ? cur : '';
+}
+partnersEl.addEventListener('change', e => { if (e.target.dataset.k === 'working') syncWorking(e.target.closest('.partner')); if (e.target.dataset.k === 'name') syncManaging(); });
+const hasData = n => [...n.querySelectorAll('[data-k=name],[data-k=pan]')].some(el => el.value.trim()) || Object.keys(n._docs||{}).length;
+function setCounts(k, ask){
+  const cards = [...partnersEl.children];
+  const dropped = cards.slice(k).filter(hasData);
+  if (dropped.length && ask && !confirm(`${dropped.length} partner form(s) with details entered will be removed. Continue?`)) return;
+  const out = [];
+  for (let i = 0; i < k; i++) out.push(cards[i] || makeCard({}));
+  partnersEl.replaceChildren(...out);
+  renumber(); refreshChecks(); saveDraft();
+}
+document.getElementById('setCounts').addEventListener('click', () => {
+  const k = Math.max(1, Math.min(50, parseInt(form.elements.p_count.value, 10) || 0));
+  setCounts(k, true);
+});
+
+/* ================= reading documents ================= */
+function setStatus(node, kind, cls, text){
+  const st = node.querySelector(`.up[data-doc="${kind}"] .st`);
+  st.className = 'st ' + (cls||''); st.textContent = text;
+}
+function askPassword(kind){
+  return wrong => prompt((wrong ? 'Incorrect password. ' : '') + `The ${DOC_LABEL[kind]} PDF is password protected. Enter the password:` +
+    (kind === 'aadhaar' ? '\n(For e-Aadhaar: first 4 letters of the name in CAPITALS followed by the year of birth, e.g. ANUS1993.)' : ''));
+}
+const FIELD_LABEL = { pan:'PAN', name:'name', father_name:"father's name", dob:'date of birth', address:'address', email:'e-mail', mobile:'mobile', relation:'relation', relation_person:'S/o-D/o-W/o name', gender:'gender' };
+async function handleUpload(node, kind, file){
+  setStatus(node, kind, '', 'Reading ' + file.name + ' …');
+  let doc;
+  try { doc = await X.readPdf(file, askPassword(kind)); }
+  catch(e){ setStatus(node, kind, 'err', e.message); return; }
+  if (doc.scanned){
+    node._docs[kind] = { file:file.name, scanned:true, fields:{}, notes:[], statusCls:'warn',
+      status: `${file.name}: this is a scanned image, so no text could be read. Please type the details in.` };
+    setStatus(node, kind, 'warn', node._docs[kind].status);
+    refreshChecks(); saveDraft(); return;
+  }
+  const r = kind === 'pan' ? X.parsePan(doc) : kind === 'aadhaar' ? X.parseAadhaar(doc) : X.parseBank(doc);
+  const got = Object.keys(r.fields).filter(k => r.fields[k]);
+  const rec = { file:file.name, fields:r.fields, notes:r.notes, lastTxn:r.lastTxn||'' };
+  rec.statusCls = got.length ? 'ok' : 'err';
+  rec.status = got.length ? `${file.name}: read ${got.map(k=>FIELD_LABEL[k]||k).join(', ')}` + (kind==='bank' && rec.lastTxn ? `; last transaction ${fmt(rec.lastTxn)}` : '')
+                          : `${file.name}: no details could be found. Please type them in.`;
+  node._docs[kind] = rec;
+  setStatus(node, kind, rec.statusCls, rec.status);
+  applyDocs(node);
+  syncManaging(); refreshChecks(); saveDraft();
+}
+function applyDocs(node){
+  const D = node._docs, pan = (D.pan||{}).fields||{}, aad = (D.aadhaar||{}).fields||{}, bank = (D.bank||{}).fields||{};
+  const want = {};
+  want.name = pan.name || aad.name || bank.name;
+  want.pan = pan.pan;
+  want.dob = pan.dob || aad.dob;
+  if (aad.relation && aad.relation !== 'C/o') want.relation = aad.relation;
+  if (aad.relation === 'W/o') want.relation_name = aad.relation_person;
+  want.father_name = pan.father_name || ((aad.relation === 'S/o' || aad.relation === 'D/o') ? aad.relation_person : undefined);
+  if (bank.address) want.address = bank.address.toUpperCase();
+  else if (aad.address) want.address = aad.address.toUpperCase();
+  want.email = bank.email;
+  want.mobile = bank.mobile || (aad.mobile ? '+91 ' + aad.mobile : undefined);
+  if (aad.gender){
+    want.gender = aad.gender;
+    const rel = want.relation || node.querySelector('[data-k=relation]').value;
+    want.title = aad.gender === 'Male' ? 'Mr.' : aad.gender === 'Female' ? (rel === 'W/o' ? 'Mrs.' : 'Ms.') : undefined;
+  }
+  for (const [k,v] of Object.entries(want)){
+    if (!v) continue;
+    const el = node.querySelector(`[data-k="${k}"]`); if (!el) continue;
+    const dflt = el.tagName === 'SELECT' ? el.options[0].value : el.defaultValue;
+    if (!el.value.trim() || el.value === node._auto[k] || el.value === dflt){ el.value = v; node._auto[k] = v; el.classList.add('auto'); el.classList.remove('invalid'); }
+  }
+}
+function bankFresh(n){
+  const b = n._docs && n._docs.bank;
+  if (!b || !b.lastTxn) return null;
+  const t = new Date(); t.setHours(0,0,0,0);
+  return new Date(b.lastTxn + 'T00:00:00') >= X.monthsBefore(t, 2);
+}
+function personChecks(node, title){
+  const out = [];
+  const D = node._docs||{}, pan=(D.pan||{}).fields||{}, aad=(D.aadhaar||{}).fields||{}, bank=(D.bank||{}).fields||{};
+  for (const k of ['pan','aadhaar','bank']){
+    const r = D[k]; if (!r) continue;
+    if (r.scanned) out.push(['m-warn', `${title}: the ${DOC_LABEL[k]} PDF (${r.file}) is a scanned image. Details must be typed in and checked by hand.`]);
+    (r.notes||[]).forEach(n => out.push(['m-warn', `${title} – ${DOC_LABEL[k]}: ${n}`]));
+  }
+  if (D.bank && !D.bank.scanned){
+    if (!D.bank.lastTxn) { if (!D.bank.fromExcel) out.push(['m-warn', `${title}: no transaction dates could be found in the bank statement (${D.bank.file}). Check how recent it is by hand.`]); }
+    else if (bankFresh(node) === false) out.push(['m-err', `⚠ ${title}: the bank statement is not recent. Its last transaction is dated ${fmt(D.bank.lastTxn)}, which is more than 2 months before today (${fmt(todayIso())}). Obtain a recent statement.`]);
+    else out.push(['m-ok', `${title}: the bank statement's last transaction is dated ${fmt(D.bank.lastTxn)}, within the last 2 months.`]);
+  }
+  if (!X.sameName(pan.name, aad.name)) out.push(['m-warn', `${title}: the name on PAN (${pan.name}) differs from the name on Aadhaar (${aad.name}).`]);
+  if (!X.sameName(pan.name || aad.name, bank.name)) out.push(['m-warn', `${title}: the name in the bank statement (${bank.name}) differs from the name on ${pan.name ? 'PAN' : 'Aadhaar'} (${pan.name || aad.name}).`]);
+  if (pan.dob && aad.dob && pan.dob !== aad.dob) out.push(['m-warn', `${title}: the date of birth on PAN (${fmt(pan.dob)}) differs from Aadhaar (${fmt(aad.dob)}).`]);
+  if (pan.father_name && aad.relation_person && (aad.relation==='S/o'||aad.relation==='D/o') && !X.sameName(pan.father_name, aad.relation_person))
+    out.push(['m-warn', `${title}: the father's name on PAN (${pan.father_name}) differs from Aadhaar (${aad.relation} ${aad.relation_person}).`]);
+  if (D.pan || D.aadhaar || D.bank){
+    if (!bank.address && aad.address && node.querySelector('[data-k=address]').value === node._auto.address)
+      out.push(['m-warn', `${title}: the address was taken from Aadhaar because ${D.bank ? 'none was found in the bank statement' : 'no bank statement has been uploaded'}.`]);
+  }
+  return out;
+}
+function refreshChecks(){
+  renderChecklist(); capSummary();
+  const box = document.getElementById('checkList'); box.innerHTML = '';
+  const all = [];
+  [...partnersEl.children].forEach(n => all.push(...personChecks(n, n.querySelector('.ptitle').textContent)));
+  if (!all.length){ box.innerHTML = '<p class="none">Upload documents to see the checks here.</p>'; return; }
+  const rank = c => c === 'm-err' ? 0 : c === 'm-warn' ? 1 : 2;
+  all.sort((a,b) => rank(a[0]) - rank(b[0]));
+  all.forEach(([cls,t]) => { const d = document.createElement('div'); d.className = cls; d.textContent = t; box.appendChild(d); });
+}
+function capSummary(){
+  const d = collect();
+  const cap = d.partners.reduce((a,p) => a + (Number(p.capital) || 0), 0);
+  const ps = d.partners.reduce((a,p) => a + (Number(p.profit_pct) || 0), 0);
+  document.getElementById('capSummary').textContent = cap ? `Total capital: Rs. ${inr(cap)} (Rupees ${inWords(cap)} only). Profit shares add up to ${pct(ps)}%.` : '';
+}
+
+/* ================= toggles / collect / restore ================= */
+const propSame = form.elements.prop_same;
+function syncProp(){ document.getElementById('propWrap').hidden = propSame.checked; form.elements.property_address.required = !propSame.checked; }
+propSame.addEventListener('change', syncProp);
+let firmCheck = {};
+const FIELDS = ['firm_name','place_of_business','firm_email','place','deed_date','commencement','duration','year_end','interest_rate',
+  'notice_months','obj_services','obj_products','obj_customers','objects','owner_name','noc_date','noc_place','property_address','w1_details','w2_details'];
+function collect(){
+  const o = {};
+  FIELDS.forEach(n => o[n] = form.elements[n].value.trim());
+  o.managing_partner = form.elements.managing_partner.value;
+  o.prop_same = propSame.checked; o.stamp_space = form.elements.stamp_space.checked; o.obj_abroad = form.elements.obj_abroad.checked;
+  o.obj_acts = [...document.querySelectorAll('#objActs input:checked')].map(c => c.value);
+  o.firm_check = firmCheck;
+  o.partners = [...partnersEl.children].map(node => {
+    const p = {}; node.querySelectorAll('[data-k]').forEach(el => p[el.dataset.k] = el.value.trim());
+    p._docs = node._docs || {}; p._auto = node._auto || {}; p._check = node._check || {};
+    if (node._excel) p._excel = true; return p;
+  });
+  return o;
+}
+function restore(d){
+  FIELDS.forEach(n => { if (d[n] !== undefined) form.elements[n].value = d[n]; });
+  if (d.prop_same !== undefined) propSame.checked = !!d.prop_same;
+  if (d.stamp_space !== undefined) form.elements.stamp_space.checked = !!d.stamp_space;
+  form.elements.obj_abroad.checked = !!d.obj_abroad;
+  document.querySelectorAll('#objActs input').forEach(c => c.checked = (d.obj_acts || []).includes(c.value));
+  firmCheck = Object.assign({}, d.firm_check || {});
+  form.elements.managing_partner.dataset.want = d.managing_partner || '';
+  const list = d.partners && d.partners.length ? d.partners : [{}, {}];
+  partnersEl.replaceChildren(...list.map(p => makeCard(p)));
+  renumber(); syncProp(); refreshChecks();
+}
+function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch(e){} }
+form.addEventListener('input', () => saveDraft());
+form.addEventListener('change', () => { saveDraft(); refreshChecks(); });
+
+/* ================= validation ================= */
+function validate(d){
+  const errors = [], warns = [];
+  form.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+  form.querySelectorAll('[required]').forEach(el => { if (!el.closest('[hidden]') && !el.value.trim()) el.classList.add('invalid'); });
+  if (form.querySelector('.invalid')) errors.push('Please fill in the fields marked in red.');
+  if (d.partners.length < 2) errors.push('A partnership needs at least two partners.');
+  if (d.partners.length > 50) warns.push('A firm can have at most 50 partners (Section 464 of the Companies Act, 2013 read with Rule 10 of the Companies (Miscellaneous) Rules, 2014).');
+  const ps = d.partners.reduce((a,p) => a + (Number(p.profit_pct) || 0), 0);
+  if (Math.abs(ps - 100) > 0.01) errors.push(`The profit shares add up to ${pct(ps)}%, not 100%.`);
+  const rate = Number(d.interest_rate) || 0;
+  if (rate > 12) warns.push(`Interest on capital at ${pct(rate)}% is above 12% per annum simple interest, the limit allowed as a deduction under Section 40(b) of the Income-tax Act, 1961. Check the corresponding provision of the income-tax law in force.`);
+  if (d.commencement && d.deed_date && d.commencement > d.deed_date) warns.push('The date of commencement is after the date of the deed.');
+  const pans = new Set();
+  [...partnersEl.children].forEach((node, i) => {
+    const p = d.partners[i], n = node.querySelector('.ptitle').textContent;
+    const mark = k => node.querySelector(`[data-k="${k}"]`).classList.add('invalid');
+    if (p.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(up(p.pan))) { mark('pan'); errors.push(n + ': the PAN format looks wrong (expected AAAAA9999A).'); }
+    if (p.pan && pans.has(up(p.pan))) { mark('pan'); errors.push(n + ': the same PAN is entered twice.'); }
+    pans.add(up(p.pan));
+    if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
+    if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
+    if (p.address && !/\b\d{3}\s?\d{3}\b/.test(p.address)) warns.push(n + ': the address has no 6-digit PIN code.');
+    if (p.dob && d.deed_date) { const a = ageOn(p.dob, d.deed_date); if (a < 18) errors.push(`${n} is ${a} years old on the date of the deed. A minor cannot be a partner and can only be admitted to the benefits of partnership (Section 30, Indian Partnership Act, 1932).`); }
+    if (p.working === 'No' && Number(p.salary) > 0) warns.push(`${n} is not a working partner, so the salary entered will not be included in the deed.`);
+  });
+  return {errors, warns};
+}
+
+/* ================= checklist and request list ================= */
+const P_ITEMS = [
+  { key:'pan', label:'PAN copy', ask:'Copy of PAN card', auto: n => !!(n._docs && n._docs.pan) },
+  { key:'aadhaar', label:'Aadhaar copy', ask:'Copy of Aadhaar (the e-Aadhaar PDF downloaded from the UIDAI website is preferred)', auto: n => !!(n._docs && n._docs.aadhaar) },
+  { key:'bank', label:'Bank statement with last transaction within 2 months', ask:'Latest bank statement showing the current residential address, with transactions up to the last two months', auto: n => bankFresh(n) === true },
+  { key:'photo', label:'Passport-size photograph', ask:'Passport-size photograph' },
+  { key:'contact', label:'Mobile no. and e-mail id', ask:'Mobile number and e-mail id', auto: n => {
+      const m = n.querySelector('[data-k=mobile]').value, e = n.querySelector('[data-k=email]').value;
+      return m.replace(/\D/g,'').length >= 10 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); } },
+  { key:'signed', label:'Deed signed on every page' },
+];
+const F_ITEMS = [
+  { key:'names', label:'Name of the firm and business confirmed', ask:'Name of the firm and a short description of the business' },
+  { key:'pob_proof', label:'Proof of place of business (recent electricity bill or property tax receipt)', ask:'Proof of the place of business: a recent electricity bill or property tax receipt' },
+  { key:'rent', label:'Rent / lease agreement (tick if received or not applicable)', ask:'Rent or lease agreement, if the premises are rented' },
+  { key:'noc', label:'NOC from owner signed' },
+  { key:'stamp', label:'Stamp paper of the value required under the State stamp law purchased' },
+  { key:'witnessed', label:'Deed signed by both witnesses' },
+  { key:'registration', label:'Registration with the Registrar of Firms, if opted / required in the State' },
+  { key:'firm_pan', label:'PAN of the firm applied for' },
+];
+const pname = n => { const nm = n.querySelector('[data-k=name]').value.trim(); const t = `Partner ${[...partnersEl.children].indexOf(n) + 1}`; return nm ? `${t} (${nm})` : t; };
+function pendingItems(){
+  const out = [];
+  [...partnersEl.children].forEach(n => P_ITEMS.forEach(it => { if (!((it.auto && it.auto(n)) || n._check[it.key])) out.push(`${pname(n)}: ${it.label}`); }));
+  F_ITEMS.forEach(it => { if (!firmCheck[it.key]) out.push(it.label); });
+  return out;
+}
+function renderChecklist(){
+  const box = document.getElementById('checklist'); box.innerHTML = '';
+  const block = (title, items, state, node) => {
+    const div = document.createElement('div'); div.className = 'cl-block';
+    const h = document.createElement('h3'); h.textContent = title; div.appendChild(h);
+    items.forEach(it => {
+      const lab = document.createElement('label'), cb = document.createElement('input');
+      cb.type = 'checkbox';
+      const auto = node && it.auto && it.auto(node);
+      cb.checked = !!(auto || state[it.key]); cb.disabled = !!auto;
+      cb.addEventListener('change', e => { e.stopPropagation(); state[it.key] = cb.checked; saveDraft(); renderChecklist(); });
+      const span = document.createElement('span'); span.textContent = it.label;
+      lab.append(cb, span);
+      if (auto) { const a = document.createElement('span'); a.className = 'cl-auto'; a.textContent = '(received)'; lab.appendChild(a); }
+      if (node && it.key === 'bank' && bankFresh(node) === false) { const a = document.createElement('span'); a.className = 'cl-auto'; a.style.color = 'var(--err)'; a.textContent = `(statement ends ${fmt(node._docs.bank.lastTxn)}: older than 2 months)`; lab.appendChild(a); }
+      div.appendChild(lab);
+    });
+    box.appendChild(div);
+  };
+  [...partnersEl.children].forEach(n => block(pname(n), P_ITEMS, n._check, n));
+  block('Firm and place of business', F_ITEMS, firmCheck, null);
+}
+function requestData(){
+  const d = collect();
+  const partner_items = [];
+  [...partnersEl.children].forEach((n, i) => {
+    const items = P_ITEMS.filter(it => it.ask && !((it.auto && it.auto(n)) || n._check[it.key])).map(it => {
+      let t = it.ask;
+      if (it.key === 'bank' && bankFresh(n) === false) t += ` (the statement received ends on ${fmt(n._docs.bank.lastTxn)})`;
+      return t;
+    });
+    if (items.length) partner_items.push({ title: d.partners[i].title || '', name_upper: up(d.partners[i].name) || `PARTNER ${i + 1}`,
+      designation: 'Partner', items: items.map((t, j) => ({ n: j + 1, text: t })) });
+  });
+  const llp_items = F_ITEMS.filter(it => it.ask && !firmCheck[it.key]).map((it, j) => ({ n: j + 1, text: it.ask }));
+  return { name_upper: up(d.firm_name) || '(name to be decided)', today: fmt(todayIso()), partner_items, llp_items, has_llp_items: llp_items.length > 0 };
+}
+document.getElementById('dlRequest').addEventListener('click', () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  download(`${safe(r.name_upper)}_Request_List.docx`, new Blob([render('request_list', r)], {type: DOCX}));
+});
+document.getElementById('copyRequest').addEventListener('click', async () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  const out = [`Documents and details required – proposed partnership firm: ${r.name_upper}`, ''];
+  r.partner_items.forEach(p => { out.push(`${p.title} ${p.name_upper}:`); p.items.forEach(it => out.push(`${it.n}. ${it.text}`)); out.push(''); });
+  if (r.llp_items.length) { out.push('For the firm and its place of business:'); r.llp_items.forEach(it => out.push(`${it.n}. ${it.text}`)); }
+  const text = out.join('\n').trim();
+  try { await navigator.clipboard.writeText(text); showMessages([['m-ok','Request list copied. You can paste it into an e-mail or message to the client.']]); }
+  catch(e){ window.prompt('Copy the request list below:', text); }
+});
+
+/* ================= generation ================= */
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+function render(name, data){
+  const doc = new window.docxtemplater(new PizZip(b64ToBytes(window.LLP_TEMPLATES[name])), { paragraphLoop:true, linebreaks:true, nullGetter: () => '' });
+  doc.render(data);
+  return doc.getZip().generate({ type:'uint8array', compression:'DEFLATE' });
+}
+function deedData(d){
+  const dw = dateWords(d.deed_date);
+  const comm = d.commencement || d.deed_date;
+  const caps = d.partners.map(p => Number(p.capital) || 0);
+  const equal = caps.every(c => c === caps[0]);
+  const workers = d.partners.filter(p => p.working === 'Yes' && Number(p.salary) > 0);
+  const months = Number(d.notice_months) || 1;
+  const mWord = ['one','two','three'][months - 1] || String(months);
+  const rate = Number(d.interest_rate) || 0;
+  const mp = d.partners.find(p => p.name === d.managing_partner);
+  return {
+    stamp_space: d.stamp_space, firm_name_upper: up(d.firm_name), place_of_business_inline: up(oneLine(d.place_of_business)),
+    place: d.place, deed_date_words: dw.short, deed_date_words_upper: up(dw.long),
+    commencement: dmy(comm, '.'),
+    partners: d.partners.map((p, i) => ({
+      n: i + 1, title: p.title, name_upper: up(p.name), relation_upper: up(p.relation), relation_name_upper: up(p.relation_name || p.father_name),
+      religion_text: p.religion ? p.religion + ', ' : '', age: ageOn(p.dob, d.deed_date), address_inline: up(oneLine(p.address)),
+      ordinal_upper: up(ordinal(i)), profit_pct: pct(Number(p.profit_pct) || 0)
+    })),
+    parts_collective: joinAnd(d.partners.map((p, i) => ordinal(i))),
+    duration_text: d.duration || 'at WILL',
+    objects: lines(d.objects),
+    capital_text: equal
+      ? `Initial amount invested by the Partners will be Rs.${inr(caps[0])}/- (Rupees ${inWords(caps[0])} Only) each, treated as Capital of the Business.`
+      : 'Initial amount invested by the Partners, treated as Capital of the Business, will be as follows:',
+    capital_list: equal ? [] : d.partners.map((p, i) => ({ n: i + 1, title: p.title, name_upper: up(p.name), capital: inr(caps[i]), capital_words: inWords(caps[i]) })),
+    year_end: d.year_end || '31st day of March',
+    has_salary: workers.length > 0,
+    salary_text: joinAnd(workers.map(p => `Rs.${inr(p.salary)}/- to ${p.name} (Rupees ${inWords(p.salary)} Only)`)),
+    interest_text: rate > 0 ? `Interest shall be paid at the rate of ${pct(rate)}% per annum on the Capital of the partners.` : 'No interest shall be paid on the capital of the partners.',
+    managing_partner_text: mp ? ` and the individual signature of the Managing Partner, ${mp.title} ${up(mp.name)},` : '',
+    notice_possessive: months === 1 ? "one month's" : `${mWord} months'`, notice_period: months === 1 ? 'one month' : `${mWord} months`,
+    arbitration_act: ARBITRATION_ACT,
+    witnesses: [d.w1_details, d.w2_details].map((w, i) => ({ n: i + 1, details: w || '' }))
+  };
+}
+function nocData(d){
+  return { noc_date: dmy(d.noc_date, '-'), noc_place_upper: up(d.noc_place || d.place), owner_name_upper: up(d.owner_name),
+           property_address: up(d.prop_same ? d.place_of_business : d.property_address), firm_name_upper: up(d.firm_name) };
+}
+function dataSheetData(d){
+  const cap = d.partners.reduce((a,p) => a + (Number(p.capital) || 0), 0);
+  const rate = Number(d.interest_rate) || 0;
+  return {
+    today: fmt(todayIso()), firm_name_upper: up(d.firm_name), place_of_business: up(d.place_of_business), firm_email: d.firm_email || '–',
+    deed_date: dmy(d.deed_date, '/'), commencement: dmy(d.commencement || d.deed_date, '/'), duration_text: d.duration || 'At will',
+    total_capital: inr(cap), total_capital_words: inWords(cap), interest_rate: rate ? `${pct(rate)}% per annum` : 'None',
+    managing_partner: d.managing_partner || 'None', n_partners: d.partners.length,
+    owner_name_upper: up(d.owner_name), noc_date: dmy(d.noc_date, '/'),
+    objects_n: lines(d.objects).map((t, i) => ({ n: i + 1, text: t })),
+    partners: d.partners.map((p, i) => ({
+      n: i + 1, title: p.title, name_upper: up(p.name), father_name_upper: up(p.father_name), relation: p.relation,
+      relation_name_upper: up(p.relation_name || p.father_name), dob: dmy(p.dob, '/'), age: ageOn(p.dob, todayIso()),
+      gender: p.gender || '–', pan: up(p.pan), mobile: p.mobile, email: p.email, address: up(p.address),
+      capital: inr(p.capital), profit_pct: pct(Number(p.profit_pct) || 0), working: p.working,
+      salary_text: p.working === 'Yes' && Number(p.salary) > 0 ? `Rs. ${inr(p.salary)} per month` : 'No salary'
+    })),
+    pending: pendingItems()
+  };
+}
+let lastUrls = [];
+function download(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function showMessages(list){
+  const box = document.getElementById('messages'); box.innerHTML = '';
+  list.forEach(([cls, text]) => { const div = document.createElement('div'); div.className = cls; div.textContent = text; box.appendChild(div); });
+}
+document.getElementById('gen').addEventListener('click', () => {
+  const d = collect();
+  const out = document.getElementById('outputs'); out.innerHTML = '';
+  lastUrls.forEach(u => URL.revokeObjectURL(u)); lastUrls = [];
+  refreshChecks();
+  const {errors, warns} = validate(d);
+  if (errors.length){ showMessages(errors.map(e => ['m-err', e]).concat(warns.map(w => ['m-warn', w]))); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const tag = safe(up(d.firm_name)) || 'FIRM';
+  let files;
+  try {
+    const deed = render('partnership_deed', deedData(d)), noc = render('noc_place_of_business', nocData(d));
+    files = [
+      { name: `${tag}_0_PRINT_SET_Deed_and_NOC.docx`, bytes: LLPMerge.merge([{ bytes: deed, key: 'deed' }, { bytes: noc, key: 'noc' }]) },
+      { name: `${tag}_1_Partnership_Deed.docx`, bytes: deed },
+      { name: `${tag}_2_NOC_Place_of_Business.docx`, bytes: noc },
+      { name: `${tag}_3_Data_Sheet_internal.docx`, bytes: render('data_sheet', dataSheetData(d)) },
+    ];
+  } catch(e) {
+    const det = (e.properties && e.properties.errors) ? e.properties.errors.map(x => x.properties.explanation).join('; ') : e.message;
+    showMessages([['m-err', 'Could not fill a template: ' + det]]); return;
+  }
+  const zip = new PizZip();
+  files.forEach(f => zip.file(f.name, f.bytes));
+  const stale = document.querySelectorAll('#checkList .m-err').length;
+  showMessages([['m-ok', `${files.length} files generated, including a print set with the deed and the NOC. The ZIP file has been downloaded; you can also download each file below.`]]
+    .concat(stale ? [['m-err', `⚠ ${stale} item(s) under "Document checks" need attention.`]] : [])
+    .concat(warns.map(w => ['m-warn', w])));
+  const ul = document.createElement('ul');
+  files.forEach(f => {
+    const li = document.createElement('li'), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([f.bytes], {type: DOCX})); a.download = f.name; a.textContent = f.name;
+    lastUrls.push(a.href); li.appendChild(a); ul.appendChild(li);
+  });
+  out.appendChild(ul);
+  download(`${tag}_Partnership_Docs.zip`, zip.generate({ type:'blob', mimeType:'application/zip' }));
+});
+
+/* ================= case file ================= */
+document.getElementById('saveCase').addEventListener('click', () => {
+  const d = collect();
+  download((safe(d.firm_name) || 'FIRM') + '_case.json', new Blob([JSON.stringify(d, null, 2)], {type:'application/json'}));
+});
+const lf = document.getElementById('loadFile');
+document.getElementById('loadCase').addEventListener('click', () => lf.click());
+lf.addEventListener('change', async () => {
+  const file = lf.files[0]; if (!file) return;
+  try { restore(JSON.parse(await file.text())); saveDraft(); showMessages([['m-ok','Case file loaded.']]); }
+  catch(e){ showMessages([['m-err','That file could not be read as a case file.']]); }
+  lf.value = '';
+});
+document.getElementById('clearAll').addEventListener('click', () => {
+  if (!confirm('Clear all entered details?')) return;
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+  form.reset(); restore({}); document.getElementById('outputs').innerHTML = ''; showMessages([]); setDefaults();
+});
+
+/* ================= object clause ================= */
+const objActs = document.getElementById('objActs');
+LLPObjects.ACTIVITIES.forEach(a => {
+  const l = document.createElement('label'), c = document.createElement('input');
+  c.type = 'checkbox'; c.value = a.key; l.append(c, document.createTextNode(a.label)); objActs.appendChild(l);
+});
+document.getElementById('objSuggest').addEventListener('click', () => {
+  const box = document.getElementById('objNotes'); box.innerHTML = '';
+  const r = LLPObjects.draft({
+    activities: [...objActs.querySelectorAll('input:checked')].map(c => c.value),
+    goods: form.elements.obj_products.value, services: form.elements.obj_services.value,
+    customers: form.elements.obj_customers.value, abroad: form.elements.obj_abroad.checked
+  });
+  r.notes.forEach(n => { const d = document.createElement('div'); d.className = 'm-warn'; d.textContent = n; box.appendChild(d); });
+  if (!r.lines.length) return;
+  const ta = form.elements.objects;
+  if (ta.value.trim() && !confirm('Replace the current object clause (including any edits) with a new suggestion?')) return;
+  ta.value = r.lines.map(l => l.replace('limited liability partnership or body corporate', 'firm, limited liability partnership, company or other body corporate')).join('\n\n');
+  const d = document.createElement('div'); d.className = 'm-ok';
+  d.textContent = 'Draft suggested from standard clause wording. Review and edit it before using it in the deed.';
+  box.prepend(d);
+  saveDraft();
+});
+
+/* ================= Excel ================= */
+document.getElementById('dlExcel').addEventListener('click', () => {
+  download('Partnership_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.Partnership_data_template)],
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+});
+const xf = document.getElementById('excelFile');
+document.getElementById('upExcel').addEventListener('click', () => xf.click());
+xf.addEventListener('change', async () => {
+  const file = xf.files[0]; xf.value = ''; if (!file) return;
+  let res;
+  try { res = excelToCase(LLPXlsx.readWorkbook(new Uint8Array(await file.arrayBuffer())), file.name); }
+  catch(e){ showMessages([['m-err', 'Excel file not loaded: ' + e.message]]); return; }
+  if (res.errors.length){ showMessages(res.errors.map(e => ['m-err', e])); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const cur = collect();
+  if ((cur.firm_name || cur.partners.some(p => p.name || p.pan)) && !confirm('Replace the details now on screen with the details from ' + file.name + '?')) return;
+  restore(res.data); saveDraft();
+  showMessages([['m-ok', `Loaded the firm details and ${res.data.partners.length} partner(s) from ${file.name}. Shaded fields came from the file; please check them.`]]
+    .concat(res.warns.map(w => ['m-warn', w])));
+  document.getElementById('messages').scrollIntoView({behavior:'smooth'});
+});
+function excelToCase(sheets, fname){
+  const errors = [], warns = [];
+  const F = sheets['Firm'], P = sheets['Partners'];
+  if (!F || !P) return { errors: ['This does not look like the partnership data template (the sheets "Firm" and "Partners" were not found). Use "Download Excel template".'], warns };
+  const S = LLPXlsx.str;
+  const fm = {};
+  for (const ref of Object.keys(F)) { const m = ref.match(/^A(\d+)$/); if (m) fm[S(F[ref])] = F['C' + m[1]]; }
+  if (!('firm_name' in fm)) return { errors: ['The hidden column A of the "Firm" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const dt = (v, label, who) => { const x = LLPXlsx.date(v); if (x === null) { warns.push(`${who}: "${S(v)}" is not a valid date for ${label}; please enter it on screen.`); return ''; } return x; };
+  const num = (v, label, who) => {
+    const t = S(v).replace(/[,\s%]|Rs\.?|₹|\/-/gi, '');
+    if (!t) return '';
+    if (!/^\d+(\.\d+)?$/.test(t)) { warns.push(`${who}: "${S(v)}" is not a number for ${label}; please enter it on screen.`); return ''; }
+    return t;
+  };
+  const addr = (l1, l2, city, pin, state) => {
+    const ls = [S(l1), S(l2)].filter(Boolean);
+    const cp = [S(city), S(pin)].filter(Boolean).join(' - ');
+    if (cp) ls.push(cp);
+    if (S(state)) ls.push(S(state));
+    return ls.join('\n');
+  };
+  const ir = num(fm.interest_rate, 'interest on capital', 'Firm sheet');
+  const data = {
+    firm_name: S(fm.firm_name), place_of_business: addr(fm.pob_addr1, fm.pob_addr2, fm.pob_city, fm.pob_pin, fm.pob_state),
+    firm_email: S(fm.firm_email), place: S(fm.place), deed_date: dt(fm.deed_date, 'date of deed', 'Firm sheet'),
+    commencement: dt(fm.commencement, 'date of commencement', 'Firm sheet'), duration: S(fm.duration),
+    interest_rate: ir === '' ? '12' : ir, managing_partner: S(fm.managing_partner), objects: S(fm.objects),
+    owner_name: S(fm.owner_name), noc_date: dt(fm.noc_date, 'date of NOC', 'Firm sheet'),
+    prop_same: !/^n/i.test(S(fm.prop_same)), property_address: S(fm.prop_addr),
+    w1_details: S(fm.w1_details), w2_details: S(fm.w2_details), partners: []
+  };
+  const keyCol = {};
+  for (const ref of Object.keys(P)) { const m = ref.match(/^([A-Z]+)1$/); if (m) keyCol[S(P[ref])] = m[1]; }
+  if (!keyCol.name) return { errors: ['The hidden row 1 of the "Partners" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const maxRow = Math.max(0, ...Object.keys(P).map(r => +r.replace(/^[A-Z]+/, '')));
+  const REL = { 's/o':'S/o', 'so':'S/o', 'd/o':'D/o', 'do':'D/o', 'w/o':'W/o', 'wo':'W/o' };
+  for (let r = 3; r <= maxRow; r++) {
+    const g = k => keyCol[k] ? P[keyCol[k] + r] : undefined;
+    if (!S(g('name'))) continue;
+    const who = `Partners sheet row ${r} (${S(g('name'))})`;
+    let rel = REL[S(g('relation')).toLowerCase().replace(/\s/g, '')];
+    if (!rel) { rel = 'S/o'; if (S(g('relation'))) warns.push(`${who}: relation "${S(g('relation'))}" not recognised; set to S/o.`); }
+    const p = {
+      name: S(g('name')), relation: rel, father_name: S(g('father_name')), relation_name: S(g('relation_name')),
+      dob: dt(g('dob'), 'date of birth', who), pan: S(g('pan')).toUpperCase(), mobile: S(g('mobile')), email: S(g('email')),
+      address: addr(g('addr1'), g('addr2'), g('city'), g('pin'), g('state')).toUpperCase(),
+      religion: S(g('religion')),
+      title: ['Mr.','Mrs.','Ms.','Dr.'].find(t => t.toLowerCase() === S(g('title')).toLowerCase().replace(/\.?$/, '.')) || (rel === 'W/o' ? 'Mrs.' : rel === 'D/o' ? 'Ms.' : 'Mr.'),
+      gender: ['Male','Female','Transgender'].find(x => x.toLowerCase() === S(g('gender')).toLowerCase()) || '',
+      capital: num(g('capital'), 'capital', who), profit_pct: num(g('profit_pct'), 'profit share', who),
+      working: /^n/i.test(S(g('working'))) ? 'No' : 'Yes', salary: num(g('salary'), 'salary', who)
+    };
+    if (/^\d{10}$/.test(p.mobile)) p.mobile = '+91 ' + p.mobile;
+    if (S(g('pin')) && !/^\d{3}\s?\d{3}$/.test(S(g('pin')))) warns.push(`${who}: PIN code "${S(g('pin'))}" is not 6 digits.`);
+    const auto = {}; for (const [k,v] of Object.entries(p)) if (v) auto[k] = v;
+    const last = dt(g('bank_last_txn'), 'date of last bank transaction', who);
+    const docs = {};
+    if (last) docs.bank = { file: fname, fromExcel: true, fields: {}, notes: [], lastTxn: last, statusCls: 'ok', status: `From Excel: last bank transaction ${fmt(last)}` };
+    data.partners.push(Object.assign(p, { _auto: auto, _docs: docs, _excel: true }));
+  }
+  if (!data.partners.length) errors.push('No partners found in the "Partners" sheet (rows from row 3 with a name).');
+  if (data.managing_partner && !data.partners.some(p => p.name === data.managing_partner))
+    warns.push(`Firm sheet: the managing partner "${data.managing_partner}" does not match any partner's name exactly; please choose on screen.`);
+  return { data, errors, warns };
+}
+
+/* ================= init ================= */
+function setDefaults(){
+  if (!form.elements.deed_date.value) form.elements.deed_date.value = todayIso();
+  if (!form.elements.noc_date.value) form.elements.noc_date.value = todayIso();
+}
+let draft = null;
+try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch(e){}
+restore(draft || {});
+setDefaults();
+})();
+</script>
+</body>
+</html>
