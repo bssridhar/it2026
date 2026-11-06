@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Net Worth Certificate</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+.req{color:var(--err)}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox],input[type=radio]{width:auto}
+input:disabled,select:disabled{background:var(--lock);color:var(--ink);opacity:1}
+textarea{min-height:64px;resize:vertical}
+.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink);margin:0}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:.88rem}
+table.t th,table.t td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600;white-space:nowrap}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap}
+table.t input,table.t select,table.t textarea{padding:5px 6px;font-size:.88rem}
+table.t textarea{min-height:56px}
+.sec{border:1px dashed var(--line);border-radius:8px;padding:12px;margin:0 0 12px}
+.sec-head{display:grid;grid-template-columns:2fr 2fr 130px auto;gap:8px;align-items:end;margin-bottom:8px}
+.sec-tot{font-size:.88rem;color:var(--muted);margin-top:6px}
+.lockbox{background:var(--lock);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.9rem}
+.shot img{max-width:100%;max-height:220px;border:1px solid var(--line);border-radius:6px;display:block;margin-top:8px}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line);z-index:2}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:640px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+@media (max-width:700px){.sec-head{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Net Worth Certificate (visa)</h1>
+  <p class="sub">Enter the details (or import the Excel template), set the conversion rate, send a watermarked draft to the client for confirmation, then generate the final certificate as PDF or Word. Everything stays in this browser.</p>
+
+  <div class="card">
+    <div class="bar">
+      <button type="button" id="dlXlsx">Download Excel template</button>
+      <button type="button" id="upXlsx">Import Excel</button>
+      <input type="file" id="xlsxFile" accept=".xlsx" hidden>
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" class="danger" id="newCase">New certificate</button>
+      <button type="button" id="settingsBtn">Firm settings</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <section class="card">
+    <h2>1. Applicant and purpose</h2>
+    <div class="grid">
+      <div class="full"><label>Case name (for your reference)</label><input data-f="case_name" placeholder="e.g. Australia visa – Subashini S"></div>
+    </div>
+    <label style="margin-top:12px">Persons named in the certificate, in order <span class="req">*</span></label>
+    <div class="tw"><table class="t" id="persons"><thead><tr><th>Name</th><th>Role</th><th>Aadhaar no.</th><th>PAN</th><th>Show</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="bar" style="margin-top:6px"><button type="button" class="link" id="addPerson">+ Add person</button>
+      <label class="check"><input type="checkbox" data-f="mask_aadhaar"> Show Aadhaar masked (XXXX XXXX 1234)</label></div>
+    <div class="grid" style="margin-top:12px">
+      <div class="full"><label>Residential address <span class="req">*</span></label><textarea data-f="address" placeholder="Line by line"></textarea></div>
+      <div class="full"><label>Purpose – completes "…establishing their ability to meet …" <span class="req">*</span></label>
+        <textarea data-f="purpose" placeholder="the Education cost for Masters Degree (Coursework) of …, University …, Location: …"></textarea></div>
+      <div><label>Date of certificate <span class="req">*</span></label><input type="date" data-f="cert_date"></div>
+      <div><label>Place <span class="req">*</span></label><input data-f="place"></div>
+      <div><label>UDIN</label><input data-f="udin" placeholder="Needed for the final certificate"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Currency and conversion rate</h2>
+    <div class="grid" id="rateGrid">
+      <div><label>Foreign currency <span class="req">*</span></label>
+        <select data-f="currency" data-rate><option value="">– choose –</option><option>AUD</option><option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option><option>NZD</option><option>SGD</option><option>AED</option><option>JPY</option><option>CHF</option><option value="OTHER">Other…</option></select></div>
+      <div id="otherCurWrap" hidden><label>Currency code</label><input data-f="currency_other" data-rate maxlength="3" style="text-transform:uppercase"></div>
+      <div><label>INR for 1 unit <span class="req">*</span></label><input type="number" step="0.0001" min="0" data-f="rate" data-rate></div>
+      <div><label>Rate as on <span class="req">*</span></label><input type="date" data-f="rate_date" data-rate></div>
+      <div class="full"><label>Source of the rate</label><input data-f="rate_source" data-rate placeholder="e.g. RBI reference rate / bank's TT buying rate / website"></div>
+      <div class="full shot"><label>Screenshot of the source (kept with the case file)</label>
+        <div class="bar"><button type="button" id="shotBtn" data-rate>Attach screenshot</button><button type="button" class="link danger" id="shotDel" hidden>Remove</button><button type="button" class="link" id="shotDl" hidden>Download</button></div>
+        <input type="file" id="shotFile" accept="image/*" hidden><img id="shotImg" alt="Screenshot of the rate source" hidden></div>
+    </div>
+    <div class="lockbox" id="lockBox"></div>
+    <div class="grid" style="margin-top:10px">
+      <div><label>Foreign currency amount in words</label><select data-f="fc_words"><option value="indian">Lakhs / crores (as in your format)</option><option value="intl">Thousands / millions</option></select></div>
+      <div><label class="check" style="margin-top:24px"><input type="checkbox" data-f="rate_note"> Show the rate date and source on the certificate</label></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Assets and liabilities <span class="bar"><button type="button" class="link" id="addSection">+ Add a new type of asset / liability</button></span></h2>
+    <p class="hint" style="margin-top:-6px">Enter liabilities as positive amounts – they are deducted. Sections with no items are left out of the certificate. "Particulars" are printed exactly as typed, line by line.</p>
+    <div id="sections"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Summary and checks</h2>
+    <div id="summary"></div>
+    <div id="checks" class="msgs" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>5. Output</h2>
+    <div class="grid">
+      <div><label class="check"><input type="checkbox" data-f="letterhead" checked> Print the firm's letterhead (untick for pre-printed letterhead paper)</label></div>
+      <div><label class="check"><input type="checkbox" data-f="commas"> Show amounts with commas (24,00,000)</label></div>
+      <div><label class="check"><input type="checkbox" data-f="attach_shot"> Add the rate screenshot as a last page</label></div>
+      <div><label>Watermark on the draft</label><select data-f="wm_angle"><option value="0">Across the page, left to right</option><option value="45">Diagonal</option></select></div>
+    </div>
+    <div class="bar" style="margin-top:12px">
+      <button type="button" class="primary" id="draftPdf">Draft PDF for client confirmation</button>
+      <button type="button" id="finalPdf">Final certificate – PDF</button>
+      <button type="button" id="finalDocx">Final certificate – Word</button>
+    </div>
+    <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+  </section>
+
+  <div class="sticky bar"><span class="hint" id="status"></span></div>
+</main>
+
+<dialog id="setDlg"><form method="dialog" id="setForm">
+  <div class="dh">Firm settings (kept in this browser)</div>
+  <div class="db"><div class="grid">
+    <div><label>Title</label><input name="signatory_title"></div>
+    <div><label>Name of the signatory</label><input name="signatory"></div>
+    <div><label>Designation</label><input name="designation"></div>
+    <div><label>Membership No.</label><input name="membership_no"></div>
+    <div class="full"><label>Membership description</label><input name="member_text"></div>
+    <div class="full"><label>Firm name (signature block)</label><input name="firm_name"></div>
+    <div class="full"><label>Below the firm name</label><input name="firm_tag"></div>
+    <div class="full"><label>Letterhead – firm name</label><input name="lh_name"></div>
+    <div class="full"><label>Letterhead – address (right side, one line per row)</label><textarea name="lh_address" rows="6"></textarea></div>
+    <div><label>Letterhead – e-mail</label><input name="lh_email"></div>
+    <div><label>Letterhead – phone line</label><input name="lh_mobile"></div>
+  </div><p class="hint">The Word certificate uses the letterhead from the firm's own format file; these letterhead fields are for the PDF.</p></div>
+  <div class="df"><button type="button" id="setCancel">Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></dialog>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="../shared/jspdf.plugin.autotable.min.js"></script>
+<script src="lib/templates.js"></script>
+<script src="lib/certpdf.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const pad = n => String(n).padStart(2,'0');
+const isoToday = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const dmy = iso => iso ? iso.split('-').reverse().join('-') : '';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const LS = { draft: 'networth-draft-v1', settings: 'networth-settings-v1' };
+const store = { get(k,d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } } };
+
+/* ---------------- firm settings ---------------- */
+const SETTINGS_DEFAULT = {
+  signatory_title: 'Mr.', signatory: 'B.S.SRIDHAR', designation: 'Proprietor', membership_no: '207678',
+  member_text: 'Fellow Member of The Institute of Chartered Accountants of India',
+  firm_name: 'B.S.SRIDHAR & CO.,', firm_tag: 'CHARTERED ACCOUNTANTS',
+  lh_name: 'B.S.SRIDHAR & CO.,', lh_address: 'PACE PRANA\nBlock 2, 3rd Floor, Flat No.7,\nSouth Park Road,\nAnna Nagar West,\nChennai 600 040\nPh: - 91-44-45540180',
+  lh_email: 'sridharca@gmail.com', lh_mobile: 'Mobile: - 98402 28480'
+};
+let settings = Object.assign({}, SETTINGS_DEFAULT, store.get(LS.settings, {}));
+
+/* ---------------- case data ---------------- */
+const DEFAULT_SECTIONS = [
+  ['Personal / Family Savings in India', 'PERSONAL / FAMILY SAVINGS FROM INDIA', 'Asset'],
+  ['Current Investments in India', 'CURRENT INVESTMENTS IN INDIA', 'Asset'],
+  ['Current Income in India', 'CURRENT INCOME IN INDIA', 'Asset'],
+  ['Immovable properties held in India', 'IMMOVABLE PROPERTIES IN INDIA', 'Asset'],
+  ['Educational Loan', 'EDUCATIONAL LOAN', 'Asset'],
+  ['Mortgage Loan', 'MORTGAGE LOAN', 'Liability'],
+];
+const blank = () => ({
+  case_name: '', persons: [{ id: uid(), name: '', role: 'Student', aadhaar: '', pan: '', print: true }], mask_aadhaar: false,
+  address: '', purpose: '', cert_date: isoToday(), place: 'Chennai', udin: '',
+  currency: '', currency_other: '', rate: '', rate_date: isoToday(), rate_source: '', screenshot: '', rate_locked: false, rate_locked_at: '',
+  fc_words: 'indian', rate_note: false, letterhead: true, commas: false, attach_shot: false, wm_angle: '0',
+  sections: DEFAULT_SECTIONS.map(([t, a, ty]) => ({ id: uid(), title: t, annex: a, type: ty, items: [] })),
+  drafts: []
+});
+let c = store.get(LS.draft, null) || blank();
+
+function save(){ if (!store.set(LS.draft, c)) setStatus('The browser could not keep an automatic copy (the screenshot may be too large). Use "Save case file" to keep your work.', true); }
+function setStatus(t, warn){ $('#status').textContent = t; $('#status').style.color = warn ? 'var(--warn)' : ''; }
+function msg(box, cls, text){ const d = document.createElement('div'); d.className = cls; d.textContent = text; $(box).replaceChildren(d); }
+
+/* ---------------- words and numbers ---------------- */
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+const two = x => x < 20 ? ONES[x] : TENS[Math.floor(x/10)] + (x % 10 ? ' ' + ONES[x % 10] : '');
+const three = x => x >= 100 ? ONES[Math.floor(x/100)] + ' Hundred' + (x % 100 ? ' and ' + two(x % 100) : '') : two(x);
+function wordsIndian(n){
+  n = Math.round(Math.abs(n)); if (!n) return 'Zero';
+  const out = [];
+  const cr = Math.floor(n / 1e7); n %= 1e7;
+  const lk = Math.floor(n / 1e5); n %= 1e5;
+  const th = Math.floor(n / 1000); n %= 1000;
+  if (cr) out.push((cr >= 100 ? wordsIndian(cr) : two(cr)) + (cr === 1 ? ' Crore' : ' Crores'));
+  if (lk) out.push(two(lk) + (lk === 1 ? ' Lakh' : ' Lakhs'));
+  if (th) out.push(two(th) + ' Thousand');
+  if (n) out.push(three(n));
+  return out.join(' ');
+}
+function wordsIntl(n){
+  n = Math.round(Math.abs(n)); if (!n) return 'Zero';
+  const units = [[1e9,'Billion'],[1e6,'Million'],[1e3,'Thousand']], out = [];
+  units.forEach(([v, w]) => { const q = Math.floor(n / v); if (q) { out.push(three(q) + ' ' + w); n %= v; } });
+  if (n) out.push(three(n));
+  return out.join(' ');
+}
+const sign = (n, s) => (n < 0 ? 'Minus ' : '') + s;
+const fmtN = (n, commas) => { const r = Math.round(n); return commas ? r.toLocaleString('en-IN') : String(r); };
+
+/* ---------------- Aadhaar / PAN checks ---------------- */
+const VD = [[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]];
+const VP = [[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],[8,9,1,6,0,4,3,5,2,7],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]];
+function verhoeffOk(num){ let ch = 0; num.split('').reverse().forEach((d, i) => { ch = VD[ch][VP[i % 8][+d]]; }); return ch === 0; }
+const aadhaarDigits = a => String(a || '').replace(/\D/g, '');
+const aadhaarFmt = (a, mask) => { const d = aadhaarDigits(a); if (d.length !== 12) return String(a || '').trim(); return mask ? `XXXX XXXX ${d.slice(8)}` : `${d.slice(0,4)} ${d.slice(4,8)} ${d.slice(8)}`; };
+
+/* ---------------- computation ---------------- */
+const curCode = () => (c.currency === 'OTHER' ? (c.currency_other || '').toUpperCase() : c.currency) || '';
+function compute(){
+  const rate = Number(c.rate) || 0;
+  const secs = c.sections.map(s => {
+    const items = s.items.filter(it => String(it.desc || '').trim() || Number(it.amount));
+    const inr = items.reduce((a, it) => a + (Number(it.amount) || 0), 0) * (s.type === 'Liability' ? -1 : 1);
+    const fc = rate ? Math.round(inr / rate) : 0;
+    return { s, items, inr, fc };
+  }).filter(x => x.items.length);
+  const totalInr = secs.reduce((a, x) => a + x.inr, 0);
+  const totalFc = secs.reduce((a, x) => a + x.fc, 0);
+  const exactFc = rate ? Math.round(totalInr / rate) : 0;
+  return { rate, secs, totalInr, totalFc, exactFc };
+}
+function personsText(){
+  return c.persons.filter(p => p.print && p.name.trim()).map(p => {
+    let t = `${p.name.trim()}${p.role ? ` (${p.role.trim()})` : ''}`;
+    const a = aadhaarDigits(p.aadhaar).length ? aadhaarFmt(p.aadhaar, c.mask_aadhaar) : '';
+    if (a) t += `, AADHAAR NO: [ ${a} ]`;
+    if (p.pan.trim()) t += `${a ? ' and' : ','} PAN NO: [ ${p.pan.trim().toUpperCase()} ]`;
+    return t;
+  }).join(', ');
+}
+function certModel(draft){
+  const k = compute(), cur = curCode(), cm = !!c.commas;
+  const amt = n => n < 0 ? `(${fmtN(-n, cm)})` : fmtN(n, cm);
+  const sum = k.secs.map((x, i) => ({ n: i + 1, title: (x.s.type === 'Liability' ? 'Less: ' : '') + x.s.title, fc: amt(x.fc), inr: amt(x.inr) }));
+  const words = c.fc_words === 'intl' ? wordsIntl : wordsIndian;
+  const sections = k.secs.map(x => {
+    const groups = [];
+    x.items.forEach(it => {
+      const sub = (it.sub || '').trim();
+      if (!groups.length || groups[groups.length - 1].sub !== sub) groups.push({ sub, items: [] });
+      groups[groups.length - 1].items.push({ desc: String(it.desc || '').replace(/\s+$/,''), amount: fmtN(Number(it.amount) || 0, cm) });
+    });
+    return { annex_title: x.s.annex || x.s.title.toUpperCase(), groups, fc: fmtN(Math.abs(x.fc), cm), inr: fmtN(Math.abs(x.inr), cm) };
+  });
+  return {
+    signatory_title: settings.signatory_title, signatory_upper: (settings.signatory || '').toUpperCase(), member_text: settings.member_text,
+    designation: settings.designation, membership_no: settings.membership_no, firm_name: settings.firm_name, firm_tag: settings.firm_tag,
+    persons_text: personsText(), address_inline: c.address.split(/\r?\n/).map(l => l.trim().replace(/,$/, '')).filter(Boolean).join(', '),
+    purpose: c.purpose.trim().replace(/\.$/, ''), cur, rate: String(c.rate),
+    rateNote: c.rate_note ? `(as on ${dmy(c.rate_date)}${c.rate_source ? ', source: ' + c.rate_source : ''})` : '',
+    rate_date: dmy(c.rate_date), rate_source: c.rate_source,
+    summary: sum, total_fc: fmtN(k.totalFc, cm), total_inr: fmtN(k.totalInr, cm),
+    total_inr_words: sign(k.totalInr, wordsIndian(k.totalInr)), total_fc_words: sign(k.totalFc, words(k.totalFc)),
+    sections, place: c.place, date: dmy(c.cert_date), udin: draft ? '(to be generated)' : (c.udin || '-')
+  };
+}
+
+/* ---------------- rendering: persons ---------------- */
+function renderPersons(){
+  const tb = $('#persons tbody'); tb.innerHTML = '';
+  c.persons.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><input data-p="name" value="${esc(p.name)}"></td><td><input data-p="role" value="${esc(p.role)}" list="roles"></td>
+      <td><input data-p="aadhaar" value="${esc(p.aadhaar)}" placeholder="12 digits"></td><td><input data-p="pan" value="${esc(p.pan)}" maxlength="10" style="text-transform:uppercase"></td>
+      <td><input type="checkbox" data-p="print" ${p.print ? 'checked' : ''}></td>
+      <td class="n"><button type="button" class="sm link" data-up ${i ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-del>Remove</button></td>`;
+    tr.addEventListener('input', e => { const k = e.target.dataset.p; if (!k) return; p[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; changed(false); });
+    tr.querySelector('[data-del]').addEventListener('click', () => { c.persons.splice(i, 1); renderPersons(); changed(); });
+    tr.querySelector('[data-up]').addEventListener('click', () => { c.persons.splice(i - 1, 0, c.persons.splice(i, 1)[0]); renderPersons(); changed(); });
+    tb.appendChild(tr);
+  });
+}
+$('#addPerson').addEventListener('click', () => { c.persons.push({ id: uid(), name: '', role: '', aadhaar: '', pan: '', print: true }); renderPersons(); changed(); });
+document.body.insertAdjacentHTML('beforeend', '<datalist id="roles"><option>Student</option><option>Father & Sponsor</option><option>Mother & Sponsor</option><option>Sponsor</option><option>Spouse</option><option>Applicant</option></datalist><datalist id="subs"><option>FIXED DEPOSIT WITH BANKS</option><option>SAVINGS BANK BALANCES</option><option>MUTUAL FUNDS</option><option>PUBLIC PROVIDENT FUND</option><option>SHARES</option><option>INCOME TAX</option><option>GOLD JEWELLERY</option><option>LIFE INSURANCE</option><option>MORTGAGE LOAN</option></datalist>');
+
+/* ---------------- rendering: sections ---------------- */
+function renderSections(){
+  const box = $('#sections'); box.innerHTML = '';
+  const rate = Number(c.rate) || 0, cur = curCode();
+  c.sections.forEach((s, si) => {
+    const d = document.createElement('div'); d.className = 'sec';
+    const tot = s.items.reduce((a, it) => a + (Number(it.amount) || 0), 0);
+    d.innerHTML = `<div class="sec-head">
+        <div><label>Name in the summary</label><input data-s="title" value="${esc(s.title)}"></div>
+        <div><label>Heading in the list of documents</label><input data-s="annex" value="${esc(s.annex)}"></div>
+        <div><label>Type</label><select data-s="type"><option ${s.type === 'Asset' ? 'selected' : ''}>Asset</option><option ${s.type === 'Liability' ? 'selected' : ''}>Liability</option></select></div>
+        <div class="bar"><button type="button" class="sm link" data-mv="-1" ${si ? '' : 'disabled'}>↑</button><button type="button" class="sm link" data-mv="1" ${si < c.sections.length - 1 ? '' : 'disabled'}>↓</button>
+          <button type="button" class="sm link danger" data-rmsec>Remove</button></div></div>
+      <div class="tw"><table class="t"><thead><tr><th style="width:22%">Sub-heading</th><th>Particulars (printed as typed)</th><th class="n" style="width:14%">Amount (Rs.)</th><th style="width:13%">Document</th><th style="width:14%">Internal note</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="bar"><button type="button" class="link" data-additem>+ Add item</button><span class="sec-tot">${s.items.length ? `Total Rs. ${tot.toLocaleString('en-IN')}${rate && cur ? ` = ${cur} ${Math.round(tot / rate).toLocaleString('en-IN')}` : ''}${s.type === 'Liability' ? ' (deducted)' : ''}` : 'No items – left out of the certificate'}</span></div>`;
+    const tb = d.querySelector('tbody');
+    s.items.forEach((it, ii) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><input data-i="sub" value="${esc(it.sub)}" list="subs"></td><td><textarea data-i="desc" rows="3">${esc(it.desc)}</textarea></td>
+        <td><input type="number" step="1" min="0" data-i="amount" value="${esc(it.amount)}" style="text-align:right"></td>
+        <td><select data-i="evidence"><option ${it.evidence === 'Original seen' ? 'selected' : ''}>Original seen</option><option ${it.evidence === 'Scanned copy' ? 'selected' : ''}>Scanned copy</option><option ${it.evidence === 'Pending' ? 'selected' : ''}>Pending</option></select></td>
+        <td><input data-i="note" value="${esc(it.note)}"></td>
+        <td class="n"><button type="button" class="sm link" data-iup ${ii ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-idel>✕</button></td>`;
+      tr.addEventListener('input', e => { const k = e.target.dataset.i; if (!k) return; it[k] = e.target.value; changed(false); });
+      tr.addEventListener('change', e => { if (e.target.dataset.i === 'amount') renderSections(); });
+      tr.querySelector('[data-idel]').addEventListener('click', () => { s.items.splice(ii, 1); renderSections(); changed(); });
+      tr.querySelector('[data-iup]').addEventListener('click', () => { s.items.splice(ii - 1, 0, s.items.splice(ii, 1)[0]); renderSections(); changed(); });
+      tb.appendChild(tr);
+    });
+    d.querySelector('.sec-head').addEventListener('input', e => { const k = e.target.dataset.s; if (!k) return; s[k] = e.target.value; changed(false); });
+    d.querySelector('[data-s=type]').addEventListener('change', () => renderSections());
+    d.querySelectorAll('[data-mv]').forEach(b => b.addEventListener('click', () => { const j = si + Number(b.dataset.mv); c.sections.splice(j, 0, c.sections.splice(si, 1)[0]); renderSections(); changed(); }));
+    d.querySelector('[data-rmsec]').addEventListener('click', async () => {
+      if (s.items.length && !(await ask('Remove this section?', `"${esc(s.title)}" and its ${s.items.length} item(s) will be removed.`))) return;
+      c.sections.splice(si, 1); renderSections(); changed();
+    });
+    d.querySelector('[data-additem]').addEventListener('click', () => { const last = s.items[s.items.length - 1]; s.items.push({ id: uid(), sub: last ? last.sub : '', desc: '', amount: '', evidence: 'Scanned copy', note: '' }); renderSections(); changed(); const tas = box.querySelectorAll('.sec')[si].querySelectorAll('textarea'); if (tas.length) tas[tas.length - 1].focus(); });
+    box.appendChild(d);
+  });
+}
+$('#addSection').addEventListener('click', () => { c.sections.push({ id: uid(), title: 'New item', annex: 'NEW ITEM', type: 'Asset', items: [] }); renderSections(); changed(); const ins = $('#sections').querySelectorAll('.sec'); ins[ins.length - 1].querySelector('input').select(); });
+
+/* ---------------- simple fields ---------------- */
+function bindFields(){
+  document.querySelectorAll('[data-f]').forEach(el => {
+    const k = el.dataset.f;
+    if (el.type === 'checkbox') el.checked = !!c[k]; else el.value = c[k] ?? '';
+    el.oninput = el.onchange = () => { c[k] = el.type === 'checkbox' ? el.checked : el.value; if (k === 'currency') syncRate(); if (k === 'rate' || k === 'currency' || k === 'currency_other') renderSections(); changed(false); };
+  });
+}
+
+/* ---------------- conversion rate: entered by the user, locked until changed ---------------- */
+function syncRate(){
+  $('#otherCurWrap').hidden = c.currency !== 'OTHER';
+  document.querySelectorAll('[data-rate]').forEach(el => el.disabled = !!c.rate_locked);
+  $('#shotDel').hidden = $('#shotDl').hidden = !c.screenshot || !!c.rate_locked && false;
+  $('#shotDel').disabled = !!c.rate_locked;
+  const img = $('#shotImg'); img.hidden = !c.screenshot; if (c.screenshot) img.src = c.screenshot;
+  const lb = $('#lockBox');
+  if (c.rate_locked) {
+    lb.innerHTML = `🔒 Rate locked: <b>1 ${esc(curCode())} = ${esc(c.rate)} INR</b> as on ${dmy(c.rate_date)}${c.rate_source ? ` (${esc(c.rate_source)})` : ''}. It will not change unless you click <button type="button" class="sm" id="unlock">Change the rate</button>`;
+    $('#unlock').onclick = async () => { if (await ask('Change the conversion rate?', 'The certificate amounts in foreign currency will be recalculated with the new rate. A draft already sent to the client will no longer match.')) { c.rate_locked = false; syncRate(); changed(); } };
+  } else {
+    lb.innerHTML = `Enter the currency, the rate and the date, then <button type="button" class="sm primary" id="lock">Lock the rate</button> <span class="hint">The tool never fetches or changes a rate by itself.</span>`;
+    $('#lock').onclick = () => {
+      const bad = [];
+      if (!curCode() || !/^[A-Z]{3}$/.test(curCode())) bad.push('the currency code');
+      if (!(Number(c.rate) > 0)) bad.push('a rate above zero');
+      if (!c.rate_date) bad.push('the date of the rate');
+      if (bad.length) { msg('#topMsgs', 'm-err', 'To lock the rate, enter ' + bad.join(', ') + '.'); return; }
+      c.rate_locked = true; c.rate_locked_at = new Date().toISOString(); syncRate(); changed();
+      msg('#topMsgs', 'm-ok', `Rate locked: 1 ${curCode()} = ${c.rate} INR.`);
+    };
+  }
+}
+$('#shotBtn').addEventListener('click', () => $('#shotFile').click());
+$('#shotFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  c.screenshot = await shrinkImage(f); syncRate(); changed();
+});
+$('#shotDel').addEventListener('click', () => { c.screenshot = ''; syncRate(); changed(); });
+$('#shotDl').addEventListener('click', () => { const a = document.createElement('a'); a.href = c.screenshot; a.download = `Rate_source_${curCode()}_${dmy(c.rate_date)}.jpg`; a.click(); });
+function shrinkImage(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => { const img = new Image(); img.onload = () => {
+      const k = Math.min(1, 1600 / img.width); const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+      res(cv.toDataURL('image/jpeg', 0.85)); }; img.onerror = rej; img.src = r.result; };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+
+/* ---------------- summary and checks ---------------- */
+function checks(final){
+  const errs = [], warns = [], k = compute();
+  if (!c.persons.some(p => p.print && p.name.trim())) errs.push('Add at least one person to be named in the certificate.');
+  c.persons.forEach(p => {
+    const d = aadhaarDigits(p.aadhaar);
+    if (p.aadhaar.trim() && (d.length !== 12 || !verhoeffOk(d))) warns.push(`${p.name || 'A person'}: the Aadhaar number does not look valid (12 digits with a check digit) – please recheck.`);
+    if (p.pan.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(p.pan.trim().toUpperCase())) warns.push(`${p.name || 'A person'}: the PAN format looks wrong.`);
+  });
+  if (!c.address.trim()) errs.push('Enter the residential address.');
+  if (!c.purpose.trim()) errs.push('Enter the purpose (what the funds are to meet).');
+  if (!c.cert_date) errs.push('Enter the date of the certificate.');
+  if (!c.place.trim()) errs.push('Enter the place.');
+  if (!c.rate_locked) errs.push('Enter and lock the conversion rate (section 2).');
+  if (!k.secs.length) errs.push('Enter at least one asset or liability.');
+  c.sections.forEach(s => s.items.forEach(it => { if (String(it.desc || '').trim() && !(Number(it.amount) > 0)) warns.push(`${s.title}: an item has no amount.`); }));
+  const pending = c.sections.reduce((a, s) => a + s.items.filter(it => it.evidence === 'Pending').length, 0);
+  if (pending) (final ? errs : warns).push(`${pending} item(s) are marked "Pending" – the supporting document has not been seen yet.`);
+  if (k.totalInr <= 0 && k.secs.length) warns.push('The total is nil or negative.');
+  if (k.totalFc !== k.exactFc && k.rate) warns.push(`Rounding: the foreign currency total is the sum of the rounded section figures (${k.totalFc}); converting the rupee total directly gives ${k.exactFc}.`);
+  if (final && !c.udin.trim()) warns.push('No UDIN entered. ICAI requires a UDIN for every certificate signed by a member – generate it and enter it before issuing.');
+  if (c.cert_date && c.rate_date && c.rate_date > c.cert_date) warns.push('The rate date is after the date of the certificate.');
+  if (!c.screenshot) warns.push('No screenshot of the rate source is attached (useful for your file).');
+  return { errs, warns };
+}
+function renderSummary(){
+  const k = compute(), cur = curCode() || 'FC';
+  const box = $('#summary');
+  if (!k.secs.length) { box.innerHTML = '<p class="hint">Enter assets and liabilities to see the summary.</p>'; }
+  else {
+    const m = certModel(true);
+    box.innerHTML = `<div class="tw"><table class="t"><thead><tr><th>Source of funds</th><th class="n">${esc(cur)}</th><th class="n">INR</th></tr></thead><tbody>` +
+      m.summary.map((s, i) => { const x = k.secs[i], f = n => n < 0 ? `(${(-n).toLocaleString('en-IN')})` : n.toLocaleString('en-IN');
+        return `<tr><td>${s.n}. ${esc(s.title)}</td><td class="n">${f(x.fc)}</td><td class="n">${f(x.inr)}</td></tr>`; }).join('') +
+      `<tr><td><b>TOTAL</b></td><td class="n"><b>${k.totalFc.toLocaleString('en-IN')} ${esc(cur)}</b></td><td class="n"><b>${k.totalInr.toLocaleString('en-IN')}</b></td></tr></tbody></table></div>
+      <p class="hint">Rupees ${esc(m.total_inr_words)} only · ${esc(cur)} ${esc(m.total_fc_words)} only${k.rate ? ` · 1 ${esc(cur)} = ${esc(c.rate)} INR` : ''}</p>`;
+  }
+  const r = checks(false);
+  $('#checks').innerHTML = r.errs.map(t => `<div class="m-warn">${esc(t)}</div>`).join('') + r.warns.map(t => `<div class="m-warn">${esc(t)}</div>`).join('') ||
+    '<div class="m-ok">Ready – all details entered.</div>';
+}
+let t0 = null;
+function changed(rerender = true){ save(); $('#outMsgs').replaceChildren(); clearTimeout(t0); t0 = setTimeout(renderSummary, 150); if (rerender) renderSummary(); setStatus('Saved in this browser · ' + new Date().toLocaleTimeString()); }
+
+/* ---------------- outputs ---------------- */
+const fileTag = () => (c.case_name || (c.persons[0] && c.persons[0].name) || 'Networth').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function pdf(draft){
+  return NWPdf.build(certModel(draft), { draft, letterhead: c.letterhead, watermarkAngle: Number(c.wm_angle) || 0,
+    firm: { name: settings.lh_name, tag: settings.firm_tag, address: settings.lh_address, email: settings.lh_email, mobile: settings.lh_mobile },
+    logo: 'data:image/png;base64,' + window.LLP_TEMPLATES.logo_png, screenshot: c.attach_shot && c.screenshot ? c.screenshot : null });
+}
+$('#draftPdf').addEventListener('click', () => {
+  const r = checks(false);
+  if (r.errs.length) { $('#outMsgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return; }
+  const doc = pdf(true);
+  doc.save(`${fileTag()}_Networth_DRAFT_${dmy(isoToday())}.pdf`);
+  c.drafts = (c.drafts || []).concat([{ at: new Date().toISOString(), rate: c.rate, cur: curCode(), total: compute().totalInr }]); changed();
+  msg('#outMsgs', 'm-ok', 'Draft PDF downloaded, with "DRAFT" across each page. Send it to the client for confirmation; after any corrections, generate the final certificate.');
+});
+async function finalGate(){
+  const r = checks(true);
+  if (r.errs.length) { $('#outMsgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return false; }
+  const w = r.warns.filter(t => /UDIN|Pending|nil or negative|Aadhaar|PAN/.test(t));
+  if (w.length && !(await ask('Generate the final certificate?', w.map(t => `<p>${esc(t)}</p>`).join('')))) return false;
+  return true;
+}
+$('#finalPdf').addEventListener('click', async () => {
+  if (!(await finalGate())) return;
+  pdf(false).save(`${fileTag()}_Networth_Certificate.pdf`);
+  msg('#outMsgs', 'm-ok', 'Final certificate (PDF) downloaded.');
+});
+$('#finalDocx').addEventListener('click', async () => {
+  if (!(await finalGate())) return;
+  const m = certModel(false);
+  const tpl = c.letterhead ? 'certificate' : 'certificate_plain';
+  const doc = new window.docxtemplater(new PizZip(b64ToBytes(window.LLP_TEMPLATES[tpl])), { paragraphLoop: true, linebreaks: true, nullGetter: () => '' });
+  doc.render(Object.assign({}, m, { rate: m.rate + (m.rateNote ? ' INR ' + m.rateNote : ''), sections: m.sections.map(s => Object.assign({}, s, { cur: m.cur })) }));
+  download(`${fileTag()}_Networth_Certificate.docx`, new Blob([doc.getZip().generate({ type: 'uint8array', compression: 'DEFLATE' })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+  msg('#outMsgs', 'm-ok', 'Final certificate (Word) downloaded.');
+});
+
+/* ---------------- case files ---------------- */
+$('#saveCase').addEventListener('click', () => download(`${fileTag()}_networth_case.json`, new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' })));
+$('#openCase').addEventListener('click', () => $('#caseFile').click());
+$('#caseFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (!d.sections || !d.persons) throw new Error('not a case file');
+        c = Object.assign(blank(), d); renderAll(); changed(); msg('#topMsgs', 'm-ok', `Opened ${f.name}.`); }
+  catch(err){ msg('#topMsgs', 'm-err', 'That file could not be read as a net worth case file.'); }
+});
+$('#newCase').addEventListener('click', async () => {
+  if (!(await ask('Start a new certificate?', 'The details on screen will be cleared. Save the case file first if you need it.'))) return;
+  c = blank(); renderAll(); changed(); msg('#topMsgs', 'm-ok', 'New certificate started.');
+});
+
+/* ---------------- Excel ---------------- */
+$('#dlXlsx').addEventListener('click', () => download('Networth_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.Networth_data_template)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })));
+$('#upXlsx').addEventListener('click', () => $('#xlsxFile').click());
+$('#xlsxFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const r = fromExcel(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())));
+    if (r.errors.length) { $('#topMsgs').innerHTML = r.errors.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return; }
+    if ((c.persons.some(p => p.name) || c.sections.some(s => s.items.length)) && !(await ask('Replace the details on screen?', `The details on screen will be replaced by those in ${esc(f.name)}.`))) return;
+    c = Object.assign(blank(), r.data); renderAll(); changed();
+    $('#topMsgs').innerHTML = [`<div class="m-ok">Imported ${esc(f.name)}: ${r.data.persons.length} person(s), ${r.data.sections.reduce((a, s) => a + s.items.length, 0)} item(s). ${r.data.rate ? 'Check the currency and rate, then lock it.' : ''}</div>`].concat(r.warns.map(t => `<div class="m-warn">${esc(t)}</div>`)).join('');
+  } catch(err){ msg('#topMsgs', 'm-err', 'Excel file not imported: ' + err.message); }
+});
+function fromExcel(sh){
+  const S = LLPXlsx.str, errors = [], warns = [];
+  const D = sh['Details'], P = sh['Persons'], SE = sh['Sections'], I = sh['Items'];
+  if (!D || !P || !SE || !I) return { errors: ['This is not the net worth data template (sheets Details, Persons, Sections and Items are needed). Use "Download Excel template".'], warns };
+  const det = {};
+  Object.keys(D).forEach(ref => { const m = ref.match(/^A(\d+)$/); if (m) det[S(D[ref])] = D['C' + m[1]]; });
+  const keyRows = (cells) => { const kc = {}; Object.keys(cells).forEach(ref => { const m = ref.match(/^([A-Z]+)1$/); if (m) kc[S(cells[ref])] = m[1]; });
+    const max = Math.max(0, ...Object.keys(cells).map(r => +r.replace(/^[A-Z]+/, ''))); const rows = [];
+    for (let r = 3; r <= max; r++) { const o = {}; let any = false; Object.entries(kc).forEach(([k, col]) => { const v = cells[col + r]; if (v !== undefined && v !== '') { o[k] = v; any = true; } }); if (any) { o._row = r; rows.push(o); } }
+    return rows; };
+  const dt = v => { const d = LLPXlsx.date(v); if (d === null) { warns.push(`"${S(v)}" is not a valid date.`); return ''; } return d; };
+  const data = blank();
+  Object.assign(data, { case_name: S(det.case_name), address: S(det.address), purpose: S(det.purpose), place: S(det.place) || data.place, udin: S(det.udin), rate_source: S(det.rate_source) });
+  if (det.cert_date) data.cert_date = dt(det.cert_date) || data.cert_date;
+  if (det.rate_date) data.rate_date = dt(det.rate_date) || data.rate_date;
+  const cur = S(det.currency).toUpperCase();
+  if (cur) { const known = ['AUD','USD','EUR','GBP','CAD','NZD','SGD','AED','JPY','CHF']; if (known.includes(cur)) data.currency = cur; else { data.currency = 'OTHER'; data.currency_other = cur; } }
+  data.rate = S(det.rate).replace(/,/g, '');
+  data.persons = keyRows(P).filter(p => S(p.name)).map(p => ({ id: uid(), name: S(p.name), role: S(p.role), aadhaar: S(p.aadhaar), pan: S(p.pan).toUpperCase(), print: !/^n/i.test(S(p.print)) }));
+  const secs = keyRows(SE).filter(s => S(s.title)).map(s => ({ id: uid(), title: S(s.title), annex: S(s.annex) || S(s.title).toUpperCase(), type: /^l/i.test(S(s.type)) ? 'Liability' : 'Asset', items: [] }));
+  if (!secs.length) errors.push('The Sections sheet has no sections.');
+  keyRows(I).forEach(it => {
+    if (!S(it.desc) && !S(it.amount)) return;
+    const sec = secs.find(s => s.title.toLowerCase() === S(it.section).toLowerCase());
+    if (!sec) { warns.push(`Items row ${it._row}: section "${S(it.section)}" is not in the Sections sheet – the item was not imported.`); return; }
+    const amt = S(it.amount).replace(/[,\s]|Rs\.?|₹|\/-/gi, '');
+    if (amt && isNaN(Number(amt))) warns.push(`Items row ${it._row}: "${S(it.amount)}" is not an amount.`);
+    sec.items.push({ id: uid(), sub: S(it.sub), desc: S(it.desc), amount: isNaN(Number(amt)) ? '' : amt, evidence: S(it.evidence) || 'Scanned copy', note: S(it.note) });
+  });
+  data.sections = secs;
+  if (!data.persons.length) warns.push('No persons found in the Persons sheet.');
+  return { data, errors, warns };
+}
+
+/* ---------------- settings and confirm dialogs ---------------- */
+$('#settingsBtn').addEventListener('click', () => { const f = $('#setForm'); Object.keys(SETTINGS_DEFAULT).forEach(k => { if (f.elements[k]) f.elements[k].value = settings[k] || ''; }); $('#setDlg').showModal(); });
+$('#setCancel').addEventListener('click', () => $('#setDlg').close());
+$('#setForm').addEventListener('submit', () => { const f = $('#setForm'); Object.keys(SETTINGS_DEFAULT).forEach(k => { if (f.elements[k]) settings[k] = f.elements[k].value; }); store.set(LS.settings, settings); renderSummary(); msg('#topMsgs', 'm-ok', 'Firm settings saved.'); });
+function ask(title, html){
+  return new Promise(res => {
+    $('#askTitle').textContent = title; $('#askBody').innerHTML = html;
+    const dl = $('#askDlg'); const done = v => { dl.close(); res(v); };
+    $('#askYes').onclick = () => done(true); $('#askNo').onclick = () => done(false); dl.oncancel = () => res(false);
+    dl.showModal();
+  });
+}
+
+function renderAll(){ bindFields(); renderPersons(); renderSections(); syncRate(); renderSummary(); }
+renderAll();
+window.addEventListener('beforeunload', () => save());
+})();
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `llp-docs/` | LLP Registration Tool Kit: Form 9, consent letter, subscription sheet, NOC, LLP Agreement, data sheet, print set |
 | `company-docs/` | Company Registration Tool Kit (Private Limited and OPC): NOC, data sheet for SPICe+ (e-MoA / e-AoA) |
 | `partnership-docs/` | Partnership Deed: deed, NOC for the place of business, data sheet, checklist |
+| `networth/` | Net Worth Certificate (visa): Excel import, locked conversion rate, draft PDF with DRAFT watermark, final PDF and Word |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

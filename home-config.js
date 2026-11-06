@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Net Worth Certificate (visa) – Excel import, manual conversion rate, watermarked draft PDF for client confirmation.",
     "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
     "New: Company Registration Tool Kit – Private Limited and One Person Company.",
     "LLP Registration Tool Kit now includes the LLP Agreement, print set, checklist and client request list.",
@@ -21,7 +22,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements"],
+  categories: ["Registration", "Agreements", "Certificates"],
 
   tools: [
     {
@@ -50,6 +51,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Partnership deed in the firm's format, NOC for the place of business, data sheet, checklist and client request list. Reads PAN, Aadhaar and bank statement PDFs or an Excel sheet.",
       added: "2026-11-05"
+    },
+    {
+      id: "networth",
+      title: "Net Worth Certificate (visa)",
+      category: "Certificates",
+      path: "networth/index.html",
+      status: "available",
+      description: "Net worth certificate in the firm's format with annexure of documents reviewed. Excel import, any foreign currency at a rate you enter and lock, draft PDF with DRAFT watermark, final PDF and Word.",
+      added: "2026-11-06"
     }
   ]
 };
