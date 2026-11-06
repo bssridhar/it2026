@@ -4,7 +4,7 @@
 - Every tool page must:
   - link back to the home page (`<a href="../index.html">← All tools</a>`);
   - include the desk calculator: `<script src="../shared/calc.js"></script>` just before `</body>`
-    (it adds the flashing "Calculator" box at the bottom left);
+    (it adds the flashing "Calculator" box at the bottom right);
   - have Save / Open case file (JSON) and keep a draft in localStorage.
 - Register each tool in `home-config.js` and add a row to `README.md`.
 - Never commit client data (sample documents with Aadhaar, PAN, etc.); test with dummy data only.

@@ -7,7 +7,7 @@
  *   MRC  : recalls memory; MRC twice clears memory. M+ / M− complete a pending sum first
  *   Tape : every entry and result, with Copy; "Use" puts the display into the field last used on the page
  * Keyboard (when the calculator has focus): 0-9 . + - * / Enter = % Backspace Delete(CE) Esc(AC)
- * A small "Calculator" box with flashing text sits at the bottom left of every page; clicking it opens the
+ * A small "Calculator" box with flashing text sits at the bottom right of every page; clicking it opens the
  * calculator, and closing the calculator brings the box back. Also opens from any element with data-calc-open,
  * or window.PTCalc.toggle(). Add <script src="../shared/calc.js"></script> to every tool page.
  */
@@ -45,7 +45,7 @@
 #ptc .tape .r{font-weight:700;border-bottom:1px dashed #aaa;margin-bottom:3px}
 #ptc .tape:empty::before{content:"Tape is empty";color:#999}
 #ptc .note{font-size:.72rem;color:#aeb5c1;padding:0 10px 8px}
-#ptcLaunch{position:fixed;left:16px;bottom:16px;z-index:49;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;border:1px solid #1f5fae;background:#fff;color:#1f5fae;font:700 14px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
+#ptcLaunch{position:fixed;right:16px;bottom:16px;z-index:49;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;border:1px solid #1f5fae;background:#fff;color:#1f5fae;font:700 14px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
 #ptcLaunch[hidden]{display:none}
 @media (max-width:1280px){#ptcLaunch{bottom:76px}}
 #ptcLaunch .ico{font-size:17px;line-height:1}
@@ -248,7 +248,7 @@
     const open = force === undefined ? el.hidden : force;
     el.hidden = !open; pref.open = open; store.set(pref);
     if (launch) launch.hidden = open;
-    if (open) { if (pref.x === null) place(16, window.innerHeight - el.offsetHeight - 16); else place(pref.x, pref.y); el.focus(); }
+    if (open) { if (pref.x === null) place(window.innerWidth - el.offsetWidth - 16, window.innerHeight - el.offsetHeight - 16); else place(pref.x, pref.y); el.focus(); }
   }
   document.addEventListener('focusin', e => {
     const t = e.target;
