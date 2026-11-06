@@ -28,6 +28,7 @@ DETAILS = [
     ("purpose", "Purpose – completes \"…their ability to meet …\" (e.g. the Education cost for Masters Degree …, University …, Location …)", True, "text"),
     ("cert_date", "Date of certificate (DD/MM/YYYY)", True, "date"),
     ("place", "Place", True, "text"),
+    ("cost_fc", "Estimated cost, in the foreign currency (printed as \"…which is estimated to be 50000 USD\")", False, "number"),
     ("udin", "UDIN (if already generated)", False, "text"),
     ("#", "CURRENCY (entered by you; the tool does not change it)"),
     ("currency", "Foreign currency code (e.g. AUD, USD, EUR, GBP, CAD, NZD, SGD)", True, "text"),
@@ -42,20 +43,24 @@ PERSONS = [
 ]
 SECTIONS = [
     ("title", "Name in the summary", 40, True), ("annex", "Heading in the list of documents", 42, True),
-    ("type", "Type (Asset / Liability)", 18, True),
+    ("type", "Type (Asset / Liability / Gold Jewellery)", 22, True),
 ]
 DEFAULT_SECTIONS = [
     ("Personal / Family Savings in India", "PERSONAL / FAMILY SAVINGS FROM INDIA", "Asset"),
     ("Current Investments in India", "CURRENT INVESTMENTS IN INDIA", "Asset"),
     ("Current Income in India", "CURRENT INCOME IN INDIA", "Asset"),
     ("Immovable properties held in India", "IMMOVABLE PROPERTIES IN INDIA", "Asset"),
+    ("Gold Jewellery", "GOLD JEWELLERY", "Gold Jewellery"),
     ("Educational Loan", "EDUCATIONAL LOAN", "Asset"),
     ("Mortgage Loan", "MORTGAGE LOAN", "Liability"),
 ]
 ITEMS = [
     ("section", "Section (choose from the list)", 32, True), ("sub", "Sub-heading (e.g. FIXED DEPOSIT WITH BANKS)", 28, False),
-    ("desc", "Particulars as they should appear (Alt+Enter for new lines)", 60, True), ("amount", "Amount (Rs.)", 16, True),
+    ("desc", "Particulars as they should appear (Alt+Enter for new lines)", 55, True),
+    ("ref", "Ref No (SB a/c no., FDR no., document no., etc.)", 24, False), ("amount", "Amount (Rs.)", 16, True),
     ("evidence", "Document (Original seen / Scanned copy / Pending)", 18, False), ("note", "Internal note (not printed)", 28, False),
+    ("weight", "Gold only: weight (grams)", 14, False), ("purity", "Gold only: purity (e.g. 22 carat)", 14, False),
+    ("rate_gm", "Gold only: rate per gram (Rs.)", 14, False),
 ]
 
 
@@ -81,7 +86,8 @@ def build():
         ("3. 'Sections': the headings of the certificate. Add a row for a new type of asset or liability (Type: Asset or Liability).", False),
         ("   Liabilities are deducted. Sections with no items are left out of the certificate.", False),
         ("4. 'Items': one row per document – choose the section, give the sub-heading, the particulars exactly as they should be printed, and the amount in rupees.", False),
-        ("   Enter liabilities as positive amounts; the tool deducts them.", False),
+        ("   Enter liabilities as positive amounts; the tool deducts them. 'Ref No' (SB a/c no., FDR no., etc.) is printed next to the particulars.", False),
+        ("   Gold jewellery: give the weight, purity and rate per gram; the amount may be left blank (weight x rate is used).", False),
         ("5. Save, and use 'Import Excel' in the Net Worth Certificate tool.", False),
         ("Do not change the hidden column A of 'Details' or the hidden first row of the other sheets.", False),
     ], 1):
@@ -131,7 +137,7 @@ def build():
 
     ss = wb.create_sheet("Sections")
     head(ss, SECTIONS)
-    dvt = DataValidation(type="list", formula1='"Asset,Liability"', allow_blank=False)
+    dvt = DataValidation(type="list", formula1='"Asset,Liability,Gold Jewellery"', allow_blank=False)
     ss.add_data_validation(dvt)
     dvt.add("C3:C40")
     for i, (t, a, ty) in enumerate(DEFAULT_SECTIONS, 3):
@@ -148,13 +154,13 @@ def build():
     it.add_data_validation(dvs)
     it.add_data_validation(dve)
     dvs.add("A3:A200")
-    dve.add("E3:E200")
+    dve.add("F3:F200")
     for rr in range(3, 61):
         for i, c in enumerate(ITEMS, 1):
             cell = it.cell(row=rr, column=i)
             cell.border = BOX
             cell.alignment = WRAP
-            cell.number_format = "#,##,##0" if c[0] == "amount" else "@"
+            cell.number_format = {"amount": "#,##,##0", "weight": "0.000", "rate_gm": "#,##,##0.00"}.get(c[0], "@")
             if c[3]:
                 cell.fill = REQ_FILL
     wb.active = 1

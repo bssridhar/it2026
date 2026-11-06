@@ -77,7 +77,7 @@
     y += 3;
     rich([{ t: 'I, ' }, { t: `${m.signatory_title} ${m.signatory_upper}`, b: 1 }, { t: `, ${m.member_text}, certify that I have reviewed the financial condition of ` },
           { t: m.persons_text, b: 1 }, { t: ', residing at ' }, { t: m.address_inline, b: 1 },
-          { t: ` with a view of establishing their ability to meet ${m.purpose}.` }], 10.5, 5);
+          { t: ` with a view of establishing their ability to meet ${m.purpose}${m.cost_text || ''}.` }], 10.5, 5);
     y += 4;
     doc.autoTable(Object.assign({}, tableBase, {
       startY: y,
@@ -108,8 +108,9 @@
       s.groups.forEach(g => {
         if (g.sub) { y += 4; need(12); doc.setFont('times', 'bold'); doc.setFontSize(10.5); text(g.sub, ML); y += 2; }
         doc.autoTable(Object.assign({}, tableBase, {
-          startY: y, body: g.items.map(it => [it.desc, it.amount]),
-          columnStyles: { 0: { cellWidth: CW * 0.78 }, 1: { halign: 'right', valign: 'bottom' } },
+          startY: y, body: g.items.map(it => m.has_ref ? [it.desc, it.ref, it.amount] : [it.desc, it.amount]),
+          columnStyles: m.has_ref ? { 0: { cellWidth: CW * 0.56 }, 1: { cellWidth: CW * 0.24 }, 2: { halign: 'right', valign: 'bottom' } }
+                                  : { 0: { cellWidth: CW * 0.78 }, 1: { halign: 'right', valign: 'bottom' } },
           bodyStyles: { cellPadding: { top: 1.6, bottom: 1.6, left: 0, right: 1.5 } },
         }));
         y = doc.lastAutoTable.finalY + 2;
@@ -186,5 +187,39 @@
     doc.setTextColor(0);
   }
 
-  root.NWPdf = { build };
+  /* Self declaration by the client for gold jewellery (working paper).
+     d: { name, pan, address, date, place, purpose, firm, items: [{desc, purity, weight, rate_gm, value}], total_weight, total_value, rate_date, rate_source, words } */
+  function goldDeclaration(d) {
+    const { jsPDF } = root.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    let y = 30;
+    doc.setFont('times', 'bold'); doc.setFontSize(13);
+    doc.text('SELF DECLARATION – GOLD JEWELLERY', PW / 2, y, { align: 'center' });
+    const tw = doc.getTextWidth('SELF DECLARATION – GOLD JEWELLERY'); doc.setLineWidth(0.3); doc.line(PW / 2 - tw / 2, y + 0.8, PW / 2 + tw / 2, y + 0.8);
+    y += 14;
+    doc.setFont('times', 'normal'); doc.setFontSize(11);
+    const para = t => { const ls = doc.splitTextToSize(t, CW); doc.text(ls, ML, y, { align: 'justify', maxWidth: CW }); y += ls.length * 5.4 + 4; };
+    para(`I, ${d.name}${d.pan ? ` (PAN: ${d.pan})` : ''}, residing at ${d.address}, hereby declare that the gold jewellery described below is owned by me / my family and is in my possession as on ${d.date}.`);
+    doc.autoTable({
+      startY: y, theme: 'grid', margin: { left: ML, right: MR },
+      styles: { font: 'times', fontSize: 10.5, textColor: 20, lineColor: 120, lineWidth: 0.2, cellPadding: 1.8 },
+      headStyles: { fillColor: [235, 235, 235], fontStyle: 'bold', halign: 'center' },
+      head: [['S.No.', 'Description of the jewellery', 'Purity', 'Weight (grams)', 'Rate per gram (Rs.)', 'Value (Rs.)']],
+      body: d.items.map((it, i) => [i + 1, it.desc, it.purity, it.weight, it.rate_gm, it.value]),
+      foot: [['', 'Total', '', d.total_weight, '', d.total_value]],
+      footStyles: { fillColor: [235, 235, 235], fontStyle: 'bold', textColor: 20 },
+      columnStyles: { 0: { cellWidth: 12, halign: 'center' }, 1: { cellWidth: 62 }, 2: { cellWidth: 20 }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' } },
+      didParseCell: c => { if (c.section === 'foot' && c.column.index >= 3) c.cell.styles.halign = 'right'; },
+    });
+    y = doc.lastAutoTable.finalY + 8;
+    para(`(Total value: Rupees ${d.words} only)`);
+    para(`The value is arrived at by applying the rate per gram stated above${d.rate_date ? `, being the rate as on ${d.rate_date}` : ''}${d.rate_source ? ` (source: ${d.rate_source})` : ''}.`);
+    para(`I furnish this declaration to ${d.firm} for the purpose of the net worth certificate being issued${d.purpose ? ` in connection with ${d.purpose}` : ''}. I declare that the above particulars are true and correct to the best of my knowledge and belief.`);
+    y += 14;
+    doc.text(`Place: ${d.place}`, ML, y); doc.text('Signature', PW - MR, y, { align: 'right' }); y += 6;
+    doc.text(`Date: ${d.date}`, ML, y); doc.setFont('times', 'bold'); doc.text(`(${d.name})`, PW - MR, y + 8, { align: 'right' });
+    return doc;
+  }
+
+  root.NWPdf = { build, goldDeclaration };
 })(window);

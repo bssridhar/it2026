@@ -144,7 +144,7 @@ def build(src, plain):
     para(d, [("TO WHOMSOEVER IT MAY CONCERN", True, True)], align="c", after=12)
     para(d, [("I, ", False), ("{signatory_title} {signatory_upper}", True), (", {member_text}, certify that I have reviewed the financial condition of ", False),
              ("{persons_text}", True), (", residing at ", False), ("{address_inline}", True),
-             (" with a view of establishing their ability to meet {purpose}.", False)], align="j", after=12)
+             (" with a view of establishing their ability to meet {purpose}{cost_text}.", False)], align="j", after=12)
 
     # summary
     t = table(d, [Cm(9.5), Cm(3.5), Cm(3.5)], [
@@ -167,7 +167,7 @@ def build(src, plain):
     para(d, [("{annex_title} (Amt. in Rs.)", True)], border=True, before=8, after=8, keep=True)
     para(d, "{#groups}", after=0)
     para(d, [("{sub}", True)], before=4, after=4, keep=True)
-    table(d, [Cm(13), Cm(3.5)], [["{#items}{desc}", ("{amount}{/items}", False, "r")]])
+    table(d, [Cm(10), Cm(3.5), Cm(3)], [["{#items}{desc}", "{ref}", ("{amount}{/items}", False, "r")]])
     para(d, "{/groups}", after=0)
     tt = table(d, [Cm(10), Cm(3.5), Cm(3)], [[("Total", True, "c"), ("{fc} {cur}", True, "r"), ("{inr}", True, "r")]])
     row_border(tt.rows[0], ("top", "bottom"))

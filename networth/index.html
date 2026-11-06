@@ -54,6 +54,17 @@ dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700
 dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
 dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
 @media (max-width:700px){.sec-head{grid-template-columns:1fr}}
+.gold-decl{background:var(--lock);border-radius:8px;padding:10px;margin-bottom:8px}
+#tot{position:fixed;right:16px;top:50%;transform:translateY(-50%);width:250px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:5;font-size:.88rem}
+#tot .th{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-weight:700}
+#tot .th button{border:none;background:none;font-size:1.1rem;line-height:1;padding:2px 6px;color:var(--muted)}
+#tot table{width:100%;border-collapse:collapse}
+#tot td{padding:5px 12px}#tot td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+#tot tr.nw td{font-weight:700;border-top:1px solid var(--line)}
+#tot .st{margin:6px 10px 10px;padding:7px 9px;border-radius:6px}
+#totOpen{position:fixed;right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;border-radius:6px 0 0 6px;z-index:5;padding:10px 6px}
+@media (max-width:1400px){main{padding-right:280px}}
+@media (max-width:900px){main{padding-right:16px}#tot{top:auto;bottom:70px;transform:none}}
 </style>
 </head>
 <body>
@@ -104,6 +115,8 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <div id="otherCurWrap" hidden><label>Currency code</label><input data-f="currency_other" data-rate maxlength="3" style="text-transform:uppercase"></div>
       <div><label>INR for 1 unit <span class="req">*</span></label><input type="number" step="0.0001" min="0" data-f="rate" data-rate></div>
       <div><label>Rate as on <span class="req">*</span></label><input type="date" data-f="rate_date" data-rate></div>
+      <div><label>Estimated cost, in this currency</label><input type="number" step="1" min="0" data-f="cost_fc" placeholder="e.g. 50000">
+        <div class="hint">Printed as "…which is estimated to be <span id="costEg">50000 USD</span>". Leave blank to omit.</div></div>
       <div class="full"><label>Source of the rate</label><input data-f="rate_source" data-rate placeholder="e.g. RBI reference rate / bank's TT buying rate / website"></div>
       <div class="full shot"><label>Screenshot of the source (kept with the case file)</label>
         <div class="bar"><button type="button" id="shotBtn" data-rate>Attach screenshot</button><button type="button" class="link danger" id="shotDel" hidden>Remove</button><button type="button" class="link" id="shotDl" hidden>Download</button></div>
@@ -146,6 +159,9 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
 
   <div class="sticky bar"><span class="hint" id="status"></span></div>
 </main>
+
+<aside id="tot" aria-label="Totals"><div class="th"><span>Totals</span><button type="button" id="totClose" title="Close" aria-label="Close">×</button></div><div id="totBody"></div></aside>
+<button type="button" id="totOpen" hidden>Totals</button>
 
 <dialog id="setDlg"><form method="dialog" id="setForm">
   <div class="dh">Firm settings (kept in this browser)</div>
@@ -203,12 +219,13 @@ const DEFAULT_SECTIONS = [
   ['Current Investments in India', 'CURRENT INVESTMENTS IN INDIA', 'Asset'],
   ['Current Income in India', 'CURRENT INCOME IN INDIA', 'Asset'],
   ['Immovable properties held in India', 'IMMOVABLE PROPERTIES IN INDIA', 'Asset'],
+  ['Gold Jewellery', 'GOLD JEWELLERY', 'Gold Jewellery'],
   ['Educational Loan', 'EDUCATIONAL LOAN', 'Asset'],
   ['Mortgage Loan', 'MORTGAGE LOAN', 'Liability'],
 ];
 const blank = () => ({
   case_name: '', persons: [{ id: uid(), name: '', role: 'Student', aadhaar: '', pan: '', print: true }], mask_aadhaar: false,
-  address: '', purpose: '', cert_date: isoToday(), place: 'Chennai', udin: '',
+  address: '', purpose: '', cost_fc: '', cert_date: isoToday(), place: 'Chennai', udin: '',
   currency: '', currency_other: '', rate: '', rate_date: isoToday(), rate_source: '', screenshot: '', rate_locked: false, rate_locked_at: '',
   fc_words: 'indian', rate_note: false, letterhead: true, commas: false, attach_shot: false, wm_angle: '0',
   sections: DEFAULT_SECTIONS.map(([t, a, ty]) => ({ id: uid(), title: t, annex: a, type: ty, items: [] })),
@@ -255,19 +272,27 @@ const aadhaarDigits = a => String(a || '').replace(/\D/g, '');
 const aadhaarFmt = (a, mask) => { const d = aadhaarDigits(a); if (d.length !== 12) return String(a || '').trim(); return mask ? `XXXX XXXX ${d.slice(8)}` : `${d.slice(0,4)} ${d.slice(4,8)} ${d.slice(8)}`; };
 
 /* ---------------- computation ---------------- */
+const GOLD = 'Gold Jewellery';
+const isGold = s => s.type === GOLD;
+const r2 = n => Math.round(n * 100) / 100;
+/* amount of an item; for gold, weight x rate per gram when both are given */
+const itemAmt = (s, it) => isGold(s) && Number(it.weight) > 0 && Number(it.rate_gm) > 0 ? Math.round(Number(it.weight) * Number(it.rate_gm)) : (Number(it.amount) || 0);
 const curCode = () => (c.currency === 'OTHER' ? (c.currency_other || '').toUpperCase() : c.currency) || '';
 function compute(){
   const rate = Number(c.rate) || 0;
   const secs = c.sections.map(s => {
-    const items = s.items.filter(it => String(it.desc || '').trim() || Number(it.amount));
-    const inr = items.reduce((a, it) => a + (Number(it.amount) || 0), 0) * (s.type === 'Liability' ? -1 : 1);
+    const items = s.items.filter(it => String(it.desc || '').trim() || itemAmt(s, it));
+    const inr = items.reduce((a, it) => a + itemAmt(s, it), 0) * (s.type === 'Liability' ? -1 : 1);
     const fc = rate ? Math.round(inr / rate) : 0;
     return { s, items, inr, fc };
   }).filter(x => x.items.length);
   const totalInr = secs.reduce((a, x) => a + x.inr, 0);
   const totalFc = secs.reduce((a, x) => a + x.fc, 0);
   const exactFc = rate ? Math.round(totalInr / rate) : 0;
-  return { rate, secs, totalInr, totalFc, exactFc };
+  const assetsFc = secs.filter(x => x.fc > 0).reduce((a, x) => a + x.fc, 0), liabFc = -secs.filter(x => x.fc < 0).reduce((a, x) => a + x.fc, 0);
+  const assetsInr = secs.filter(x => x.inr > 0).reduce((a, x) => a + x.inr, 0), liabInr = -secs.filter(x => x.inr < 0).reduce((a, x) => a + x.inr, 0);
+  const cost = Number(String(c.cost_fc || '').replace(/,/g, '')) || 0;
+  return { rate, secs, totalInr, totalFc, exactFc, assetsFc, liabFc, assetsInr, liabInr, cost };
 }
 function personsText(){
   return c.persons.filter(p => p.print && p.name.trim()).map(p => {
@@ -288,7 +313,9 @@ function certModel(draft){
     x.items.forEach(it => {
       const sub = (it.sub || '').trim();
       if (!groups.length || groups[groups.length - 1].sub !== sub) groups.push({ sub, items: [] });
-      groups[groups.length - 1].items.push({ desc: String(it.desc || '').replace(/\s+$/,''), amount: fmtN(Number(it.amount) || 0, cm) });
+      let desc = String(it.desc || '').replace(/\s+$/,'');
+      if (isGold(x.s) && Number(it.weight) > 0) desc += `${desc ? '\n' : ''}Weight: ${it.weight} g${it.purity ? ` (${it.purity})` : ''}${Number(it.rate_gm) > 0 ? ` @ Rs. ${it.rate_gm} per g` : ''}`;
+      groups[groups.length - 1].items.push({ desc, ref: String(it.ref || '').trim(), amount: fmtN(itemAmt(x.s, it), cm) });
     });
     return { annex_title: x.s.annex || x.s.title.toUpperCase(), groups, fc: fmtN(Math.abs(x.fc), cm), inr: fmtN(Math.abs(x.inr), cm) };
   });
@@ -297,6 +324,8 @@ function certModel(draft){
     designation: settings.designation, membership_no: settings.membership_no, firm_name: settings.firm_name, firm_tag: settings.firm_tag,
     persons_text: personsText(), address_inline: c.address.split(/\r?\n/).map(l => l.trim().replace(/,$/, '')).filter(Boolean).join(', '),
     purpose: c.purpose.trim().replace(/\.$/, ''), cur, rate: String(c.rate),
+    cost_text: k.cost ? `, which is estimated to be ${fmtN(k.cost, cm)} ${cur}` : '',
+    has_ref: k.secs.some(x => x.items.some(it => String(it.ref || '').trim())),
     rateNote: c.rate_note ? `(as on ${dmy(c.rate_date)}${c.rate_source ? ', source: ' + c.rate_source : ''})` : '',
     rate_date: dmy(c.rate_date), rate_source: c.rate_source,
     summary: sum, total_fc: fmtN(k.totalFc, cm), total_inr: fmtN(k.totalInr, cm),
@@ -315,13 +344,14 @@ function renderPersons(){
       <td><input type="checkbox" data-p="print" ${p.print ? 'checked' : ''}></td>
       <td class="n"><button type="button" class="sm link" data-up ${i ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-del>Remove</button></td>`;
     tr.addEventListener('input', e => { const k = e.target.dataset.p; if (!k) return; p[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; changed(false); });
+    tr.addEventListener('change', e => { if (e.target.dataset.p === 'name' && c.sections.some(isGold)) renderSections(); });
     tr.querySelector('[data-del]').addEventListener('click', () => { c.persons.splice(i, 1); renderPersons(); changed(); });
     tr.querySelector('[data-up]').addEventListener('click', () => { c.persons.splice(i - 1, 0, c.persons.splice(i, 1)[0]); renderPersons(); changed(); });
     tb.appendChild(tr);
   });
 }
 $('#addPerson').addEventListener('click', () => { c.persons.push({ id: uid(), name: '', role: '', aadhaar: '', pan: '', print: true }); renderPersons(); changed(); });
-document.body.insertAdjacentHTML('beforeend', '<datalist id="roles"><option>Student</option><option>Father & Sponsor</option><option>Mother & Sponsor</option><option>Sponsor</option><option>Spouse</option><option>Applicant</option></datalist><datalist id="subs"><option>FIXED DEPOSIT WITH BANKS</option><option>SAVINGS BANK BALANCES</option><option>MUTUAL FUNDS</option><option>PUBLIC PROVIDENT FUND</option><option>SHARES</option><option>INCOME TAX</option><option>GOLD JEWELLERY</option><option>LIFE INSURANCE</option><option>MORTGAGE LOAN</option></datalist>');
+document.body.insertAdjacentHTML('beforeend', '<datalist id="roles"><option>Student</option><option>Father & Sponsor</option><option>Mother & Sponsor</option><option>Sponsor</option><option>Spouse</option><option>Applicant</option></datalist><datalist id="subs"><option>FIXED DEPOSIT WITH BANKS</option><option>SAVINGS BANK BALANCES</option><option>MUTUAL FUNDS</option><option>PUBLIC PROVIDENT FUND</option><option>SHARES</option><option>INCOME TAX</option><option>GOLD JEWELLERY</option><option>LIFE INSURANCE</option><option>MORTGAGE LOAN</option></datalist><datalist id="purities"><option>22 carat</option><option>24 carat</option><option>18 carat</option></datalist>');
 
 /* ---------------- rendering: sections ---------------- */
 function renderSections(){
@@ -329,39 +359,71 @@ function renderSections(){
   const rate = Number(c.rate) || 0, cur = curCode();
   c.sections.forEach((s, si) => {
     const d = document.createElement('div'); d.className = 'sec';
-    const tot = s.items.reduce((a, it) => a + (Number(it.amount) || 0), 0);
+    const g = isGold(s);
+    const tot = s.items.reduce((a, it) => a + itemAmt(s, it), 0);
+    const opt = v => `<option ${s.type === v ? 'selected' : ''}>${v}</option>`;
     d.innerHTML = `<div class="sec-head">
         <div><label>Name in the summary</label><input data-s="title" value="${esc(s.title)}"></div>
         <div><label>Heading in the list of documents</label><input data-s="annex" value="${esc(s.annex)}"></div>
-        <div><label>Type</label><select data-s="type"><option ${s.type === 'Asset' ? 'selected' : ''}>Asset</option><option ${s.type === 'Liability' ? 'selected' : ''}>Liability</option></select></div>
+        <div><label>Type</label><select data-s="type">${opt('Asset')}${opt('Liability')}${opt(GOLD)}</select></div>
         <div class="bar"><button type="button" class="sm link" data-mv="-1" ${si ? '' : 'disabled'}>↑</button><button type="button" class="sm link" data-mv="1" ${si < c.sections.length - 1 ? '' : 'disabled'}>↓</button>
           <button type="button" class="sm link danger" data-rmsec>Remove</button></div></div>
-      <div class="tw"><table class="t"><thead><tr><th style="width:22%">Sub-heading</th><th>Particulars (printed as typed)</th><th class="n" style="width:14%">Amount (Rs.)</th><th style="width:13%">Document</th><th style="width:14%">Internal note</th><th></th></tr></thead><tbody></tbody></table></div>
-      <div class="bar"><button type="button" class="link" data-additem>+ Add item</button><span class="sec-tot">${s.items.length ? `Total Rs. ${tot.toLocaleString('en-IN')}${rate && cur ? ` = ${cur} ${Math.round(tot / rate).toLocaleString('en-IN')}` : ''}${s.type === 'Liability' ? ' (deducted)' : ''}` : 'No items – left out of the certificate'}</span></div>`;
+      ${g ? `<div class="grid gold-decl">
+        <div><label>Declaration given by</label><select data-s="declarant"><option value="">– choose –</option>${c.persons.filter(p => p.name.trim()).map(p => `<option value="${p.id}" ${s.declarant === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></div>
+        <div><label>Gold rate as on</label><input type="date" data-s="gold_date" value="${esc(s.gold_date || '')}"></div>
+        <div><label>Source of the gold rate</label><input data-s="gold_source" value="${esc(s.gold_source || '')}" placeholder="e.g. IBJA rate / jeweller's board rate"></div>
+        <div><label>&nbsp;</label><button type="button" data-golddecl>Self declaration (PDF, working paper)</button></div></div>` : ''}
+      <div class="tw"><table class="t"><thead><tr><th style="width:16%">Sub-heading</th><th>Particulars (printed as typed)</th><th style="width:14%">Ref No</th>
+        ${g ? '<th style="width:8%">Purity</th><th class="n" style="width:8%">Weight (g)</th><th class="n" style="width:9%">Rate / g (Rs.)</th>' : ''}
+        <th class="n" style="width:12%">Amount (Rs.)</th><th style="width:11%">Document</th><th style="width:11%">Internal note</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="bar"><button type="button" class="link" data-additem>+ Add item</button><span class="sec-tot">${s.items.length ? `Total Rs. ${tot.toLocaleString('en-IN')}${rate && cur ? ` = ${cur} ${Math.round(tot / rate).toLocaleString('en-IN')}` : ''}${s.type === 'Liability' ? ' (deducted)' : ''}${g ? ` · ${r2(s.items.reduce((a, it) => a + (Number(it.weight) || 0), 0))} g` : ''}` : 'No items – left out of the certificate'}</span></div>`;
     const tb = d.querySelector('tbody');
     s.items.forEach((it, ii) => {
       const tr = document.createElement('tr');
+      const auto = g && Number(it.weight) > 0 && Number(it.rate_gm) > 0;
       tr.innerHTML = `<td><input data-i="sub" value="${esc(it.sub)}" list="subs"></td><td><textarea data-i="desc" rows="3">${esc(it.desc)}</textarea></td>
-        <td><input type="number" step="1" min="0" data-i="amount" value="${esc(it.amount)}" style="text-align:right"></td>
-        <td><select data-i="evidence"><option ${it.evidence === 'Original seen' ? 'selected' : ''}>Original seen</option><option ${it.evidence === 'Scanned copy' ? 'selected' : ''}>Scanned copy</option><option ${it.evidence === 'Pending' ? 'selected' : ''}>Pending</option></select></td>
+        <td><input data-i="ref" value="${esc(it.ref)}" placeholder="A/c, FDR, doc no."></td>
+        ${g ? `<td><input data-i="purity" value="${esc(it.purity)}" list="purities"></td><td><input type="number" step="0.001" min="0" data-i="weight" value="${esc(it.weight)}" style="text-align:right"></td><td><input type="number" step="0.01" min="0" data-i="rate_gm" value="${esc(it.rate_gm)}" style="text-align:right"></td>` : ''}
+        <td><input type="number" step="1" min="0" data-i="amount" value="${esc(auto ? itemAmt(s, it) : it.amount)}" style="text-align:right" ${auto ? 'readonly title="Weight x rate per gram"' : ''}></td>
+        <td><select data-i="evidence"><option ${it.evidence === 'Original seen' ? 'selected' : ''}>Original seen</option><option ${it.evidence === 'Scanned copy' ? 'selected' : ''}>Scanned copy</option><option ${it.evidence === 'Self declaration' ? 'selected' : ''}>Self declaration</option><option ${it.evidence === 'Pending' ? 'selected' : ''}>Pending</option></select></td>
         <td><input data-i="note" value="${esc(it.note)}"></td>
         <td class="n"><button type="button" class="sm link" data-iup ${ii ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-idel>✕</button></td>`;
-      tr.addEventListener('input', e => { const k = e.target.dataset.i; if (!k) return; it[k] = e.target.value; changed(false); });
-      tr.addEventListener('change', e => { if (e.target.dataset.i === 'amount') renderSections(); });
+      tr.addEventListener('input', e => { const k = e.target.dataset.i; if (!k) return; it[k] = e.target.value; if ((k === 'weight' || k === 'rate_gm') && Number(it.weight) > 0 && Number(it.rate_gm) > 0) { const am = tr.querySelector('[data-i=amount]'); am.value = itemAmt(s, it); am.readOnly = true; } changed(false); });
+      tr.addEventListener('change', e => { if (['amount', 'weight', 'rate_gm'].includes(e.target.dataset.i)) renderSections(); });
       tr.querySelector('[data-idel]').addEventListener('click', () => { s.items.splice(ii, 1); renderSections(); changed(); });
       tr.querySelector('[data-iup]').addEventListener('click', () => { s.items.splice(ii - 1, 0, s.items.splice(ii, 1)[0]); renderSections(); changed(); });
       tb.appendChild(tr);
     });
-    d.querySelector('.sec-head').addEventListener('input', e => { const k = e.target.dataset.s; if (!k) return; s[k] = e.target.value; changed(false); });
-    d.querySelector('[data-s=type]').addEventListener('change', () => renderSections());
+    d.querySelectorAll('[data-s]').forEach(el => el.addEventListener('input', () => { s[el.dataset.s] = el.value; changed(false); }));
+    d.querySelector('[data-s=type]').addEventListener('change', () => { renderSections(); changed(); });
     d.querySelectorAll('[data-mv]').forEach(b => b.addEventListener('click', () => { const j = si + Number(b.dataset.mv); c.sections.splice(j, 0, c.sections.splice(si, 1)[0]); renderSections(); changed(); }));
     d.querySelector('[data-rmsec]').addEventListener('click', async () => {
       if (s.items.length && !(await ask('Remove this section?', `"${esc(s.title)}" and its ${s.items.length} item(s) will be removed.`))) return;
       c.sections.splice(si, 1); renderSections(); changed();
     });
-    d.querySelector('[data-additem]').addEventListener('click', () => { const last = s.items[s.items.length - 1]; s.items.push({ id: uid(), sub: last ? last.sub : '', desc: '', amount: '', evidence: 'Scanned copy', note: '' }); renderSections(); changed(); const tas = box.querySelectorAll('.sec')[si].querySelectorAll('textarea'); if (tas.length) tas[tas.length - 1].focus(); });
+    d.querySelector('[data-additem]').addEventListener('click', () => { const last = s.items[s.items.length - 1]; s.items.push({ id: uid(), sub: last ? last.sub : '', desc: '', ref: '', amount: '', evidence: g ? 'Self declaration' : 'Scanned copy', note: '', purity: g ? (last ? last.purity : '22 carat') : '', weight: '', rate_gm: g && last ? last.rate_gm : '' }); renderSections(); changed(); const tas = box.querySelectorAll('.sec')[si].querySelectorAll('textarea'); if (tas.length) tas[tas.length - 1].focus(); });
+    if (g) d.querySelector('[data-golddecl]').addEventListener('click', () => goldDecl(s));
     box.appendChild(d);
   });
+}
+function goldDecl(s){
+  const p = c.persons.find(x => x.id === s.declarant);
+  const items = s.items.filter(it => String(it.desc || '').trim() || itemAmt(s, it));
+  const bad = [];
+  if (!p) bad.push('choose who gives the declaration');
+  if (!items.length) bad.push('enter the jewellery');
+  if (items.some(it => !(Number(it.weight) > 0) || !(Number(it.rate_gm) > 0))) bad.push('enter the weight and rate per gram for every item');
+  if (bad.length) { msg('#outMsgs', 'm-err', 'Self declaration: ' + bad.join('; ') + '.'); $('#outMsgs').scrollIntoView({ block: 'center' }); return; }
+  const tv = items.reduce((a, it) => a + itemAmt(s, it), 0), tw = r2(items.reduce((a, it) => a + Number(it.weight), 0));
+  const f = n => Number(n).toLocaleString('en-IN', { maximumFractionDigits: 3 });
+  const doc = NWPdf.goldDeclaration({
+    name: p.name.trim(), pan: p.pan.trim().toUpperCase(), address: c.address.split(/\r?\n/).map(l => l.trim().replace(/,$/, '')).filter(Boolean).join(', '),
+    date: dmy(c.cert_date), place: c.place, purpose: c.purpose.trim().replace(/\.$/, ''), firm: `${settings.firm_name.replace(/,\s*$/, '')}, ${settings.firm_tag.replace(/\b(\w)(\w*)/g, (m, a, b) => a + b.toLowerCase())}`,
+    items: items.map(it => ({ desc: String(it.desc || '').trim(), purity: it.purity || '', weight: f(it.weight), rate_gm: Number(it.rate_gm).toLocaleString('en-IN', { minimumFractionDigits: 2 }), value: tv && itemAmt(s, it).toLocaleString('en-IN') })),
+    total_weight: f(tw), total_value: tv.toLocaleString('en-IN'), words: wordsIndian(tv), rate_date: dmy(s.gold_date), rate_source: s.gold_source || ''
+  });
+  doc.save(`${fileTag()}_Gold_self_declaration.pdf`);
+  msg('#outMsgs', 'm-ok', 'Self declaration downloaded. Get it signed by the client and keep it with your working papers.');
 }
 $('#addSection').addEventListener('click', () => { c.sections.push({ id: uid(), title: 'New item', annex: 'NEW ITEM', type: 'Asset', items: [] }); renderSections(); changed(); const ins = $('#sections').querySelectorAll('.sec'); ins[ins.length - 1].querySelector('input').select(); });
 
@@ -432,7 +494,9 @@ function checks(final){
   if (!c.place.trim()) errs.push('Enter the place.');
   if (!c.rate_locked) errs.push('Enter and lock the conversion rate (section 2).');
   if (!k.secs.length) errs.push('Enter at least one asset or liability.');
-  c.sections.forEach(s => s.items.forEach(it => { if (String(it.desc || '').trim() && !(Number(it.amount) > 0)) warns.push(`${s.title}: an item has no amount.`); }));
+  c.sections.forEach(s => s.items.forEach(it => { if (String(it.desc || '').trim() && !(itemAmt(s, it) > 0)) warns.push(`${s.title}: an item has no amount.`); }));
+  c.sections.filter(s => isGold(s) && s.items.length).forEach(s => { if (!s.declarant) warns.push(`${s.title}: choose who gives the self declaration, and generate it for your working papers.`); });
+  if (k.cost && k.rate && k.totalFc < k.cost) warns.push(`Net worth (${k.totalFc.toLocaleString('en-IN')} ${curCode()}) is less than the estimated cost (${k.cost.toLocaleString('en-IN')} ${curCode()}).`);
   const pending = c.sections.reduce((a, s) => a + s.items.filter(it => it.evidence === 'Pending').length, 0);
   if (pending) (final ? errs : warns).push(`${pending} item(s) are marked "Pending" – the supporting document has not been seen yet.`);
   if (k.totalInr <= 0 && k.secs.length) warns.push('The total is nil or negative.');
@@ -442,7 +506,31 @@ function checks(final){
   if (!c.screenshot) warns.push('No screenshot of the rate source is attached (useful for your file).');
   return { errs, warns };
 }
+function renderTotals(){
+  const k = compute(), cur = curCode() || 'FC', f = n => n.toLocaleString('en-IN');
+  let h = '';
+  if (!k.rate) h = '<p class="hint" style="padding:10px 12px;margin:0">Enter the conversion rate to see the totals in the foreign currency.</p>';
+  else {
+    h = `<table><tr><td>Total assets</td><td class="n">${f(k.assetsFc)} ${esc(cur)}</td></tr><tr><td>Total liabilities</td><td class="n">${f(k.liabFc)} ${esc(cur)}</td></tr>
+      <tr class="nw"><td>Net worth</td><td class="n">${f(k.totalFc)} ${esc(cur)}</td></tr><tr><td>Estimated cost</td><td class="n">${k.cost ? f(k.cost) + ' ' + esc(cur) : '–'}</td></tr></table>
+      <div class="hint" style="padding:0 12px">INR: assets ${f(k.assetsInr)} · liabilities ${f(k.liabInr)} · net ${f(k.totalInr)}</div>`;
+    if (k.cost) h += k.totalFc < k.cost ? `<div class="st m-err">Net worth is short of the cost by ${f(k.cost - k.totalFc)} ${esc(cur)}.</div>`
+                                         : `<div class="st m-ok">Net worth exceeds the cost by ${f(k.totalFc - k.cost)} ${esc(cur)}.</div>`;
+  }
+  $('#totBody').innerHTML = h;
+  $('#costEg').textContent = `${c.cost_fc || '50000'} ${curCode() || 'USD'}`;
+}
+$('#totClose').addEventListener('click', () => { $('#tot').hidden = true; $('#totOpen').hidden = false; store.set('networth-totals-hidden', true); });
+$('#totOpen').addEventListener('click', () => { $('#tot').hidden = false; $('#totOpen').hidden = true; store.set('networth-totals-hidden', false); });
+if (store.get('networth-totals-hidden', false)) { $('#tot').hidden = true; $('#totOpen').hidden = false; }
+async function shortfallOk(){
+  const k = compute();
+  if (!k.cost || k.totalFc >= k.cost) return true;
+  const cur = curCode();
+  return ask('Net worth is less than the estimated cost', `<p>Net worth: <b>${k.totalFc.toLocaleString('en-IN')} ${esc(cur)}</b><br>Estimated cost: <b>${k.cost.toLocaleString('en-IN')} ${esc(cur)}</b><br>Shortfall: <b>${(k.cost - k.totalFc).toLocaleString('en-IN')} ${esc(cur)}</b></p><p>Do you still want to generate the document?</p>`);
+}
 function renderSummary(){
+  renderTotals();
   const k = compute(), cur = curCode() || 'FC';
   const box = $('#summary');
   if (!k.secs.length) { box.innerHTML = '<p class="hint">Enter assets and liabilities to see the summary.</p>'; }
@@ -470,9 +558,10 @@ function pdf(draft){
     firm: { name: settings.lh_name, tag: settings.firm_tag, address: settings.lh_address, email: settings.lh_email, mobile: settings.lh_mobile },
     logo: 'data:image/png;base64,' + window.LLP_TEMPLATES.logo_png, screenshot: c.attach_shot && c.screenshot ? c.screenshot : null });
 }
-$('#draftPdf').addEventListener('click', () => {
+$('#draftPdf').addEventListener('click', async () => {
   const r = checks(false);
   if (r.errs.length) { $('#outMsgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return; }
+  if (!(await shortfallOk())) return;
   const doc = pdf(true);
   doc.save(`${fileTag()}_Networth_DRAFT_${dmy(isoToday())}.pdf`);
   c.drafts = (c.drafts || []).concat([{ at: new Date().toISOString(), rate: c.rate, cur: curCode(), total: compute().totalInr }]); changed();
@@ -483,7 +572,7 @@ async function finalGate(){
   if (r.errs.length) { $('#outMsgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return false; }
   const w = r.warns.filter(t => /UDIN|Pending|nil or negative|Aadhaar|PAN/.test(t));
   if (w.length && !(await ask('Generate the final certificate?', w.map(t => `<p>${esc(t)}</p>`).join('')))) return false;
-  return true;
+  return shortfallOk();
 }
 $('#finalPdf').addEventListener('click', async () => {
   if (!(await finalGate())) return;
@@ -539,14 +628,14 @@ function fromExcel(sh){
     return rows; };
   const dt = v => { const d = LLPXlsx.date(v); if (d === null) { warns.push(`"${S(v)}" is not a valid date.`); return ''; } return d; };
   const data = blank();
-  Object.assign(data, { case_name: S(det.case_name), address: S(det.address), purpose: S(det.purpose), place: S(det.place) || data.place, udin: S(det.udin), rate_source: S(det.rate_source) });
+  Object.assign(data, { case_name: S(det.case_name), address: S(det.address), purpose: S(det.purpose), place: S(det.place) || data.place, udin: S(det.udin), rate_source: S(det.rate_source), cost_fc: S(det.cost_fc).replace(/,/g, '') });
   if (det.cert_date) data.cert_date = dt(det.cert_date) || data.cert_date;
   if (det.rate_date) data.rate_date = dt(det.rate_date) || data.rate_date;
   const cur = S(det.currency).toUpperCase();
   if (cur) { const known = ['AUD','USD','EUR','GBP','CAD','NZD','SGD','AED','JPY','CHF']; if (known.includes(cur)) data.currency = cur; else { data.currency = 'OTHER'; data.currency_other = cur; } }
   data.rate = S(det.rate).replace(/,/g, '');
   data.persons = keyRows(P).filter(p => S(p.name)).map(p => ({ id: uid(), name: S(p.name), role: S(p.role), aadhaar: S(p.aadhaar), pan: S(p.pan).toUpperCase(), print: !/^n/i.test(S(p.print)) }));
-  const secs = keyRows(SE).filter(s => S(s.title)).map(s => ({ id: uid(), title: S(s.title), annex: S(s.annex) || S(s.title).toUpperCase(), type: /^l/i.test(S(s.type)) ? 'Liability' : 'Asset', items: [] }));
+  const secs = keyRows(SE).filter(s => S(s.title)).map(s => ({ id: uid(), title: S(s.title), annex: S(s.annex) || S(s.title).toUpperCase(), type: /^l/i.test(S(s.type)) ? 'Liability' : /^g/i.test(S(s.type)) ? GOLD : 'Asset', items: [] }));
   if (!secs.length) errors.push('The Sections sheet has no sections.');
   keyRows(I).forEach(it => {
     if (!S(it.desc) && !S(it.amount)) return;
@@ -554,7 +643,9 @@ function fromExcel(sh){
     if (!sec) { warns.push(`Items row ${it._row}: section "${S(it.section)}" is not in the Sections sheet – the item was not imported.`); return; }
     const amt = S(it.amount).replace(/[,\s]|Rs\.?|₹|\/-/gi, '');
     if (amt && isNaN(Number(amt))) warns.push(`Items row ${it._row}: "${S(it.amount)}" is not an amount.`);
-    sec.items.push({ id: uid(), sub: S(it.sub), desc: S(it.desc), amount: isNaN(Number(amt)) ? '' : amt, evidence: S(it.evidence) || 'Scanned copy', note: S(it.note) });
+    const num = v => { const t = S(v).replace(/[,\s]|Rs\.?|₹|g(ms?|rams?)?$/gi, ''); return t && !isNaN(Number(t)) ? t : ''; };
+    sec.items.push({ id: uid(), sub: S(it.sub), desc: S(it.desc), ref: S(it.ref), amount: isNaN(Number(amt)) ? '' : amt, evidence: S(it.evidence) || (isGold(sec) ? 'Self declaration' : 'Scanned copy'), note: S(it.note),
+      purity: S(it.purity), weight: num(it.weight), rate_gm: num(it.rate_gm) });
   });
   data.sections = secs;
   if (!data.persons.length) warns.push('No persons found in the Persons sheet.');
