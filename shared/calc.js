@@ -7,7 +7,9 @@
  *   MRC  : recalls memory; MRC twice clears memory. M+ / M− complete a pending sum first
  *   Tape : every entry and result, with Copy; "Use" puts the display into the field last used on the page
  * Keyboard (when the calculator has focus): 0-9 . + - * / Enter = % Backspace Delete(CE) Esc(AC)
- * Open with any element that has data-calc-open, or window.PTCalc.toggle().
+ * A small "Calculator" box with flashing text sits at the bottom left of every page; clicking it opens the
+ * calculator, and closing the calculator brings the box back. Also opens from any element with data-calc-open,
+ * or window.PTCalc.toggle(). Add <script src="../shared/calc.js"></script> to every tool page.
  */
 (function () {
   "use strict";
@@ -43,9 +45,18 @@
 #ptc .tape .r{font-weight:700;border-bottom:1px dashed #aaa;margin-bottom:3px}
 #ptc .tape:empty::before{content:"Tape is empty";color:#999}
 #ptc .note{font-size:.72rem;color:#aeb5c1;padding:0 10px 8px}
-@media print{#ptc{display:none!important}}`;
+#ptcLaunch{position:fixed;left:16px;bottom:16px;z-index:49;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;border:1px solid #1f5fae;background:#fff;color:#1f5fae;font:700 14px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
+#ptcLaunch[hidden]{display:none}
+@media (max-width:1280px){#ptcLaunch{bottom:76px}}
+#ptcLaunch .ico{font-size:17px;line-height:1}
+#ptcLaunch .txt{animation:ptcBlink 1.1s steps(1,end) infinite}
+#ptcLaunch:hover .txt,#ptcLaunch:focus-visible .txt{animation:none}
+@keyframes ptcBlink{0%{opacity:1}50%{opacity:.15}}
+@media (prefers-color-scheme:dark){#ptcLaunch{background:#1d2128;color:#6ea6ec;border-color:#6ea6ec}}
+@media (prefers-reduced-motion:reduce){#ptcLaunch .txt{animation:ptcPulse 2.4s ease-in-out infinite}@keyframes ptcPulse{50%{opacity:.55}}}
+@media print{#ptc,#ptcLaunch{display:none!important}}`;
 
-  let el, numEl, tapeEl, indEl, noteEl;
+  let el, numEl, tapeEl, indEl, noteEl, launch;
   // calculator state
   let entry = '0', fresh = true, acc = null, op = null, lastOp = null, lastArg = null, err = false, prevKey = '';
   let mem = Number(pref.mem) || 0, gt = Number(pref.gt) || 0;
@@ -236,6 +247,7 @@
     if (!el) build();
     const open = force === undefined ? el.hidden : force;
     el.hidden = !open; pref.open = open; store.set(pref);
+    if (launch) launch.hidden = open;
     if (open) { if (pref.x === null) place(16, window.innerHeight - el.offsetHeight - 16); else place(pref.x, pref.y); el.focus(); }
   }
   document.addEventListener('focusin', e => {
@@ -245,7 +257,15 @@
   });
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-calc-open]'); if (b) { e.preventDefault(); toggle(); } });
   window.addEventListener('resize', () => { if (el && !el.hidden) place(el.getBoundingClientRect().left, el.getBoundingClientRect().top); });
-  function init() { if (pref.open) toggle(true); }
+  function init() {
+    if (!el) build();
+    launch = document.createElement('button');
+    launch.type = 'button'; launch.id = 'ptcLaunch'; launch.title = 'Open the calculator';
+    launch.innerHTML = '<svg class="ico" aria-hidden="true" width="16" height="18" viewBox="0 0 16 18"><rect x="1" y="1" width="14" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="3.5" width="8" height="3" rx=".5" fill="currentColor"/><g fill="currentColor"><circle cx="5" cy="9.5" r="1"/><circle cx="8" cy="9.5" r="1"/><circle cx="11" cy="9.5" r="1"/><circle cx="5" cy="13" r="1"/><circle cx="8" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></g></svg><span class="txt">Calculator</span>';
+    launch.addEventListener('click', () => toggle(true));
+    document.body.appendChild(launch);
+    if (pref.open) toggle(true); else launch.hidden = false;
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.PTCalc = { toggle, press };
 })();

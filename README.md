@@ -31,3 +31,9 @@ The home page also has a search box (press `/` to jump to it) and a "Recently us
 last three tools opened in that browser.
 
 Each tool's own README explains its inputs, checks and templates.
+
+## Calculator
+
+Every tool has a desk calculator (`shared/calc.js`): click the flashing **Calculator** box at the bottom left
+of the page. It has GT, memory (M+, M−, MRC), %, √, 00, a tape, and "Use in field" to put the figure into the
+field last clicked. New tools must include `<script src="../shared/calc.js"></script>` before `</body>`.
