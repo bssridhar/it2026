@@ -83,6 +83,7 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <button type="button" id="openCase">Open case file</button>
       <input type="file" id="caseFile" accept=".json" hidden>
       <button type="button" class="danger" id="newCase">New certificate</button>
+      <button type="button" data-calc-open title="Desk calculator (drag it anywhere; type on the keyboard when it is selected)">Calculator</button>
       <button type="button" id="settingsBtn">Firm settings</button>
     </div>
     <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
@@ -191,6 +192,7 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
 <script src="../shared/jspdf.plugin.autotable.min.js"></script>
 <script src="lib/templates.js"></script>
 <script src="lib/certpdf.js"></script>
+<script src="../shared/calc.js"></script>
 <script>
 (function(){
 "use strict";

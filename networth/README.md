@@ -34,6 +34,15 @@ foreign currency, and whether net worth exceeds the cost. Close it with × and r
 If net worth is less than the estimated cost, the tool asks for confirmation before a draft or final certificate
 is generated.
 
+## Calculator
+
+**Calculator** (top bar) opens a 12-digit desk calculator that can be dragged anywhere and stays open while
+you work. Keys: GT (grand total of every = result; GT twice clears it), MRC / M+ / M−, %, √, 00, +/−, → (backspace),
+CE and AC. % works as on a desk calculator: 2,500 × 18 % = 450; 2,000 + 18 % = 2,360; 2,000 − 10 % = 1,800;
+45 ÷ 180 % = 25. Pressing = again repeats the last operation. When the calculator is selected you can type on the
+keyboard (Enter for =, Esc for AC). "Use in field" puts the displayed figure into the field you last clicked
+on the page; the tape keeps every entry and can be copied. Memory and GT stay until cleared.
+
 ## Calculation
 
 * Each section's foreign-currency figure = section INR ÷ rate, rounded to the nearest unit.
