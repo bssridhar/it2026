@@ -10,6 +10,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `company-docs/` | Company Registration Tool Kit (Private Limited and OPC): NOC, data sheet for SPICe+ (e-MoA / e-AoA) |
 | `partnership-docs/` | Partnership Deed: deed, NOC for the place of business, data sheet, checklist |
 | `networth/` | Net Worth Certificate (visa): Excel import, locked conversion rate, draft PDF with DRAFT watermark, final PDF and Word |
+| `cii/` | Cost Inflation Index: CII table (2001-02 to 2026-27) and indexed cost calculator with working |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

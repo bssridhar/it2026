@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Cost Inflation Index – CII table up to 2026-27 (384) and indexed cost calculator with working.",
     "New: Net Worth Certificate (visa) – Excel import, manual conversion rate, watermarked draft PDF for client confirmation.",
     "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
     "New: Company Registration Tool Kit – Private Limited and One Person Company.",
@@ -22,7 +23,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Certificates"],
+  categories: ["Registration", "Agreements", "Certificates", "Income Tax"],
 
   tools: [
     {
@@ -59,6 +60,15 @@ window.HOME_CONFIG = {
       path: "networth/index.html",
       status: "available",
       description: "Net worth certificate in the firm's format with annexure of documents reviewed. Excel import, any foreign currency at a rate you enter and lock, draft PDF with DRAFT watermark, final PDF and Word.",
+      added: "2026-11-06"
+    },
+    {
+      id: "cii",
+      title: "Cost Inflation Index",
+      category: "Income Tax",
+      path: "cii/index.html",
+      status: "available",
+      description: "CII table from 2001-02 to 2026-27 and an indexed cost calculator: purchase and sale dates and amounts, improvements, pre-2001 FMV, with the working step by step.",
       added: "2026-11-06"
     }
   ]
