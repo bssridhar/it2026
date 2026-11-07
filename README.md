@@ -11,6 +11,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `partnership-docs/` | Partnership Deed: deed, NOC for the place of business, data sheet, checklist |
 | `networth/` | Net Worth Certificate (visa): Excel import, locked conversion rate, draft PDF with DRAFT watermark, final PDF and Word |
 | `cii/` | Cost Inflation Index: CII table (2001-02 to 2026-27) and indexed cost calculator with working |
+| `taxcalc/` | Income Tax Calculator, tax year 2026-27, new regime: slab-wise working, rebate, surcharge, cess |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

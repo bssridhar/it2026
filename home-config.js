@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Income Tax Calculator for tax year 2026-27 (new regime) with slab-wise working.",
     "New: Cost Inflation Index – CII table up to 2026-27 (384) and indexed cost calculator with working.",
     "New: Net Worth Certificate (visa) – Excel import, manual conversion rate, watermarked draft PDF for client confirmation.",
     "New: Partnership Deed tool – deed, NOC for the place of business, data sheet and checklist.",
@@ -70,6 +71,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "CII table from 2001-02 to 2026-27 and an indexed cost calculator: purchase and sale dates and amounts, improvements, pre-2001 FMV, with the working step by step.",
       added: "2026-11-06"
+    },
+    {
+      id: "taxcalc",
+      title: "Income Tax Calculator – TY 2026-27",
+      category: "Income Tax",
+      path: "taxcalc/index.html",
+      status: "available",
+      description: "Tax under the new regime for tax year 2026-27: slab-wise working, rebate up to Rs. 12 lakh with marginal relief, surcharge, cess and standard deduction.",
+      added: "2026-11-07"
     }
   ]
 };
