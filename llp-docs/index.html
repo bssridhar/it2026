@@ -8,27 +8,29 @@
 :root{
   --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
   --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
-  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff; --auto:#eef4fc;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
     --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
-    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
   }
 }
 :root[data-theme="dark"]{
   --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
   --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
-  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-main{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
 h1{font-size:1.45rem;margin:4px 0 4px}
 .sub{color:var(--muted);margin:0 0 18px}
 section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
-section.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+section.card h2{font-size:1.05rem;margin:0 0 12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
 .full{grid-column:1/-1}
 label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
@@ -36,21 +38,43 @@ label .req{color:var(--err)}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
 textarea{min-height:76px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.auto{background:var(--auto)}
 .invalid{border-color:var(--err)!important;background:var(--err-bg)}
 .hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.src{font-size:.72rem;color:var(--accent);margin-left:4px}
+.counts{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.counts > div{width:190px}
+.objbox{padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:4px}
+.acts{display:flex;flex-wrap:wrap;gap:6px 16px}
+.acts label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.88rem;margin:0}
+.acts input{width:auto}
+textarea[readonly]{opacity:.75}
+.cl-block{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px}
+.cl-block h3{font-size:.92rem;margin:0 0 6px}
+.cl-block label{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:.88rem;margin:3px 0}
+.cl-block input{width:auto;margin-top:3px}
+.cl-auto{color:var(--ok);font-size:.78rem}
+#contribSummary{font-size:.88rem;color:var(--muted)}
+.excel{margin-top:14px;padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:6px}
 .partner{border:1px dashed var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
-.partner h3{margin:0 0 10px;font-size:.98rem;display:flex;justify-content:space-between;align-items:center}
+.partner h3{margin:0 0 10px;font-size:.98rem}
+.uploads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 14px;padding:12px;border-radius:8px;background:var(--bg)}
+.up label.btn{display:inline-block;cursor:pointer;padding:7px 12px;border:1px solid var(--accent);color:var(--accent);border-radius:6px;font-size:.88rem;margin:0}
+.up input[type=file]{display:none}
+.up .st{font-size:.8rem;margin-top:5px;color:var(--muted);word-break:break-word}
+.up .st.ok{color:var(--ok)} .up .st.err{color:var(--err)} .up .st.warn{color:var(--warn)}
 button{font:inherit;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
-button.link{border:none;background:none;color:var(--accent);padding:4px 6px}
 button.danger{color:var(--err)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)}
 .check input{width:auto}
-#messages div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
 .m-err{background:var(--err-bg);color:var(--err)}
 .m-warn{background:var(--warn-bg);color:var(--warn)}
 .m-ok{background:var(--ok-bg);color:var(--ok)}
+#checks h2{margin-bottom:8px}
+#checks .none{color:var(--muted);font-size:.9rem}
 #outputs ul{padding-left:18px;margin:8px 0 0}
 #outputs li{margin:3px 0}
 #outputs a{color:var(--accent)}
@@ -63,12 +87,32 @@ details summary{cursor:pointer;color:var(--muted)}
 </head>
 <body>
 <main>
+  <a class="home" href="../index.html">&larr; All tools</a>
   <h1>LLP Incorporation Documents</h1>
-  <p class="sub">Enter the details once to generate the Form 9 consent, consent letter, subscription sheet and NOC for the registered office as Word files. Everything runs in this browser and nothing is uploaded.</p>
+  <p class="sub">Generates the Form 9 consent, consent letter, subscription sheet and NOC for the registered office as Word files. Partner details can be read from PAN, Aadhaar and bank statement PDFs. Everything runs in this browser and nothing is uploaded.</p>
 
   <form id="f" novalidate autocomplete="off">
   <section class="card">
-    <h2>1. LLP details</h2>
+    <h2>1. Partners in the proposed LLP</h2>
+    <div class="counts">
+      <div><label>Number of designated partners <span class="req">*</span></label><input type="number" min="0" max="20" name="dp_count" value="2"></div>
+      <div><label>Number of other partners</label><input type="number" min="0" max="50" name="p_count" value="0"></div>
+      <button type="button" class="primary" id="setCounts">Set up partner forms</button>
+    </div>
+    <div class="hint">An LLP needs at least two partners (Section 6(1)) and at least two designated partners who are individuals, at least one of them resident in India (Section 7(1)), LLP Act, 2008.</div>
+    <div class="excel">
+      <strong>Have the details in Excel instead?</strong>
+      <span class="hint">Useful when the KYC copies are scanned. Download the template, fill it in and upload it. This fills the LLP, partner, NOC and witness details below.</span>
+      <div class="bar">
+        <button type="button" id="dlExcel">Download Excel template</button>
+        <button type="button" id="upExcel">Upload filled Excel</button>
+        <input type="file" id="excelFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. LLP details</h2>
     <div class="grid">
       <div class="full"><label>Proposed name of LLP <span class="req">*</span></label>
         <input name="llp_name" required placeholder="e.g. ABC INTERIORS LLP">
@@ -79,16 +123,18 @@ details summary{cursor:pointer;color:var(--muted)}
       <div><label>Place of signing <span class="req">*</span></label><input name="place" required value="Chennai"></div>
       <div><label>Date of signing (consents &amp; subscription sheet) <span class="req">*</span></label><input type="date" name="date" required></div>
       <div><label>Proof of identity (Form 9 enclosure)</label><input name="id_proof" value="PAN"></div>
+      <div><label>E-mail id of LLP (for the data sheet)</label><input type="email" name="llp_email"></div>
     </div>
   </section>
 
   <section class="card">
-    <h2>2. Partners <span class="bar"><button type="button" class="link" id="addPartner">+ Add partner</button></span></h2>
+    <h2>3. Partner details</h2>
+    <p class="hint" style="margin-top:-6px">For each partner, upload the PAN, Aadhaar and bank statement PDFs and the fields below fill in automatically (shaded fields came from a document). Check every field. The address is taken from the bank statement. Scanned or photographed copies can't be read, so key those details in by hand.</p>
     <div id="partners"></div>
   </section>
 
   <section class="card">
-    <h2>3. NOC from owner of registered office premises</h2>
+    <h2>4. NOC from owner of registered office premises</h2>
     <div class="grid">
       <div><label>Name of owner <span class="req">*</span></label><input name="owner_name" required></div>
       <div><label>Date of NOC <span class="req">*</span></label><input type="date" name="noc_date" required></div>
@@ -99,12 +145,54 @@ details summary{cursor:pointer;color:var(--muted)}
   </section>
 
   <section class="card">
-    <h2>4. Witness (subscription sheet)</h2>
+    <h2>5. Witness (subscription sheet)</h2>
     <div class="grid">
       <div><label>Name of witness</label><input name="witness_name"></div>
       <div><label>Profession, with professional membership no.</label><input name="witness_profession" placeholder="e.g. Chartered Accountant, M.No. 000000"></div>
       <div class="full"><label>Address of witness</label><textarea name="witness_address"></textarea>
         <div class="hint">If left blank, the witness column is left empty so it can be filled in by hand.</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. LLP Agreement</h2>
+    <div class="grid">
+      <div><label>Date of agreement</label><input type="date" name="agreement_date">
+        <div class="hint">Leave blank to fill in by hand after incorporation.</div></div>
+      <div><label>Courts at (dispute clause)</label><input name="jurisdiction" placeholder="Same as place of signing"></div>
+      <div><label>Remuneration to designated partner (Rs. per month) <span class="req">*</span></label><input type="number" min="0" step="1" name="remuneration" required></div>
+      <div><label>Minimum contribution of an incoming partner (Rs.)</label><input type="number" min="0" step="1" name="incoming_min" value="50000"></div>
+      <div class="full objbox">
+        <strong>Draft the objects clause</strong>
+        <span class="hint">Describe the business and the tool suggests a draft main objects clause, which you can edit here.</span>
+        <div class="grid" style="margin-top:8px">
+          <div class="full"><label>Type of activity</label><div id="objActs" class="acts"></div></div>
+          <div class="full"><label>Services provided</label><input name="obj_services" placeholder="e.g. interior designing, space planning and fit-out works"></div>
+          <div class="full"><label>Goods dealt in / made</label><input name="obj_products" placeholder="e.g. modular furniture, false ceiling materials and furnishings"></div>
+          <div class="full"><label>Customers / sectors (optional)</label><input name="obj_customers" placeholder="e.g. residential, commercial and hospitality projects"></div>
+          <div class="full"><label class="check"><input type="checkbox" name="obj_abroad"> Business in India and abroad</label></div>
+        </div>
+        <div class="bar" style="margin:10px 0 8px"><button type="button" id="objSuggest">Suggest draft objects</button></div>
+        <div id="objNotes" class="msgs"></div>
+        <label>Draft objects clause (one object per line; edit freely)</label>
+        <textarea name="obj_draft" rows="8" placeholder="Click &quot;Suggest draft objects&quot;, or type the objects here"></textarea>
+        <label class="check" style="margin-top:8px"><input type="checkbox" name="obj_use"> Use in LLP agreement (clause 6 below is replaced by this draft)</label>
+      </div>
+      <div class="full"><label>Main business of the LLP (clause 6) <span class="req">*</span></label><textarea name="main_business" required rows="5" placeholder="One object per line"></textarea>
+        <div class="hint">Each line becomes a separate paragraph. The first line is also shown as the main business in the data sheet.</div></div>
+      <div class="full"><label>Other business (Schedule 1, part B)</label><textarea name="other_business" rows="5" placeholder="One object per line"></textarea>
+        <div class="hint">Part A of Schedule 1 (ancillary objects) and Schedule 2 are standard text from your format.</div></div>
+      <div class="full" id="contribSummary"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>7. Checklist</h2>
+    <p class="hint" style="margin-top:-6px">Items received from an upload or entered details tick themselves; tick the rest as they come in. Unticked items go into the data sheet and the request list for the client.</p>
+    <div id="checklist"></div>
+    <div class="bar" style="margin-top:10px">
+      <button type="button" id="dlRequest">Download request list (Word)</button>
+      <button type="button" id="copyRequest">Copy request list as text</button>
     </div>
   </section>
 
@@ -117,7 +205,12 @@ details summary{cursor:pointer;color:var(--muted)}
   </section>
   </form>
 
-  <div id="messages" aria-live="polite"></div>
+  <section class="card" id="checks" aria-live="polite">
+    <h2>Document checks</h2>
+    <div id="checkList" class="msgs"><p class="none">Upload documents to see the checks here.</p></div>
+  </section>
+
+  <div id="messages" class="msgs" aria-live="polite"></div>
   <div id="outputs"></div>
 
   <div class="sticky bar">
@@ -127,74 +220,254 @@ details summary{cursor:pointer;color:var(--muted)}
     <input type="file" id="loadFile" accept=".json" hidden>
     <button type="button" class="danger" id="clearAll">Clear form</button>
   </div>
-  <p class="footer">Wording follows the firm's standard formats. Check each generated document against the current MCA requirements and the client's KYC documents before it is signed.</p>
+  <p class="footer">Wording follows the firm's standard formats. Details read from documents are a convenience, so check each generated document against the original KYC documents and current MCA requirements before it is signed. The Aadhaar number is never read or stored.</p>
 </main>
 
 <template id="partnerTpl">
   <div class="partner">
-    <h3><span class="ptitle">Partner</span> <button type="button" class="link danger rm">Remove</button></h3>
+    <h3 class="ptitle">Partner</h3>
+    <div class="uploads">
+      <div class="up" data-doc="pan"><label class="btn">PAN (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="aadhaar"><label class="btn">Aadhaar (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="bank"><label class="btn">Bank statement (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+    </div>
     <div class="grid">
+      <div><label>Title</label><select data-k="title"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option></select></div>
       <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
       <div><label>Designation</label><select data-k="designation"><option>Designated Partner</option><option>Partner</option></select></div>
       <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
-      <div><label>Father's name (in full) <span class="req">*</span></label><input data-k="father_name" required>
-      </div>
-      <div><label>Husband's name (only if W/o)</label><input data-k="relation_name" placeholder="Leave blank to use father's name">
+      <div><label>Father's name (in full) <span class="req" data-req="father">*</span></label><input data-k="father_name" required></div>
+      <div><label>Husband's name (only if W/o) <span class="req" data-req="husband" hidden>*</span></label><input data-k="relation_name" placeholder="Required if W/o">
         <div class="hint">Printed after S/o / D/o / W/o in the consent letter.</div></div>
       <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
       <div><label>PAN <span class="req">*</span></label><input data-k="pan" required maxlength="10" style="text-transform:uppercase"></div>
       <div><label>Mobile no. <span class="req">*</span></label><input data-k="mobile" required placeholder="+91 9xxxxxxxxx"></div>
       <div><label>E-mail id <span class="req">*</span></label><input type="email" data-k="email" required></div>
-      <div class="full"><label>Residential address <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
+      <div class="full"><label>Residential address (as per bank statement) <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
+      <div><label>Gender</label><select data-k="gender"><option value="">–</option><option>Male</option><option>Female</option><option>Transgender</option></select></div>
+      <div><label>Resident in India</label><select data-k="resident"><option>Yes</option><option>No</option></select></div>
+      <div><label>Religion (LLP Agreement, optional)</label><input data-k="religion" placeholder="e.g. Hindu"></div>
+      <div><label>Contribution (Rs.) <span class="req">*</span></label><input type="number" min="0" step="1" data-k="contribution" required></div>
+      <div><label>Profit share (%)</label><input type="number" min="0" max="100" step="0.01" data-k="profit_pct" placeholder="Blank = same as contribution %"></div>
       <div><label>Occupation</label><input data-k="occupation" value="Business"></div>
       <div><label>Nationality</label><input data-k="nationality" value="Indian"></div>
       <div><label>DPIN / DIN</label><input data-k="dpin" placeholder="Leave blank if not yet allotted">
         <div class="hint">If blank, "NA – NOW APPLIED" is printed.</div></div>
-      <div><label>Proof of address (Form 9 enclosure)</label><input data-k="address_proof" value="AADHAR" list="poa"></div>
+      <div><label>Proof of address (Form 9 enclosure)</label><input data-k="address_proof" value="BANK STATEMENT" list="poa"></div>
       <div class="full"><label>Body corporate / firm whose nominee the partner is (Form 9 item 11)</label><input data-k="nominee_of" value="NA"></div>
       <div class="full"><label>Professional membership no. &amp; certificate of practice no. (Form 9 item 12)</label><input data-k="prof_membership" value="NA"></div>
     </div>
   </div>
 </template>
-<datalist id="poa"><option value="AADHAR"><option value="PASSPORT"><option value="VOTER ID"><option value="DRIVING LICENCE"><option value="BANK STATEMENT"><option value="ELECTRICITY BILL"></datalist>
+<datalist id="poa"><option value="BANK STATEMENT"><option value="AADHAR"><option value="PASSPORT"><option value="VOTER ID"><option value="DRIVING LICENCE"><option value="ELECTRICITY BILL"></datalist>
 
-<script src="lib/pizzip.min.js"></script>
-<script src="lib/docxtemplater.js"></script>
+<script src="../shared/pdf.worker.min.js"></script>
+<script src="../shared/pdf.min.js"></script>
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
 <script src="lib/templates.js"></script>
+<script src="../shared/extract.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/merge.js"></script>
+<script src="../shared/objects.js"></script>
 <script>
 (function(){
 "use strict";
 const form = document.getElementById('f');
 const partnersEl = document.getElementById('partners');
 const tpl = document.getElementById('partnerTpl');
-const DRAFT_KEY = 'llp-docs-draft-v1';
+const DRAFT_KEY = 'llp-docs-draft-v2';
 const TEMPLATE_NAMES = {
   form9_consent: 'Form 9 – Consent (one per partner)',
   consent_letter: 'Consent letter (one per partner)',
   subscription_sheet: 'Subscription sheet',
-  noc_registered_office: 'NOC for registered office'
+  noc_registered_office: 'NOC for registered office',
+  llp_agreement: 'LLP Agreement',
+  data_sheet: 'Data sheet (internal)',
+  request_list: 'Request list for client'
 };
+const DOC_LABEL = { pan: 'PAN', aadhaar: 'Aadhaar', bank: 'Bank statement' };
 const overrides = {};
+const X = window.LLPExtract;
 
-/* ---------- partners ---------- */
-function addPartner(data){
+/* ================= partner cards ================= */
+/** W/o: husband's name is required and father's name is optional; otherwise the reverse. */
+function syncRelation(node){
+  const w = node.querySelector('[data-k=relation]').value === 'W/o';
+  const f = node.querySelector('[data-k=father_name]'), h = node.querySelector('[data-k=relation_name]');
+  f.required = !w; h.required = w;
+  node.querySelector('[data-req=father]').hidden = w; node.querySelector('[data-req=husband]').hidden = !w;
+  (w ? f : h).classList.remove('invalid');
+}
+document.getElementById('partners').addEventListener('change', e => { if (e.target.dataset.k === 'relation') syncRelation(e.target.closest('.partner')); });
+function makeCard(data){
   const node = tpl.content.firstElementChild.cloneNode(true);
-  if (data) for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
-  node.querySelector('.rm').addEventListener('click', () => { node.remove(); renumber(); saveDraft(); });
-  partnersEl.appendChild(node);
-  renumber();
+  node._docs = {};
+  if (data){
+    for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
+    node._docs = data._docs || {};
+    node._auto = data._auto || {};
+    node._excel = !!data._excel;
+    node._check = data._check || {};
+    for (const [k,v] of Object.entries(node._auto)){
+      const el = node.querySelector(`[data-k="${k}"]`); if (el && el.value === v) el.classList.add('auto');
+    }
+  }
+  node._auto = node._auto || {};
+  node._check = node._check || {};
+  node.querySelectorAll('.up').forEach(up => {
+    const kind = up.dataset.doc, inp = up.querySelector('input');
+    inp.addEventListener('change', () => { if (inp.files[0]) handleUpload(node, kind, inp.files[0]); inp.value = ''; });
+    const prev = node._docs[kind];
+    if (prev) setStatus(node, kind, prev.statusCls, prev.status);
+  });
+  node.addEventListener('input', e => { if (e.target.dataset.k && node._auto[e.target.dataset.k] !== e.target.value) e.target.classList.remove('auto'); });
+  syncRelation(node);
+  return node;
 }
 function renumber(){
-  [...partnersEl.children].forEach((p,i)=> p.querySelector('.ptitle').textContent = 'Partner ' + (i+1));
+  let d = 0, p = 0;
+  [...partnersEl.children].forEach(node => {
+    const isDp = node.querySelector('[data-k=designation]').value === 'Designated Partner';
+    node.querySelector('.ptitle').textContent = isDp ? `Designated Partner ${++d}` : `Partner ${++p}`;
+  });
+  form.elements.dp_count.value = d; form.elements.p_count.value = p;
 }
-document.getElementById('addPartner').addEventListener('click', () => addPartner());
+partnersEl.addEventListener('change', e => { if (e.target.dataset.k === 'designation') renumber(); });
 
-/* ---------- property address toggle ---------- */
+function hasData(node){ return [...node.querySelectorAll('[data-k=name],[data-k=pan]')].some(el => el.value.trim()) || Object.keys(node._docs||{}).length; }
+function setCounts(dpN, pN, ask){
+  const cards = [...partnersEl.children];
+  const dps = cards.filter(n => n.querySelector('[data-k=designation]').value === 'Designated Partner');
+  const ps = cards.filter(n => !dps.includes(n));
+  const dropped = dps.slice(dpN).concat(ps.slice(pN)).filter(hasData);
+  if (dropped.length && ask && !confirm(`${dropped.length} partner form(s) with details entered will be removed. Continue?`)) return;
+  const out = [];
+  for (let i = 0; i < dpN; i++) out.push(dps[i] || makeCard({designation:'Designated Partner'}));
+  for (let i = 0; i < pN; i++) out.push(ps[i] || makeCard({designation:'Partner'}));
+  partnersEl.replaceChildren(...out);
+  renumber(); refreshChecks(); saveDraft();
+}
+document.getElementById('setCounts').addEventListener('click', () => {
+  const dpN = Math.max(0, Math.min(20, parseInt(form.elements.dp_count.value,10)||0));
+  const pN = Math.max(0, Math.min(50, parseInt(form.elements.p_count.value,10)||0));
+  if (dpN + pN === 0) { showMessages([['m-err','Enter at least one partner.']]); return; }
+  setCounts(dpN, pN, true);
+});
+
+/* ================= reading documents ================= */
+function setStatus(node, kind, cls, text){
+  const st = node.querySelector(`.up[data-doc="${kind}"] .st`);
+  st.className = 'st ' + (cls||''); st.textContent = text;
+}
+function askPassword(kind){
+  return wrong => prompt((wrong ? 'Incorrect password. ' : '') + `The ${DOC_LABEL[kind]} PDF is password protected. Enter the password:` +
+    (kind === 'aadhaar' ? '\n(For e-Aadhaar: first 4 letters of the name in CAPITALS followed by the year of birth, e.g. ANUS1993.)' : ''));
+}
+async function handleUpload(node, kind, file){
+  setStatus(node, kind, '', 'Reading ' + file.name + ' …');
+  let doc;
+  try { doc = await X.readPdf(file, askPassword(kind)); }
+  catch(e){ setStatus(node, kind, 'err', e.message); return; }
+  if (doc.scanned){
+    node._docs[kind] = { file:file.name, scanned:true, fields:{}, notes:[], statusCls:'warn',
+      status: `${file.name}: this is a scanned image, so no text could be read. Please type the details in.` };
+    setStatus(node, kind, 'warn', node._docs[kind].status);
+    refreshChecks(); saveDraft(); return;
+  }
+  const r = kind === 'pan' ? X.parsePan(doc) : kind === 'aadhaar' ? X.parseAadhaar(doc) : X.parseBank(doc);
+  const got = Object.keys(r.fields).filter(k => r.fields[k]);
+  const rec = { file:file.name, fields:r.fields, notes:r.notes, lastTxn:r.lastTxn||'', txnCount:r.txnCount||0, period:r.period||'' };
+  rec.statusCls = got.length ? 'ok' : 'err';
+  rec.status = got.length ? `${file.name}: read ${got.map(k=>FIELD_LABEL[k]||k).join(', ')}` + (kind==='bank' && rec.lastTxn ? `; last transaction ${fmt(rec.lastTxn)}` : '')
+                          : `${file.name}: no details could be found. Please type them in.`;
+  node._docs[kind] = rec;
+  setStatus(node, kind, rec.statusCls, rec.status);
+  applyDocs(node);
+  refreshChecks(); saveDraft();
+}
+const FIELD_LABEL = { pan:'PAN', name:'name', father_name:"father's name", dob:'date of birth', address:'address', email:'e-mail', mobile:'mobile', relation:'relation', relation_person:'S/o-D/o-W/o name', gender:'gender' };
+const fmt = isoD => isoD ? isoD.split('-').reverse().join('/') : '';
+
+/** Fill fields from the documents. Precedence: PAN > Aadhaar for identity, bank > Aadhaar for address.
+ *  A field the user has typed over is never overwritten. */
+function applyDocs(node){
+  const D = node._docs, pan = (D.pan||{}).fields||{}, aad = (D.aadhaar||{}).fields||{}, bank = (D.bank||{}).fields||{};
+  const want = {};
+  want.name = pan.name || aad.name || bank.name;
+  want.pan = pan.pan;
+  want.dob = pan.dob || aad.dob;
+  if (aad.relation && aad.relation !== 'C/o') want.relation = aad.relation;
+  if (aad.relation === 'W/o') want.relation_name = aad.relation_person;
+  want.father_name = pan.father_name || ((aad.relation === 'S/o' || aad.relation === 'D/o') ? aad.relation_person : undefined);
+  if (bank.address){ want.address = bank.address.toUpperCase(); want.address_proof = 'BANK STATEMENT'; }
+  else if (aad.address){ want.address = aad.address.toUpperCase(); want.address_proof = 'AADHAR'; }
+  want.email = bank.email;
+  if (aad.gender){
+    want.gender = aad.gender;
+    const rel = want.relation || node.querySelector('[data-k=relation]').value;
+    want.title = aad.gender === 'Male' ? 'Mr.' : aad.gender === 'Female' ? (rel === 'W/o' ? 'Mrs.' : 'Ms.') : undefined;
+  }
+  want.mobile = bank.mobile || (aad.mobile ? '+91 ' + aad.mobile : undefined);
+  for (const [k,v] of Object.entries(want)){
+    if (!v) continue;
+    const el = node.querySelector(`[data-k="${k}"]`); if (!el) continue;
+    const dflt = el.tagName === 'SELECT' ? el.options[0].value : el.defaultValue;
+    const untouched = !el.value.trim() || el.value === node._auto[k] || el.value === dflt;
+    if (untouched){ el.value = v; node._auto[k] = v; el.classList.add('auto'); el.classList.remove('invalid'); }
+  }
+  syncRelation(node);
+}
+
+/* ================= checks (shown at the end of the screen) ================= */
+function partnerChecks(node, title){
+  const out = [];
+  const D = node._docs||{}, pan=(D.pan||{}).fields||{}, aad=(D.aadhaar||{}).fields||{}, bank=(D.bank||{}).fields||{};
+  for (const k of ['pan','aadhaar','bank']){
+    const r = D[k]; if (!r) continue;
+    if (r.scanned) out.push(['m-warn', `${title}: the ${DOC_LABEL[k]} PDF (${r.file}) is a scanned image. Details must be typed in and checked by hand.`]);
+    (r.notes||[]).forEach(n => out.push(['m-warn', `${title} – ${DOC_LABEL[k]}: ${n}`]));
+  }
+  if (D.bank && !D.bank.scanned){
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (!D.bank.lastTxn && !D.bank.fromExcel) out.push(['m-warn', `${title}: no transaction dates could be found in the bank statement (${D.bank.file}). Check how recent it is by hand.`]);
+    else {
+      const last = new Date(D.bank.lastTxn + 'T00:00:00'), limit = X.monthsBefore(today, 2);
+      if (last < limit) out.push(['m-err', `⚠ ${title}: the bank statement is not recent. Its last transaction is dated ${fmt(D.bank.lastTxn)}, which is more than 2 months before today (${fmt(X.iso(today))}). Obtain a recent statement.`]);
+      else out.push(['m-ok', `${title}: the bank statement's last transaction is dated ${fmt(D.bank.lastTxn)}, within the last 2 months.`]);
+    }
+  }
+  if (!X.sameName(pan.name, aad.name)) out.push(['m-warn', `${title}: the name on PAN (${pan.name}) differs from the name on Aadhaar (${aad.name}).`]);
+  if (!X.sameName(pan.name || aad.name, bank.name)) out.push(['m-warn', `${title}: the name in the bank statement (${bank.name}) differs from the name on ${pan.name ? 'PAN' : 'Aadhaar'} (${pan.name || aad.name}).`]);
+  if (pan.dob && aad.dob && pan.dob !== aad.dob) out.push(['m-warn', `${title}: the date of birth on PAN (${fmt(pan.dob)}) differs from Aadhaar (${fmt(aad.dob)}).`]);
+  if (pan.father_name && aad.relation_person && (aad.relation==='S/o'||aad.relation==='D/o') && !X.sameName(pan.father_name, aad.relation_person))
+    out.push(['m-warn', `${title}: the father's name on PAN (${pan.father_name}) differs from Aadhaar (${aad.relation} ${aad.relation_person}).`]);
+  if (D.pan || D.aadhaar || D.bank){
+    const addrEl = node.querySelector('[data-k=address]');
+    if (!bank.address && aad.address && addrEl.value === node._auto.address) out.push(['m-warn', `${title}: the address was taken from Aadhaar because ${D.bank ? 'none was found in the bank statement' : 'no bank statement has been uploaded'}.`]);
+    const missing = ['pan','aadhaar','bank'].filter(k => !D[k]).map(k => DOC_LABEL[k]);
+    if (missing.length && !node._excel) out.push(['m-warn', `${title}: not uploaded yet: ${missing.join(', ')}.`]);
+  }
+  if (node._excel && !(D.bank && D.bank.lastTxn))
+    out.push(['m-warn', `${title}: no date of last bank transaction was entered in the Excel file, so check how recent the bank statement is by hand.`]);
+  return out;
+}
+function refreshChecks(){
+  renderChecklist(); contribSummary();
+  const box = document.getElementById('checkList'); box.innerHTML = '';
+  const all = [];
+  [...partnersEl.children].forEach(node => all.push(...partnerChecks(node, node.querySelector('.ptitle').textContent)));
+  if (!all.length){ box.innerHTML = '<p class="none">Upload documents to see the checks here.</p>'; return; }
+  all.sort((a,b) => (a[0]==='m-err'?0:a[0]==='m-warn'?1:2) - (b[0]==='m-err'?0:b[0]==='m-warn'?1:2));
+  all.forEach(([cls,t]) => { const d = document.createElement('div'); d.className = cls; d.textContent = t; box.appendChild(d); });
+}
+
+/* ================= property address toggle ================= */
 const propSame = form.elements.prop_same, propWrap = document.getElementById('propWrap');
 function syncProp(){ propWrap.hidden = propSame.checked; form.elements.property_address.required = !propSame.checked; }
 propSame.addEventListener('change', syncProp);
 
-/* ---------- collect / restore ---------- */
+/* ================= collect / restore ================= */
 function collect(){
   const g = n => form.elements[n].value.trim();
   return {
@@ -204,26 +477,38 @@ function collect(){
     prop_same: propSame.checked, property_address: form.elements.property_address.value.trim(),
     witness_name: g('witness_name'), witness_profession: g('witness_profession'),
     witness_address: form.elements.witness_address.value.trim(),
-    partners: [...partnersEl.children].map(p => {
-      const o = {}; p.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim()); return o;
+    llp_email: g('llp_email'), agreement_date: g('agreement_date'), jurisdiction: g('jurisdiction'),
+    remuneration: g('remuneration'), incoming_min: g('incoming_min'),
+    main_business: form.elements.main_business.value.trim(), other_business: form.elements.other_business.value.trim(),
+    obj_acts: [...document.querySelectorAll('#objActs input:checked')].map(c => c.value),
+    obj_products: g('obj_products'), obj_services: g('obj_services'), obj_customers: g('obj_customers'), obj_abroad: form.elements.obj_abroad.checked,
+    obj_draft: form.elements.obj_draft.value.trim(), obj_use: form.elements.obj_use.checked,
+    llp_check: llpCheck,
+    partners: [...partnersEl.children].map(node => {
+      const o = {}; node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
+      o._docs = node._docs || {}; o._auto = node._auto || {}; o._check = node._check || {};
+      if (node._excel) o._excel = true; return o;
     })
   };
 }
 function restore(d){
   for (const [k,v] of Object.entries(d)){
     if (k === 'partners') continue;
-    const el = form.elements[k]; if (!el) continue;
+    if (k === 'llp_check') { llpCheck = Object.assign({}, v || {}); continue; }
+    if (k === 'obj_acts') { document.querySelectorAll('#objActs input').forEach(c => c.checked = (v || []).includes(c.value)); continue; }
+    const el = form.elements[k]; if (!el || el instanceof RadioNodeList) continue;
     if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
   }
-  partnersEl.innerHTML = '';
-  (d.partners && d.partners.length ? d.partners : [null, null]).forEach(p => addPartner(p));
-  syncProp();
+  if (!d.llp_check) llpCheck = {};
+  const list = d.partners && d.partners.length ? d.partners : [{designation:'Designated Partner'},{designation:'Designated Partner'}];
+  partnersEl.replaceChildren(...list.map(p => makeCard(p)));
+  renumber(); syncProp(); syncObjects(); refreshChecks();
 }
 function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch(e){} }
-form.addEventListener('input', saveDraft);
-form.addEventListener('change', saveDraft);
+form.addEventListener('input', () => { saveDraft(); });
+form.addEventListener('change', () => { saveDraft(); refreshChecks(); });
 
-/* ---------- helpers ---------- */
+/* ================= helpers ================= */
 const up = s => (s||'').toUpperCase();
 function dmy(iso, sep){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return [d,m,y].join(sep); }
 function ageOn(dobIso, onIso){
@@ -234,12 +519,59 @@ function ageOn(dobIso, onIso){
 }
 const oneLine = s => (s||'').split(/\r?\n/).map(x=>x.trim().replace(/,$/,'')).filter(Boolean).join(', ');
 const safe = s => (s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+/** Amount in words, Indian system (lakh / crore). */
+function inWords(n){
+  n = Math.round(Number(n) || 0);
+  if (n === 0) return 'Zero';
+  const two = x => x < 20 ? ONES[x] : TENS[Math.floor(x/10)] + (x % 10 ? ' ' + ONES[x % 10] : '');
+  const three = x => x >= 100 ? ONES[Math.floor(x/100)] + ' Hundred' + (x % 100 ? ' ' + two(x % 100) : '') : two(x);
+  const out = [];
+  const crore = Math.floor(n / 1e7); n %= 1e7;
+  const lakh = Math.floor(n / 1e5); n %= 1e5;
+  const th = Math.floor(n / 1000); n %= 1000;
+  if (crore) out.push(inWords(crore) + ' Crore');
+  if (lakh) out.push(two(lakh) + ' Lakh');
+  if (th) out.push(two(th) + ' Thousand');
+  if (n) out.push(three(n));
+  return out.join(' ');
+}
+const inr = n => (Math.round(Number(n) || 0)).toLocaleString('en-IN');
+const pct = x => String(Math.round(x * 100) / 100);
+const ORD = ['First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth','Eleventh','Twelfth','Thirteenth','Fourteenth','Fifteenth','Sixteenth','Seventeenth','Eighteenth','Nineteenth','Twentieth'];
+const ordinal = i => ORD[i] || ((i + 1) + 'th');
+const NUMW = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+const joinAnd = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1];
+const lines = s => (s || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+function dayText(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const sfx = (d % 100 >= 11 && d % 100 <= 13) ? 'th' : ({1:'st',2:'nd',3:'rd'}[d % 10] || 'th');
+  const mon = ['January','February','March','April','May','June','July','August','September','October','November','December'][m-1];
+  return `${d}${sfx} day of ${mon} ${y}`;
+}
+/** Contribution and profit shares, with profit share defaulting to the contribution %. */
+function shares(d){
+  const total = d.partners.reduce((a,p) => a + (Number(p.contribution) || 0), 0);
+  return { total, rows: d.partners.map(p => {
+    const c = Number(p.contribution) || 0, cp = total ? c * 100 / total : 0;
+    const pp = p.profit_pct !== '' && p.profit_pct !== undefined ? Number(p.profit_pct) : cp;
+    return { c, cp, pp };
+  })};
+}
+function contribSummary(){
+  const el = document.getElementById('contribSummary'); if (!el) return;
+  const d = collect(), sh = shares(d);
+  if (!sh.total) { el.textContent = 'Enter each partner\'s contribution in section 3 to see the total here.'; return; }
+  const pt = sh.rows.reduce((a,r) => a + r.pp, 0);
+  el.textContent = `Total contribution: Rs. ${inr(sh.total)} (Rupees ${inWords(sh.total)} only). Profit shares add up to ${pct(pt)}%.`;
+}
 
-/* ---------- validation ---------- */
+/* ================= validation ================= */
 function validate(d){
   const errors = [], warns = [];
   form.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));
-  form.querySelectorAll('[required]').forEach(el => { if (!el.value.trim()) el.classList.add('invalid'); });
+  form.querySelectorAll('[required]').forEach(el => { if (!el.closest('[hidden]') && !el.value.trim()) el.classList.add('invalid'); });
   if (form.querySelector('.invalid')) errors.push('Please fill in the fields marked in red.');
   if (d.llp_name && !/(\bLLP|LIMITED LIABILITY PARTNERSHIP)$/i.test(d.llp_name))
     warns.push('The LLP name does not end with "LLP" or "Limited Liability Partnership" (Section 15(1), LLP Act, 2008).');
@@ -248,19 +580,28 @@ function validate(d){
   if (dps < 2) warns.push('An LLP needs at least two designated partners who are individuals, at least one of them resident in India (Section 7(1), LLP Act, 2008).');
   const pans = new Set();
   [...partnersEl.children].forEach((node,i) => {
-    const p = d.partners[i], n = 'Partner ' + (i+1);
+    const p = d.partners[i], n = node.querySelector('.ptitle').textContent;
     const mark = k => node.querySelector(`[data-k="${k}"]`).classList.add('invalid');
     if (p.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(up(p.pan))) { mark('pan'); errors.push(n + ': the PAN format looks wrong (expected AAAAA9999A).'); }
     if (p.pan && pans.has(up(p.pan))) { mark('pan'); errors.push(n + ': the same PAN is entered twice.'); }
     pans.add(up(p.pan));
     if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
     if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
+    if (p.address && !/\b\d{3}\s?\d{3}\b/.test(p.address)) warns.push(n + ': the address has no 6-digit PIN code.');
+    if (p.relation === 'W/o' && !p.father_name) warns.push(n + `: father's name not entered. Form 9 (item 3) asks for the father's name, so it will be left blank there. MCA forms ask for the father's name for married women too.`);
     if (p.dob && d.date) { const a = ageOn(p.dob, d.date); if (a < 18) warns.push(`${n} is ${a} years old on the date of signing.`); }
+    if (p.contribution !== '' && !(Number(p.contribution) > 0)) { mark('contribution'); errors.push(n + ': the contribution must be more than zero.'); }
   });
+  const sh = shares(d);
+  const pt = sh.rows.reduce((a,r) => a + r.pp, 0);
+  if (sh.total && Math.abs(pt - 100) > 0.01) errors.push(`The profit shares add up to ${pct(pt)}%, not 100%. Correct them in section 3.`);
+  if (dps >= 1 && !d.partners.some(p => p.designation === 'Designated Partner' && p.resident !== 'No'))
+    warns.push('No designated partner is marked as resident in India. At least one designated partner must be resident in India (Section 7(1), LLP Act, 2008).');
+  if (d.agreement_date && d.date && d.agreement_date < d.date) warns.push('The date of the LLP Agreement is earlier than the date of signing the incorporation documents.');
   return {errors, warns};
 }
 
-/* ---------- generation ---------- */
+/* ================= generation ================= */
 function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
 function render(name, data){
   const src = overrides[name] || b64ToBytes(window.LLP_TEMPLATES[name]);
@@ -281,7 +622,51 @@ function partnerData(p, d){
     address: up(p.address), address_inline: up(oneLine(p.address)), email: p.email, mobile: p.mobile,
     pan: up(p.pan), occupation: p.occupation || 'Business', nationality: p.nationality || 'Indian',
     dpin: p.dpin || 'NA – NOW APPLIED', nominee_of: p.nominee_of || 'NA', prof_membership: p.prof_membership || 'NA',
-    designation: p.designation, designation_upper: up(p.designation), address_proof: up(p.address_proof || 'AADHAR')
+    designation: p.designation, designation_upper: up(p.designation), address_proof: up(p.address_proof || 'BANK STATEMENT'),
+    title: p.title || 'Mr.', gender: p.gender || '', resident: p.resident || 'Yes'
+  });
+}
+function agreementData(d){
+  const sh = shares(d);
+  const on = d.agreement_date || d.date;
+  const year = (on || '').slice(0,4);
+  const parties = d.partners.map((p,i) => Object.assign(partnerData(p, d), {
+    ordinal: ordinal(i), ordinal_upper: up(ordinal(i)), relation_upper: up(p.relation),
+    religion_text: p.religion ? p.religion + ', ' : '', age: ageOn(p.dob, on),
+    contribution: inr(sh.rows[i].c), contribution_words: inWords(sh.rows[i].c),
+    contribution_pct: pct(sh.rows[i].cp), profit_pct: pct(sh.rows[i].pp)
+  }));
+  const dpOrd = d.partners.map((p,i) => p.designation === 'Designated Partner' ? ordinal(i) + ' Party' : null).filter(Boolean);
+  const coll = joinAnd(d.partners.map((p,i) => ordinal(i))) + ' Parties';
+  return Object.assign(common(d), {
+    place_upper: up(d.place),
+    agr_date_text: d.agreement_date ? dayText(d.agreement_date) : `________ day of ______________ ${year}`,
+    parties, parties_collective: coll, parties_collective_upper: up(coll),
+    llp_address_inline: up(oneLine(d.llp_address)),
+    total_contribution: inr(sh.total), total_contribution_words: inWords(sh.total),
+    main_objects: lines(d.main_business), other_objects: lines(d.other_business),
+    incoming_min_contribution: inr(d.incoming_min || 0),
+    dp_parties: joinAnd(dpOrd), dp_word: dpOrd.length > 1 ? 'Designated Partners' : 'Designated Partner',
+    remuneration: inr(d.remuneration), remuneration_words: inWords(d.remuneration),
+    parties_count_words: NUMW[d.partners.length] || String(d.partners.length),
+    jurisdiction: d.jurisdiction || d.place
+  });
+}
+function dataSheetData(d){
+  const sh = shares(d);
+  const todayIso = X.iso(new Date());
+  return Object.assign(common(d), {
+    today: fmt(todayIso), llp_email: d.llp_email || '–', main_business: lines(d.main_business)[0] || '–',
+    total_contribution: inr(sh.total), total_contribution_words: inWords(sh.total),
+    n_partners: d.partners.length, n_dps: d.partners.filter(p => p.designation === 'Designated Partner').length,
+    owner_name_upper: up(d.owner_name), noc_date: dmy(d.noc_date, '/'),
+    partners: d.partners.map((p,i) => Object.assign(partnerData(p, d), {
+      n: i + 1, relation_name_upper: up(p.relation_name || p.father_name),
+      contribution: inr(sh.rows[i].c), contribution_pct: pct(sh.rows[i].cp), profit_pct: pct(sh.rows[i].pp),
+      dpin: p.dpin || 'Not allotted', gender: p.gender || '–',
+      bank_last_txn: (p._docs && p._docs.bank && p._docs.bank.lastTxn) ? fmt(p._docs.bank.lastTxn) : '–'
+    })),
+    pending: pendingItems().map(x => x.who ? `${x.who}: ${x.label}` : x.label)
   });
 }
 function buildAll(d){
@@ -289,10 +674,11 @@ function buildAll(d){
   const tag = safe(up(d.llp_name).replace(/\s*(LLP|LIMITED LIABILITY PARTNERSHIP)$/,'')) || 'LLP';
   const witness = [d.witness_name && up(d.witness_name), d.witness_address && up(d.witness_address), d.witness_profession]
                     .filter(Boolean).join('\n');
+  const titles = [...partnersEl.children].map(n => n.querySelector('.ptitle').textContent);
   d.partners.forEach((p,i) => {
-    const pd = partnerData(p,d), who = safe(up(p.name));
-    files.push({ name:`${tag}_1_Form9_Consent_P${i+1}_${who}.docx`, bytes: render('form9_consent', pd) });
-    files.push({ name:`${tag}_2_Consent_Letter_P${i+1}_${who}.docx`, bytes: render('consent_letter', pd) });
+    const pd = partnerData(p,d), who = safe(up(p.name)), code = titles[i].startsWith('Designated') ? 'DP' + titles[i].split(' ').pop() : 'P' + titles[i].split(' ').pop();
+    files.push({ name:`${tag}_1_Form9_Consent_${code}_${who}.docx`, bytes: render('form9_consent', pd) });
+    files.push({ name:`${tag}_2_Consent_Letter_${code}_${who}.docx`, bytes: render('consent_letter', pd) });
   });
   files.push({ name:`${tag}_3_Subscription_Sheet.docx`, bytes: render('subscription_sheet', Object.assign(common(d), {
     partners: d.partners.map(p => ({ name_upper: up(p.name), designation_upper: up(p.designation), witness_details: witness }))
@@ -302,8 +688,109 @@ function buildAll(d){
     property_address: up(d.prop_same ? d.llp_address : d.property_address),
     noc_date: dmy(d.noc_date,'-'), noc_place_upper: up(d.noc_place || d.place)
   }))});
+  files.push({ name:`${tag}_5_LLP_Agreement.docx`, bytes: render('llp_agreement', agreementData(d)) });
+  // one file with everything to be signed, in signing order
+  const keyOf = n => /_1_Form9/.test(n) ? 'f9' : /_2_Consent/.test(n) ? 'cl' : /_3_Sub/.test(n) ? 'sub' : /_4_NOC/.test(n) ? 'noc' : 'agr';
+  const order = [];
+  d.partners.forEach((p,i) => { order.push(files[i*2], files[i*2+1]); });
+  order.push(...files.slice(d.partners.length * 2));
+  const combined = LLPMerge.merge(order.map(f => ({ bytes: f.bytes, key: keyOf(f.name) })));
+  files.unshift({ name:`${tag}_0_PRINT_SET_All_Documents.docx`, bytes: combined });
+  files.push({ name:`${tag}_6_Data_Sheet_internal.docx`, bytes: render('data_sheet', dataSheetData(d)) });
   return {files, tag};
 }
+
+/* ================= checklist and request list ================= */
+let llpCheck = {};
+const P_ITEMS = [
+  { key:'pan', label:'PAN copy', ask:'Copy of PAN card', auto: n => !!(n._docs && n._docs.pan) },
+  { key:'aadhaar', label:'Aadhaar copy', ask:'Copy of Aadhaar (the e-Aadhaar PDF downloaded from the UIDAI website is preferred)', auto: n => !!(n._docs && n._docs.aadhaar) },
+  { key:'bank', label:'Bank statement with last transaction within 2 months', ask:'Latest bank statement showing the current residential address, with transactions up to the last two months', auto: n => bankFresh(n) === true },
+  { key:'photo', label:'Passport-size photograph', ask:'Passport-size photograph' },
+  { key:'contact', label:'Mobile no. and e-mail id', ask:'Mobile number and e-mail id', auto: n => {
+      const m = n.querySelector('[data-k=mobile]').value, e = n.querySelector('[data-k=email]').value;
+      return m.replace(/\D/g,'').length >= 10 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); } },
+  { key:'dsc', label:'Digital signature certificate (DSC)' },
+  { key:'form9', label:'Form 9 consent signed' },
+  { key:'consent', label:'Consent letter signed' },
+];
+const L_ITEMS = [
+  { key:'names', label:'Proposed names and business activity confirmed', ask:'Proposed names for the LLP, in order of preference, and a short description of the business' },
+  { key:'ro_proof', label:'Proof of registered office (recent electricity bill or property tax receipt)', ask:'Proof of the registered office address: a recent electricity bill or property tax receipt' },
+  { key:'rent', label:'Rent / lease agreement (tick if received or not applicable)', ask:'Rent or lease agreement, if the premises are rented' },
+  { key:'noc', label:'NOC from owner signed' },
+  { key:'sub', label:'Subscription sheet signed by all partners' },
+  { key:'agreement', label:'LLP Agreement signed and stamped (Form 3 to be filed within 30 days of incorporation)' },
+];
+function bankFresh(n){
+  const b = n._docs && n._docs.bank;
+  if (!b || !b.lastTxn) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  return new Date(b.lastTxn + 'T00:00:00') >= X.monthsBefore(today, 2);
+}
+const pname = n => { const nm = n.querySelector('[data-k=name]').value.trim(); const t = n.querySelector('.ptitle').textContent; return nm ? `${t} (${nm})` : t; };
+function pendingItems(){
+  const out = [];
+  [...partnersEl.children].forEach(n => P_ITEMS.forEach(it => {
+    if (!((it.auto && it.auto(n)) || n._check[it.key])) out.push({ who: pname(n), node: n, label: it.label, item: it });
+  }));
+  L_ITEMS.forEach(it => { if (!llpCheck[it.key]) out.push({ who: '', label: it.label, item: it }); });
+  return out;
+}
+function renderChecklist(){
+  const box = document.getElementById('checklist'); if (!box) return;
+  box.innerHTML = '';
+  const block = (title, items, state, node) => {
+    const div = document.createElement('div'); div.className = 'cl-block';
+    const h = document.createElement('h3'); h.textContent = title; div.appendChild(h);
+    items.forEach(it => {
+      const lab = document.createElement('label'), cb = document.createElement('input');
+      cb.type = 'checkbox';
+      const auto = node && it.auto && it.auto(node);
+      cb.checked = !!(auto || state[it.key]); cb.disabled = !!auto;
+      cb.addEventListener('change', e => { e.stopPropagation(); state[it.key] = cb.checked; saveDraft(); renderChecklist(); });
+      const span = document.createElement('span'); span.textContent = it.label;
+      lab.append(cb, span);
+      if (auto) { const a = document.createElement('span'); a.className = 'cl-auto'; a.textContent = '(received)'; lab.appendChild(a); }
+      if (node && it.key === 'bank' && bankFresh(node) === false) { const a = document.createElement('span'); a.className = 'cl-auto'; a.style.color = 'var(--err)'; a.textContent = `(statement ends ${fmt(node._docs.bank.lastTxn)}: older than 2 months)`; lab.appendChild(a); }
+      div.appendChild(lab);
+    });
+    box.appendChild(div);
+  };
+  [...partnersEl.children].forEach(n => block(pname(n), P_ITEMS, n._check, n));
+  block('LLP and registered office', L_ITEMS, llpCheck, null);
+}
+function requestData(){
+  const d = collect();
+  const partner_items = [];
+  [...partnersEl.children].forEach((n,i) => {
+    const items = P_ITEMS.filter(it => it.ask && !((it.auto && it.auto(n)) || n._check[it.key])).map(it => {
+      let t = it.ask;
+      if (it.key === 'bank' && bankFresh(n) === false) t += ` (the statement received ends on ${fmt(n._docs.bank.lastTxn)})`;
+      return t;
+    });
+    if (items.length) partner_items.push({ title: d.partners[i].title || '', name_upper: up(d.partners[i].name) || n.querySelector('.ptitle').textContent.toUpperCase(),
+      designation: d.partners[i].designation, items: items.map((t,j) => ({ n: j + 1, text: t })) });
+  });
+  const llp_items = L_ITEMS.filter(it => it.ask && !llpCheck[it.key]).map((it,j) => ({ n: j + 1, text: it.ask }));
+  return { llp_name_upper: up(d.llp_name) || '(name to be decided)', today: fmt(X.iso(new Date())),
+           partner_items, llp_items, has_llp_items: llp_items.length > 0 };
+}
+document.getElementById('dlRequest').addEventListener('click', () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  download(`${safe(r.llp_name_upper)}_Request_List.docx`, new Blob([render('request_list', r)], {type: DOCX}));
+});
+document.getElementById('copyRequest').addEventListener('click', async () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  const out = [`Documents and details required – proposed LLP: ${r.llp_name_upper}`, ''];
+  r.partner_items.forEach(p => { out.push(`${p.title} ${p.name_upper} (${p.designation}):`); p.items.forEach(it => out.push(`${it.n}. ${it.text}`)); out.push(''); });
+  if (r.llp_items.length) { out.push('For the registered office and the LLP:'); r.llp_items.forEach(it => out.push(`${it.n}. ${it.text}`)); }
+  const text = out.join('\n').trim();
+  try { await navigator.clipboard.writeText(text); showMessages([['m-ok','Request list copied. You can paste it into an e-mail or message to the client.']]); }
+  catch(e){ window.prompt('Copy the request list below:', text); }
+});
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 let lastUrls = [];
 function download(name, blob){
@@ -318,6 +805,7 @@ document.getElementById('gen').addEventListener('click', () => {
   const d = collect();
   const out = document.getElementById('outputs'); out.innerHTML = '';
   lastUrls.forEach(u => URL.revokeObjectURL(u)); lastUrls = [];
+  refreshChecks();
   const {errors, warns} = validate(d);
   if (errors.length){ showMessages(errors.map(e=>['m-err',e]).concat(warns.map(w=>['m-warn',w]))); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
   let result;
@@ -330,7 +818,10 @@ document.getElementById('gen').addEventListener('click', () => {
   result.files.forEach(f => zip.file(f.name, f.bytes));
   const zipName = `${result.tag}_LLP_Incorporation_Docs.zip`;
   const zipBlob = zip.generate({ type:'blob', mimeType:'application/zip' });
-  showMessages([['m-ok', `${result.files.length} documents generated. The ZIP file has been downloaded; you can also download each file below.`]].concat(warns.map(w=>['m-warn',w])));
+  const stale = document.querySelectorAll('#checkList .m-err').length;
+  showMessages([['m-ok', `${result.files.length} files generated, including a print set with all documents in signing order (the file starting with 0_PRINT_SET). The ZIP file has been downloaded; you can also download each file below.`]]
+    .concat(stale ? [['m-err', `⚠ ${stale} item(s) under "Document checks" need attention before filing.`]] : [])
+    .concat(warns.map(w=>['m-warn',w])));
   const ul = document.createElement('ul');
   result.files.forEach(f => {
     const li = document.createElement('li'), a = document.createElement('a');
@@ -341,7 +832,7 @@ document.getElementById('gen').addEventListener('click', () => {
   download(zipName, zipBlob);
 });
 
-/* ---------- case file save / open / clear ---------- */
+/* ================= case file save / open / clear ================= */
 document.getElementById('saveCase').addEventListener('click', () => {
   const d = collect();
   download((safe(d.llp_name)||'LLP') + '_case.json', new Blob([JSON.stringify(d, null, 2)], {type:'application/json'}));
@@ -361,7 +852,7 @@ document.getElementById('clearAll').addEventListener('click', () => {
   setDefaults();
 });
 
-/* ---------- template overrides ---------- */
+/* ================= template overrides ================= */
 const tplBox = document.getElementById('tplOverrides');
 Object.entries(TEMPLATE_NAMES).forEach(([key,label]) => {
   const row = document.createElement('div'); row.className = 'tpl-row';
@@ -375,7 +866,146 @@ Object.entries(TEMPLATE_NAMES).forEach(([key,label]) => {
   row.append(span, inp, st); tplBox.appendChild(row);
 });
 
-/* ---------- init ---------- */
+/* ================= Excel template ================= */
+document.getElementById('dlExcel').addEventListener('click', () => {
+  download('LLP_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.LLP_data_template)],
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+});
+const xf = document.getElementById('excelFile');
+document.getElementById('upExcel').addEventListener('click', () => xf.click());
+xf.addEventListener('change', async () => {
+  const file = xf.files[0]; xf.value = ''; if (!file) return;
+  let res;
+  try { res = excelToCase(LLPXlsx.readWorkbook(new Uint8Array(await file.arrayBuffer())), file.name); }
+  catch(e){ showMessages([['m-err', 'Excel file not loaded: ' + e.message]]); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  if (res.errors.length){ showMessages(res.errors.map(e=>['m-err',e])); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const cur = collect();
+  if ((cur.llp_name || cur.partners.some(p => p.name || p.pan)) && !confirm('Replace the details now on screen with the details from ' + file.name + '?')) return;
+  restore(res.data); saveDraft();
+  showMessages([['m-ok', `Loaded the LLP details and ${res.data.partners.length} partner(s) from ${file.name}. Shaded fields came from the file; please check them, then click Generate documents.`]]
+    .concat(res.warns.map(w=>['m-warn',w])));
+  document.getElementById('messages').scrollIntoView({behavior:'smooth'});
+});
+
+function excelToCase(sheets, fname){
+  const errors = [], warns = [];
+  const L = sheets['LLP'], P = sheets['Partners'];
+  if (!L || !P) return { errors: ['This does not look like the LLP data template (the sheets "LLP" and "Partners" were not found). Use "Download Excel template".'], warns };
+  const S = LLPXlsx.str;
+  // LLP sheet: key in column A, value in column C
+  const llp = {};
+  for (const ref of Object.keys(L)) {
+    const m = ref.match(/^A(\d+)$/); if (!m) continue;
+    llp[S(L[ref])] = L['C' + m[1]];
+  }
+  if (!('llp_name' in llp)) return { errors: ['The hidden column A of the "LLP" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const num = (v, label, who) => {
+    const t = S(v).replace(/[,\s]|Rs\.?|₹|\/-/gi, '');
+    if (!t) return '';
+    if (!/^\d+(\.\d+)?$/.test(t)) { warns.push(`${who}: "${S(v)}" is not a number for ${label}; please enter it on screen.`); return ''; }
+    return t;
+  };
+  const dt = (v, label, who) => { const d = LLPXlsx.date(v); if (d === null) { warns.push(`${who}: "${S(v)}" is not a valid date for ${label}; please enter it on screen.`); return ''; } return d; };
+  const addr = (l1, l2, city, pin, state) => {
+    const lines = [S(l1), S(l2)].filter(Boolean);
+    const cp = [S(city), S(pin)].filter(Boolean).join(' - ');
+    if (cp) lines.push(cp);
+    if (S(state)) lines.push(S(state));
+    return lines.join('\n');
+  };
+  const data = {
+    llp_name: S(llp.llp_name),
+    llp_address: addr(llp.ro_addr1, llp.ro_addr2, llp.ro_city, llp.ro_pin, llp.ro_state),
+    place: S(llp.place), date: dt(llp.date, 'date of signing', 'LLP sheet'), id_proof: S(llp.id_proof) || 'PAN',
+    owner_name: S(llp.owner_name), noc_date: dt(llp.noc_date, 'date of NOC', 'LLP sheet'), noc_place: S(llp.noc_place),
+    prop_same: !/^n/i.test(S(llp.prop_same)), property_address: S(llp.prop_addr),
+    witness_name: S(llp.witness_name), witness_profession: S(llp.witness_profession), witness_address: S(llp.witness_address),
+    llp_email: S(llp.llp_email), agreement_date: dt(llp.agreement_date, 'date of agreement', 'LLP sheet'),
+    jurisdiction: S(llp.jurisdiction), remuneration: num(llp.remuneration, 'remuneration', 'LLP sheet'),
+    incoming_min: num(llp.incoming_min, 'minimum contribution of an incoming partner', 'LLP sheet') || '50000',
+    main_business: S(llp.main_business), other_business: S(llp.other_business),
+    partners: []
+  };
+  if (!data.prop_same && !data.property_address) warns.push('LLP sheet: the property address is marked as different but is blank.');
+  // Partners sheet: keys in row 1, data from row 3
+  const keyCol = {};
+  for (const ref of Object.keys(P)) { const m = ref.match(/^([A-Z]+)1$/); if (m) keyCol[S(P[ref])] = m[1]; }
+  if (!keyCol.name) return { errors: ['The hidden row 1 of the "Partners" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const maxRow = Math.max(0, ...Object.keys(P).map(r => +r.replace(/^[A-Z]+/, '')));
+  const DES = { 'designated partner':'Designated Partner', 'dp':'Designated Partner', 'partner':'Partner', 'p':'Partner' };
+  const REL = { 's/o':'S/o', 'so':'S/o', 'd/o':'D/o', 'do':'D/o', 'w/o':'W/o', 'wo':'W/o' };
+  for (let r = 3; r <= maxRow; r++) {
+    const g = k => keyCol[k] ? P[keyCol[k] + r] : undefined;
+    if (!S(g('name'))) continue;
+    const who = `Partners sheet row ${r} (${S(g('name'))})`;
+    let des = DES[S(g('designation')).toLowerCase()];
+    if (!des) { des = 'Designated Partner'; warns.push(`${who}: designation "${S(g('designation'))}" not recognised; set to Designated Partner.`); }
+    let rel = REL[S(g('relation')).toLowerCase().replace(/\s/g,'')];
+    if (!rel) { rel = 'S/o'; if (S(g('relation'))) warns.push(`${who}: relation "${S(g('relation'))}" not recognised; set to S/o.`); }
+    const p = {
+      designation: des, name: S(g('name')), relation: rel, father_name: S(g('father_name')), relation_name: S(g('relation_name')),
+      dob: dt(g('dob'), 'date of birth', who), pan: S(g('pan')).toUpperCase(), mobile: S(g('mobile')), email: S(g('email')),
+      address: addr(g('addr1'), g('addr2'), g('city'), g('pin'), g('state')).toUpperCase(),
+      address_proof: S(g('address_proof')) || 'BANK STATEMENT', occupation: S(g('occupation')) || 'Business',
+      nationality: S(g('nationality')) || 'Indian', dpin: S(g('dpin')),
+      nominee_of: S(g('nominee_of')) || 'NA', prof_membership: S(g('prof_membership')) || 'NA',
+      title: ['Mr.','Mrs.','Ms.','Dr.'].find(t => t.toLowerCase() === S(g('title')).toLowerCase().replace(/\.?$/, '.')) || (rel === 'W/o' ? 'Mrs.' : rel === 'D/o' ? 'Ms.' : 'Mr.'),
+      gender: ['Male','Female','Transgender'].find(x => x.toLowerCase() === S(g('gender')).toLowerCase()) || '',
+      resident: /^n/i.test(S(g('resident'))) ? 'No' : 'Yes', religion: S(g('religion')),
+      contribution: num(g('contribution'), 'contribution', who), profit_pct: num(g('profit_pct'), 'profit share', who)
+    };
+    if (/^\d{10}$/.test(p.mobile)) p.mobile = '+91 ' + p.mobile;
+    if (S(g('pin')) && !/^\d{3}\s?\d{3}$/.test(S(g('pin')))) warns.push(`${who}: PIN code "${S(g('pin'))}" is not 6 digits.`);
+    const auto = {}; for (const [k,v] of Object.entries(p)) if (v) auto[k] = v;
+    const last = dt(g('bank_last_txn'), 'date of last bank transaction', who);
+    const docs = {};
+    if (last) docs.bank = { file: fname, fromExcel: true, fields: {}, notes: [], lastTxn: last, statusCls: 'ok',
+      status: `From Excel: last bank transaction ${last.split('-').reverse().join('/')}` };
+    data.partners.push(Object.assign(p, { _auto: auto, _docs: docs, _excel: true }));
+  }
+  if (!data.partners.length) errors.push('No partners found in the "Partners" sheet (rows from row 3 with a name).');
+  return { data, errors, warns };
+}
+
+/* ================= objects clause drafting ================= */
+const objActs = document.getElementById('objActs');
+LLPObjects.ACTIVITIES.forEach(a => {
+  const l = document.createElement('label'), c = document.createElement('input');
+  c.type = 'checkbox'; c.value = a.key; l.append(c, document.createTextNode(a.label)); objActs.appendChild(l);
+});
+function syncObjects(){
+  const use = form.elements.obj_use.checked, mb = form.elements.main_business;
+  mb.readOnly = use;
+  if (use) { mb.value = form.elements.obj_draft.value.trim(); mb.classList.remove('invalid'); }
+}
+form.elements.obj_use.addEventListener('change', () => {
+  if (form.elements.obj_use.checked && !form.elements.obj_draft.value.trim()) {
+    form.elements.obj_use.checked = false;
+    document.getElementById('objNotes').innerHTML = '<div class="m-warn">The draft is empty. Suggest or type the objects first.</div>';
+    return;
+  }
+  syncObjects(); saveDraft();
+});
+form.elements.obj_draft.addEventListener('input', syncObjects);
+document.getElementById('objSuggest').addEventListener('click', () => {
+  const box = document.getElementById('objNotes'); box.innerHTML = '';
+  const r = LLPObjects.draft({
+    activities: [...objActs.querySelectorAll('input:checked')].map(c => c.value),
+    goods: form.elements.obj_products.value, services: form.elements.obj_services.value, customers: form.elements.obj_customers.value,
+    abroad: form.elements.obj_abroad.checked
+  });
+  r.notes.forEach(n => { const d = document.createElement('div'); d.className = 'm-warn'; d.textContent = n; box.appendChild(d); });
+  if (!r.lines.length) return;
+  const ta = form.elements.obj_draft;
+  if (ta.value.trim() && !confirm('Replace the current draft (including any edits) with a new suggestion?')) return;
+  ta.value = r.lines.join('\n\n');
+  const d = document.createElement('div'); d.className = 'm-ok';
+  d.textContent = 'Draft suggested from standard clause wording. Review and edit it, then tick "Use in LLP agreement".';
+  box.prepend(d);
+  syncObjects(); saveDraft();
+});
+
+/* ================= init ================= */
 function setDefaults(){
   const today = new Date(); const iso = new Date(today.getTime() - today.getTimezoneOffset()*60000).toISOString().slice(0,10);
   if (!form.elements.date.value) form.elements.date.value = iso;
@@ -387,5 +1017,6 @@ restore(draft || {});
 setDefaults();
 })();
 </script>
+<script src="../shared/calc.js"></script>
 </body>
 </html>
