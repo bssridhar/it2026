@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: TDS rate chart and calculator under section 393 – shows the section and Sl. No. to select on the portal.",
     "New: Income Tax Calculator for tax year 2026-27 (new regime) with slab-wise working.",
     "New: Cost Inflation Index – CII table up to 2026-27 (384) and indexed cost calculator with working.",
     "New: Net Worth Certificate (visa) – Excel import, manual conversion rate, watermarked draft PDF for client confirmation.",
@@ -79,6 +80,15 @@ window.HOME_CONFIG = {
       path: "taxcalc/index.html",
       status: "available",
       description: "Tax under the new regime for tax year 2026-27: slab-wise working, rebate up to Rs. 12 lakh with marginal relief, surcharge, cess and standard deduction.",
+      added: "2026-11-07"
+    },
+    {
+      id: "tds",
+      title: "TDS Rate Chart and Calculator – TY 2026-27",
+      category: "Income Tax",
+      path: "tds/index.html",
+      status: "available",
+      description: "Section 393 rate chart (all Table rows) and TDS calculator with thresholds, showing the section and Table Sl. No. to select when paying TDS on the e-filing portal.",
       added: "2026-11-07"
     }
   ]
