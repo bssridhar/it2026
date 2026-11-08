@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Payment Voucher – PDF voucher with Cash / Cheque / UPI details and a register of vouchers.",
     "New: HUF Formation – affidavit for stamp paper and PAN data sheet for the HUF.",
     "New: TDS rate chart and calculator under section 393 – shows the section and Sl. No. to select on the portal.",
     "New: Income Tax Calculator for tax year 2026-27 (new regime) with slab-wise working.",
@@ -26,7 +27,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Certificates", "Income Tax"],
+  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Office"],
 
   tools: [
     {
@@ -100,6 +101,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Section 393 rate chart (all Table rows) and TDS calculator with thresholds, showing the section and Table Sl. No. to select when paying TDS on the e-filing portal.",
       added: "2026-11-07"
+    },
+    {
+      id: "voucher",
+      title: "Payment Voucher",
+      category: "Office",
+      path: "voucher/index.html",
+      status: "available",
+      description: "Payment voucher as a PDF in the voucher-book format with the firm's name: Cash / Cheque / UPI, automatic numbering, amount in words, office and payee copies, and a register of vouchers.",
+      added: "2026-11-08"
     }
   ]
 };
