@@ -13,6 +13,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `cii/` | Cost Inflation Index: CII table (2001-02 to 2026-27) and indexed cost calculator with working |
 | `taxcalc/` | Income Tax Calculator, tax year 2026-27, new regime: slab-wise working, rebate, surcharge, cess |
 | `tds/` | TDS rate chart (section 393, Income-tax Act, 2025) and calculator, with the section and Sl. No. to select on the portal |
+| `huf/` | HUF Formation: affidavit (stamp paper) and PAN data sheet for the HUF |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

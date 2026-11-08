@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: HUF Formation – affidavit for stamp paper and PAN data sheet for the HUF.",
     "New: TDS rate chart and calculator under section 393 – shows the section and Sl. No. to select on the portal.",
     "New: Income Tax Calculator for tax year 2026-27 (new regime) with slab-wise working.",
     "New: Cost Inflation Index – CII table up to 2026-27 (384) and indexed cost calculator with working.",
@@ -45,6 +46,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Private Limited Company and One Person Company: NOC, data sheet for SPICe+ (e-MoA / e-AoA), checklist and client request list.",
       added: "2026-11-05"
+    },
+    {
+      id: "huf",
+      title: "HUF Formation",
+      category: "Registration",
+      path: "huf/index.html",
+      status: "available",
+      description: "Affidavit for forming an HUF (for stamp paper) in the firm's format, and the data sheet for the HUF's PAN application from the same details. Excel import.",
+      added: "2026-11-08"
     },
     {
       id: "partnership",
