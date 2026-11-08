@@ -15,6 +15,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `tds/` | TDS rate chart (section 393, Income-tax Act, 2025) and calculator, with the section and Sl. No. to select on the portal |
 | `huf/` | HUF Formation: affidavit (stamp paper) and PAN data sheet for the HUF |
 | `voucher/` | Payment Voucher: PDF in the voucher-book format, Cash / Cheque / UPI, numbering, register |
+| `trust/` | Trust Formation: deed, NOC, resolution, PAN and Form 104 data sheets, formalities checklist |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

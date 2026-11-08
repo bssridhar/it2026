@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Trust Formation – deed, NOC, bank resolution, PAN and Form 104 data sheets, and a checklist of every formality.",
     "New: Payment Voucher – PDF voucher with Cash / Cheque / UPI details and a register of vouchers.",
     "New: HUF Formation – affidavit for stamp paper and PAN data sheet for the HUF.",
     "New: TDS rate chart and calculator under section 393 – shows the section and Sl. No. to select on the portal.",
@@ -55,6 +56,15 @@ window.HOME_CONFIG = {
       path: "huf/index.html",
       status: "available",
       description: "Affidavit for forming an HUF (for stamp paper) in the firm's format, and the data sheet for the HUF's PAN application from the same details. Excel import.",
+      added: "2026-11-08"
+    },
+    {
+      id: "trust",
+      title: "Trust Formation",
+      category: "Registration",
+      path: "trust/index.html",
+      status: "available",
+      description: "Trust deed in the firm's format (objects retained, clauses added), NOC, bank resolution, PAN data sheet, Form 104 data sheet (section 332 / 354, Income-tax Act, 2025), activities note and a formalities tracker.",
       added: "2026-11-08"
     },
     {
