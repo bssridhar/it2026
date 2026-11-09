@@ -16,6 +16,7 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 | `huf/` | HUF Formation: affidavit (stamp paper) and PAN data sheet for the HUF |
 | `voucher/` | Payment Voucher: PDF in the voucher-book format, Cash / Cheque / UPI, numbering, register |
 | `trust/` | Trust Formation: deed, NOC, resolution, PAN and Form 104 data sheets, formalities checklist |
+| `pfesi/` | EPF and ESI monthly returns: ECR file, ESIC upload file (.xls), registers, summary and reconciliation |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: EPF and ESI Monthly Returns – ECR file, ESIC upload file, registers and portal reconciliation from the salary sheet.",
     "New: Trust Formation – deed, NOC, bank resolution, PAN and Form 104 data sheets, and a checklist of every formality.",
     "New: Payment Voucher – PDF voucher with Cash / Cheque / UPI details and a register of vouchers.",
     "New: HUF Formation – affidavit for stamp paper and PAN data sheet for the HUF.",
@@ -28,7 +29,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Office"],
+  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Payroll", "Office"],
 
   tools: [
     {
@@ -111,6 +112,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Section 393 rate chart (all Table rows) and TDS calculator with thresholds, showing the section and Table Sl. No. to select when paying TDS on the e-filing portal.",
       added: "2026-11-07"
+    },
+    {
+      id: "pfesi",
+      title: "EPF and ESI Monthly Returns",
+      category: "Payroll",
+      path: "pfesi/index.html",
+      status: "available",
+      description: "Import the salary sheet; EPF with the dated wage ceiling (split month), ESI with contribution-period coverage; ECR file, ESIC upload file (.xls), registers, monthly summary and reconciliation with the portal.",
+      added: "2026-11-09"
     },
     {
       id: "voucher",
