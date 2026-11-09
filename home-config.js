@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Form 26AS · AIS · TIS Consolidator – reads the three PDFs and prepares the income consolidation workbook with TDS credit and review points.",
     "New: EPF and ESI Monthly Returns – ECR file, ESIC upload file, registers and portal reconciliation from the salary sheet.",
     "New: Trust Formation – deed, NOC, bank resolution, PAN and Form 104 data sheets, and a checklist of every formality.",
     "New: Payment Voucher – PDF voucher with Cash / Cheque / UPI details and a register of vouchers.",
@@ -112,6 +113,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Section 393 rate chart (all Table rows) and TDS calculator with thresholds, showing the section and Table Sl. No. to select when paying TDS on the e-filing portal.",
       added: "2026-11-07"
+    },
+    {
+      id: "26as-ais-tis",
+      title: "Form 26AS · AIS · TIS Consolidator",
+      category: "Income Tax",
+      path: "26as-ais-tis/index.html",
+      status: "available",
+      description: "Reads Form 26AS, AIS and TIS PDFs; nature-wise income with 26AS vs AIS/TIS and the figure to consider, TDS credit, and points for review – downloaded as an Excel workbook.",
+      added: "2026-11-09"
     },
     {
       id: "pfesi",
