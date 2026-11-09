@@ -40,6 +40,10 @@ button.danger{color:var(--err)}
 .person .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600}
 .obj{display:grid;grid-template-columns:28px 1fr 2.6fr 70px;gap:8px;align-items:start;border-bottom:1px solid var(--line);padding:6px 0}
 .obj.off{opacity:.5}
+.obj-head{border-bottom:none;padding:0}
+.ordcol{display:flex;flex-direction:column;gap:6px}
+.ordcol input[type=number]{width:70px}
+.preview{background:var(--lock);border-radius:6px;padding:8px 10px;font-size:.88rem}
 .obj textarea{min-height:44px}
 @media (max-width:700px){.obj{grid-template-columns:28px 1fr}.obj textarea{grid-column:1/-1}}
 .step{display:grid;grid-template-columns:28px 1.6fr 150px 1.4fr;gap:8px;align-items:start;border-bottom:1px solid var(--line);padding:8px 0}
@@ -85,11 +89,16 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <div><label>Statutory references in the deed</label><select data-f="act"><option value="2025">Income-tax Act, 2025 (sections 350 and 354)</option><option value="1961">Income-tax Act, 1961 (as in the old format)</option></select></div>
       <div class="full"><label>Immovable property of the trust on formation (leave blank if none)</label><input data-f="property" placeholder="e.g. Land measuring ... at ..."></div>
       <div class="full grid">
-        <label class="check"><input type="checkbox" data-f="other_contribute"> Other trustees to contribute to the corpus from time to time (clause 1)</label>
+        <label class="check"><input type="checkbox" data-f="no_outside_india"> No activities outside India (object and clause)</label>
+        <label class="check"><input type="checkbox" data-f="other_contribute"> Other trustees to contribute to the corpus from time to time</label>
         <label class="check"><input type="checkbox" data-f="obj_takeover"> Object: take over other charitable trusts with similar objects</label>
-        <label class="check"><input type="checkbox" data-f="no_outside_india"> No activities outside India</label>
+        <label class="check"><input type="checkbox" data-f="jur_clause"> Jurisdiction clause (courts of the city below)</label>
         <label class="check"><input type="checkbox" data-f="arbitration"> Arbitration clause (Indian Council of Arbitration)</label>
+        <label class="check"><input type="checkbox" data-f="adm_heading"> Print "ADMINISTRATION" as the heading of clause 5</label>
+        <label class="check"><input type="checkbox" data-f="sign_pos"> Print positions under the signatures</label>
         <label class="check"><input type="checkbox" data-f="mask"> Show Aadhaar masked in the deed</label>
+      </div>
+      <div><label>Page size of the deed</label><select data-f="page"><option value="letter">Letter (as in the firm's format)</option><option value="a4">A4</option><option value="legal">Legal</option></select>
       </div>
     </div>
   </section>
@@ -116,9 +125,11 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
   </section>
 
   <section class="card" id="s4">
-    <h2>4. Objects of the trust <span class="bar"><button type="button" class="link" id="addObj">+ Add object</button><button type="button" class="link" id="resetObj">Restore the firm's standard objects</button></span></h2>
-    <p class="hint" style="margin-top:-6px">The objects from the firm's format are loaded. Untick to leave one out, edit the wording, or add new ones. Objects with the same heading are printed under that heading as (i), (ii)…; leave the heading blank for a stand-alone object. The "not for profit" declaration is always added at the end.</p>
+    <h2>4. Objects of the trust <span class="bar"><button type="button" class="link" id="addObj">+ Add a new object</button><select id="libSel" style="width:auto;max-width:280px"><option value="">+ Add from the standard library…</option></select><button type="button" class="link" id="sortObj">Arrange by order No.</button><button type="button" class="link" id="resetObj">Restore the firm's standard objects</button></span></h2>
+    <p class="hint" style="margin-top:-6px">The objects of the firm's format are loaded. Untick to leave one out, edit the wording, or add new ones. <b>Order No.</b>: give 1 to the main object, 2 to the next and so on – the deed prints them in that order as a), b), c)… (objects without a number follow in list order). The heading is optional; objects with the same heading are printed under it as (i), (ii). The "not for profit" and "no activities outside India" objects and the "For removal of doubts" declaration are added at the end automatically.</p>
+    <div class="obj obj-head hint"><span>Use</span><span>Order No. / heading</span><span>Object</span><span></span></div>
     <div id="objs"></div>
+    <div class="preview hint" id="objPreview" style="margin-top:8px"></div>
   </section>
 
   <section class="card" id="s5">
@@ -126,13 +137,30 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
     <div class="grid">
       <div><label>Minimum trustees</label><input type="number" min="1" data-f="min_trustees"></div>
       <div><label>Maximum trustees</label><input type="number" min="1" data-f="max_trustees"></div>
-      <div><label>Term of office bearers elected on vacancy (years)</label><input type="number" min="1" data-f="term_years"></div>
-      <div><label>Executive committee meets once in (months)</label><input type="number" min="1" data-f="ec_meet_months"></div>
-      <div><label>Quorum – executive committee</label><input type="number" min="1" data-f="ec_quorum"></div>
-      <div><label>Meeting of all trustees once in (months)</label><input type="number" min="1" data-f="tr_meet_months"></div>
-      <div><label>Quorum – trustees' meeting</label><input type="number" min="1" data-f="tr_quorum"></div>
-      <div><label>Days of notice for meetings</label><input type="number" min="1" data-f="notice_days"></div>
-      <div class="full"><label>Bank account operated by</label><select data-f="bank_rule"><option>Either of President or Secretary jointly with Treasurer</option><option>Any two trustees jointly</option><option>Managing Trustee singly</option><option>As authorised by the Board of Trustees</option></select></div>
+      <div><label>Term of office of the office bearers (years)</label><input type="number" min="1" data-f="term_years"></div>
+      <div class="full"><label class="check"><input type="checkbox" data-f="meetings"> Add clauses on meetings of trustees (frequency, quorum, notice)</label></div>
+      <div class="mt"><label>Meeting of all trustees once in (months)</label><input type="number" min="1" data-f="tr_meet_months"></div>
+      <div class="mt"><label>Quorum – trustees' meeting</label><input type="number" min="1" data-f="tr_quorum"></div>
+      <div class="mt"><label>Days of notice for meetings</label><input type="number" min="1" data-f="notice_days"></div>
+    </div>
+    <h2 style="margin-top:18px">Operation of the bank account (clause 5(e) of the deed and the bank resolution)</h2>
+    <div class="grid">
+      <div class="full"><label>Mode of operation</label><select data-f="bank_mode">
+        <option value="ob_either">Office bearers – jointly or individually, as decided by the Board (firm's format)</option>
+        <option value="ob_single">Office bearers – any one of them individually</option>
+        <option value="ob_joint">Office bearers – jointly (all, or any two / three of them)</option>
+        <option value="ob_with">Either of the office bearers jointly with another office bearer (e.g. President or Secretary with the Treasurer)</option>
+        <option value="tr_single">Trustees – any one of them individually</option>
+        <option value="tr_joint">Trustees – any two / three of them jointly</option>
+        <option value="tr_all">Trustees – all of them jointly</option>
+        <option value="custom">Own wording</option></select></div>
+      <div class="full bk bk-ob"><label>Office bearers who operate the account</label><div class="bar" id="bankWho"></div></div>
+      <div class="bk bk-with"><label>Jointly with</label><select data-f="bank_with"><option>Treasurer</option><option>Secretary</option><option>President</option><option>Vice President</option><option>Managing Trustee</option></select></div>
+      <div class="bk bk-n"><label>Number signing jointly</label><select data-f="bank_n"><option value="2">Any two</option><option value="3">Any three</option></select></div>
+      <div class="bk bk-lim"><label>Single signature up to (Rs.) – optional</label><input data-f="bank_limit" inputmode="numeric" placeholder="e.g. 50000"><div class="hint">Above this, any two jointly.</div></div>
+      <div class="full bk bk-custom"><label>Wording of the clause</label><textarea data-f="bank_custom" rows="2"></textarea></div>
+      <div class="full"><label class="check"><input type="checkbox" data-f="bank_board"> Add: "The bank account shall be operated by any of the trustees, either individually or jointly, if decided so by the Board of Trustees to that effect."</label></div>
+      <div class="full"><label>As it will read in the deed</label><div class="preview" id="bankPreview"></div></div>
     </div>
   </section>
 
@@ -142,7 +170,8 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <div><label>Place of execution (with PIN) <span class="req">*</span></label><input data-f="exec_place"></div>
       <div><label>Date of execution</label><input type="date" data-f="exec_date"><label class="check" style="margin-top:6px"><input type="checkbox" data-f="date_blank"> Leave the day blank</label></div>
       <div id="monthWrap"><label>Month and year (printed with the blank day)</label><input data-f="exec_month" placeholder="e.g. April 2026"></div>
-      <div><label>Courts having jurisdiction (city) <span class="req">*</span></label><input data-f="jurisdiction"></div>
+      <div><label>Corpus settled on (date)</label><input type="date" data-f="settle_date"><label class="check" style="margin-top:6px"><input type="checkbox" data-f="settle_blank"> Leave blank if not entered</label></div>
+      <div><label>Courts having jurisdiction (city, if the clause is used)</label><input data-f="jurisdiction"></div>
       <div class="full"><label>Additional clauses (optional – one per line; each becomes a numbered clause before the jurisdiction clause)</label><textarea data-f="extra" rows="3"></textarea></div>
       <div class="full"><label>Witnesses (optional – leave blank to write in at execution)</label>
         <div class="grid" id="wits"></div></div>
@@ -158,6 +187,9 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <div><label>PAN of the trust (after allotment)</label><input data-f="trust_pan" maxlength="10" style="text-transform:uppercase"></div>
       <div><label>Bank</label><input data-f="bank_name"></div>
       <div><label>Branch</label><input data-f="bank_branch"></div>
+      <div><label>Type of account</label><select data-f="acc_type"><option>Savings</option><option>Current</option></select></div>
+      <div><label>Date of the trustees' meeting (resolution)</label><input type="date" data-f="res_date"></div>
+      <div><label>Place of the meeting (default: principal office)</label><input data-f="res_place"></div>
       <div><label>Mobile of the trust</label><input data-f="mobile" inputmode="tel"></div>
       <div><label>E-mail of the trust</label><input data-f="email" type="email"></div>
       <div><label>FCRA registration No., if any</label><input data-f="fcra"></div>
@@ -184,7 +216,7 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
     <div class="outs" style="margin-top:8px">
       <button type="button" class="primary" data-out="deed">Trust Deed (Word)<small>For stamp paper and registration</small></button>
       <button type="button" data-out="noc">NOC for the principal office<small>To be signed by the owner</small></button>
-      <button type="button" data-out="resolution">Trustees' resolution – bank account<small>Certified true copy</small></button>
+      <button type="button" data-out="resolution">Resolution – opening and operating the bank account<small>Certified true copy, as per the deed, with specimen signatures</small></button>
       <button type="button" data-out="pan">PAN data sheet<small>For the trust's PAN application</small></button>
       <button type="button" data-out="form104">Form No. 104 data sheet<small>Provisional registration u/s 332(3) and approval u/s 354(2)</small></button>
       <button type="button" data-out="activities">Note on proposed activities<small>Attachment to Form No. 104</small></button>
@@ -212,18 +244,23 @@ const TC = window.TrustCompose, H = TC.helpers;
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const LS = 'trust-draft-v1';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const stdObjects = () => window.TRUST_OBJECTS.flatMap(g => g.items.map(t => ({ id: uid(), use: true, head: g.head, text: t })));
-const newPerson = () => ({ id: uid(), title: 'Mr.', name: '', rel: 'S/o', father: '', dob: '', aadhaar: '', pan: '', address: '', mobile: '', email: '', occupation: '', founder: true, trustee: true, position: 'Trustee', signatory: false });
+const stdObjects = () => window.TRUST_OBJECTS.flatMap(g => g.items.map(t => ({ id: uid(), use: true, head: g.head, text: t, order: '' })));
+const LIB = window.TRUST_OBJECTS.concat(window.TRUST_OBJECTS_LIB || []).flatMap(g => g.items.map(t => ({ head: g.head, text: t })));
+const newPerson = (pos) => ({ id: uid(), title: 'Mr.', name: '', rel: 'S/o', father: '', dob: '', aadhaar: '', pan: '', address: '', mobile: '', email: '', occupation: '', founder: true, trustee: true, position: pos || 'Trustee', signatory: !!pos });
 const blank = () => { const d = new Date(); return {
-  trust_name: '', corpus: '10000', act: '2025', property: '', other_contribute: true, obj_takeover: true, no_outside_india: true, arbitration: true, mask: false,
+  trust_name: '', corpus: '25000', act: '2025', property: '', other_contribute: false, obj_takeover: false, no_outside_india: true, arbitration: false, jur_clause: false, adm_heading: false, sign_pos: false, mask: false, page: 'letter',
   off_flat: '', off_building: '', off_road: '', off_area: '', off_city: '', off_state: 'Tamil Nadu', off_pin: '', off_owner: '', off_owner_rel: '',
-  persons: [newPerson(), newPerson()], objects: stdObjects(),
-  min_trustees: 2, max_trustees: 10, term_years: 3, ec_meet_months: 3, ec_quorum: 3, tr_meet_months: 6, tr_quorum: 3, notice_days: 15, bank_rule: 'Either of President or Secretary jointly with Treasurer',
+  persons: [newPerson('President'), newPerson('Secretary')], objects: stdObjects(),
+  min_trustees: 2, max_trustees: 10, term_years: 5, meetings: false, tr_meet_months: 6, tr_quorum: 2, notice_days: 15,
+  bank_mode: 'ob_either', bank_who: ['President', 'Secretary'], bank_with: 'Treasurer', bank_n: '2', bank_limit: '', bank_board: true, bank_custom: '',
+  settle_date: '', settle_blank: true, acc_type: 'Savings', res_date: '', res_place: '',
   exec_place: '', exec_date: '', date_blank: true, exec_month: `${MONTHS[d.getMonth()]} ${d.getFullYear()}`, jurisdiction: 'Chennai', extra: '',
   witnesses: [{ name: '', rel: '', address: '' }, { name: '', rel: '', address: '' }],
   sro: '', deed_date: '', deed_regno: '', trust_pan: '', bank_name: '', bank_branch: '', mobile: '', email: '', fcra: '', rpt: '', want354: true, activities: '', ref: '',
   tracker: {}, f104_date: '', commence: '' }; };
-let c; try { c = Object.assign(blank(), JSON.parse(localStorage.getItem(LS) || 'null') || {}); } catch (e) { c = blank(); }
+const migrate = d => { if (d && d.bank_rule && !d.bank_mode) { d.bank_mode = d.bank_rule === 'Any two trustees jointly' ? 'tr_joint' : d.bank_rule === 'Managing Trustee singly' ? 'ob_single' : d.bank_rule === 'As authorised by the Board of Trustees' ? 'tr_single' : 'ob_with';
+  d.bank_who = d.bank_rule === 'Managing Trustee singly' ? ['Managing Trustee'] : ['President', 'Secretary']; delete d.bank_rule; } return d; };
+let c; try { c = Object.assign(blank(), migrate(JSON.parse(localStorage.getItem(LS) || 'null')) || {}); } catch (e) { c = blank(); }
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(c)); } catch (e) {} };
 
 /* ---------- simple fields ---------- */
@@ -236,6 +273,13 @@ function refresh(){
   const n = Number(String(c.corpus).replace(/[^\d]/g, '')) || 0;
   $('#corpusWords').textContent = n ? `Rupees ${H.words(n)} only` : '';
   $('#monthWrap').hidden = !c.date_blank; document.querySelector('[data-f=exec_date]').disabled = !!c.date_blank;
+  document.querySelector('[data-f=settle_date]').disabled = false;
+  document.querySelectorAll('.mt').forEach(el => el.hidden = !c.meetings);
+  const m = c.bank_mode || 'ob_either';
+  const show = { 'bk-ob': m.startsWith('ob_'), 'bk-with': m === 'ob_with', 'bk-n': m === 'ob_joint' || m === 'tr_joint', 'bk-lim': ['ob_either', 'ob_single', 'tr_single'].includes(m), 'bk-custom': m === 'custom' };
+  Object.entries(show).forEach(([k, v]) => document.querySelectorAll('.' + k).forEach(el => el.hidden = !v));
+  $('#bankPreview').textContent = TC.bankText(c);
+  renderBankWho(); objPreview();
   renderSteps(false); renderChecks();
 }
 
@@ -279,16 +323,41 @@ function renderObjs(){
   const box = $('#objs'); box.innerHTML = '';
   c.objects.forEach((o, i) => {
     const d = document.createElement('div'); d.className = 'obj' + (o.use ? '' : ' off');
-    d.innerHTML = `<input type="checkbox" data-o="use" ${o.use ? 'checked' : ''} title="Include in the deed"><input data-o="head" value="${esc(o.head)}" placeholder="Heading (optional)"><textarea data-o="text" rows="2">${esc(o.text)}</textarea>
-      <div><button type="button" class="sm link" data-up ${i ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-del>✕</button></div>`;
-    d.addEventListener('input', e => { const k = e.target.dataset.o; if (!k) return; o[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; if (k === 'use') d.classList.toggle('off', !o.use); save(); renderChecks(); });
+    d.innerHTML = `<input type="checkbox" data-o="use" ${o.use ? 'checked' : ''} title="Include in the deed">
+      <div class="ordcol"><input type="number" min="1" data-o="order" value="${esc(o.order)}" placeholder="No." title="Order No. – 1 for the main object"><input data-o="head" value="${esc(o.head)}" placeholder="Heading (optional)"></div>
+      <textarea data-o="text" rows="2">${esc(o.text)}</textarea>
+      <div><button type="button" class="sm link" data-up ${i ? '' : 'disabled'} title="Move up">↑</button><button type="button" class="sm link" data-down ${i < c.objects.length - 1 ? '' : 'disabled'} title="Move down">↓</button><button type="button" class="sm link danger" data-del title="Remove">✕</button></div>`;
+    d.addEventListener('input', e => { const k = e.target.dataset.o; if (!k) return; o[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; if (k === 'use') d.classList.toggle('off', !o.use); save(); renderChecks(); objPreview(); });
     d.querySelector('[data-del]').onclick = () => { c.objects.splice(i, 1); save(); renderObjs(); renderChecks(); };
     d.querySelector('[data-up]').onclick = () => { c.objects.splice(i - 1, 0, c.objects.splice(i, 1)[0]); save(); renderObjs(); };
+    d.querySelector('[data-down]').onclick = () => { c.objects.splice(i + 1, 0, c.objects.splice(i, 1)[0]); save(); renderObjs(); };
     box.appendChild(d);
   });
+  objPreview();
 }
-$('#addObj').onclick = () => { c.objects.push({ id: uid(), use: true, head: '', text: '' }); save(); renderObjs(); const t = $('#objs').lastElementChild.querySelector('textarea'); t.focus(); };
+function objPreview(){
+  const L = n => { let s = ''; n++; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(97 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+  const list = TC.orderedObjects(c);
+  $('#objPreview').innerHTML = list.length ? '<b>Order in the deed:</b> ' + list.map((o, i) => `${L(i)}) ${esc(o.text.slice(0, 60))}${o.text.length > 60 ? '…' : ''}`).join(' · ') : '';
+}
+$('#addObj').onclick = () => { c.objects.push({ id: uid(), use: true, head: '', text: '', order: '' }); save(); renderObjs(); $('#objs').lastElementChild.querySelector('textarea').focus(); };
+$('#libSel').innerHTML += LIB.map((o, i) => `<option value="${i}">${esc((o.head ? o.head + ' – ' : '') + o.text.slice(0, 90))}${o.text.length > 90 ? '…' : ''}</option>`).join('');
+$('#libSel').onchange = e => { const o = LIB[+e.target.value]; e.target.value = ''; if (!o) return;
+  if (c.objects.some(x => x.text.trim() === o.text.trim())) { const x = c.objects.find(x => x.text.trim() === o.text.trim()); x.use = true; }
+  else c.objects.push({ id: uid(), use: true, head: '', text: o.text, order: '' });
+  save(); renderObjs(); renderChecks(); };
+$('#sortObj').onclick = () => { const used = TC.orderedObjects(c); const rest = c.objects.filter(o => !used.includes(o)); c.objects = used.concat(rest); c.objects.forEach((o, i) => { if (o.use) o.order = String(used.indexOf(o) + 1); else o.order = ''; }); save(); renderObjs(); };
 $('#resetObj').onclick = async () => { if (!(await ask("Restore the firm's standard objects?", 'The objects on screen will be replaced by those in the firm\'s format.'))) return; c.objects = stdObjects(); save(); renderObjs(); renderChecks(); };
+
+/* ---------- bank: office bearers ---------- */
+function renderBankWho(){
+  const opts = ['President', 'Vice President', 'Secretary', 'Treasurer', 'Managing Trustee'];
+  const box = $('#bankWho'); const cur = c.bank_who || [];
+  const html = opts.map(o => `<label class="check"><input type="checkbox" value="${o}" ${cur.includes(o) ? 'checked' : ''}> ${o}</label>`).join('');
+  if (box.dataset.v !== cur.join('|')) { box.innerHTML = html; box.dataset.v = cur.join('|'); }
+}
+$('#bankWho').onchange = e => { const v = e.target.value; c.bank_who = (c.bank_who || []).filter(x => x !== v); if (e.target.checked) c.bank_who.push(v);
+  const order = ['President', 'Vice President', 'Secretary', 'Treasurer', 'Managing Trustee']; c.bank_who.sort((a, b) => order.indexOf(a) - order.indexOf(b)); save(); refresh(); };
 
 /* ---------- witnesses ---------- */
 function renderWits(){
@@ -332,10 +401,13 @@ function renderChecks(){
 /* ---------- documents ---------- */
 function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
 function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+const PAGES = { letter: [12240, 15840], a4: [11906, 16838], legal: [12240, 20160] };
 function render(tpl, data){
   const doc = new window.docxtemplater(new PizZip(b64ToBytes(window.LLP_TEMPLATES[tpl])), { paragraphLoop: true, linebreaks: true, nullGetter: () => '' });
   doc.render(data);
-  return new Blob([doc.getZip().generate({ type: 'uint8array', compression: 'DEFLATE' })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const z = doc.getZip();
+  if (tpl === 'trust_deed') { const [w, h] = PAGES[c.page] || PAGES.letter; z.file('word/document.xml', z.file('word/document.xml').asText().replace(/<w:pgSz w:w="\d+" w:h="\d+"/, `<w:pgSz w:w="${w}" w:h="${h}"`)); }
+  return new Blob([z.generate({ type: 'uint8array', compression: 'DEFLATE' })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 }
 function ask(title, html){ return new Promise(res => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg'); const done = v => { dl.close(); res(v); }; $('#askYes').onclick = () => done(true); $('#askNo').onclick = () => done(false); dl.oncancel = () => res(false); dl.showModal(); }); }
 const tag = () => (c.trust_name || 'Trust').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 50);
@@ -361,7 +433,7 @@ document.querySelectorAll('[data-out]').forEach(b => b.onclick = async () => {
 $('#saveCase').onclick = () => download(`${tag()}_trust_case.json`, new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' }));
 $('#openCase').onclick = () => $('#caseFile').click();
 $('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const d = JSON.parse(await f.text()); if (!('trust_name' in d) || !Array.isArray(d.persons)) throw 0; c = Object.assign(blank(), d); save(); all(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
+  try { const d = JSON.parse(await f.text()); if (!('trust_name' in d) || !Array.isArray(d.persons)) throw 0; c = Object.assign(blank(), migrate(d)); save(); all(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
   catch (err) { $('#topMsgs').innerHTML = '<div class="m-err">That file is not a trust case file.</div>'; } };
 $('#newCase').onclick = async () => { if (!(await ask('Start a new trust?', 'The details on screen will be cleared. Save the case file first if you need it.'))) return; c = blank(); save(); all(); };
 
@@ -382,14 +454,19 @@ $('#xlsxFile').onchange = async e => {
     const dt = v => { if (v === undefined || v === '') return ''; const d = LLPXlsx.date(v); if (d === null) { warns.push(`"${S(v)}" is not a valid date.`); return ''; } return d; };
     const yes = (v, d) => v === undefined || S(v) === '' ? d : /^y/i.test(S(v));
     const n = blank();
-    ['trust_name','off_flat','off_building','off_road','off_area','off_city','off_state','off_pin','off_owner','off_owner_rel','exec_place','jurisdiction','sro','bank_rule','bank_name','bank_branch','mobile','email']
+    ['trust_name','off_flat','off_building','off_road','off_area','off_city','off_state','off_pin','off_owner','off_owner_rel','exec_place','jurisdiction','sro','bank_name','bank_branch','mobile','email','bank_with','acc_type']
       .forEach(k => { if (det[k] !== undefined && S(det[k]) !== '') n[k] = S(det[k]); });
     ['corpus','min_trustees','max_trustees','term_years','ec_meet_months','ec_quorum','tr_meet_months','tr_quorum','notice_days'].forEach(k => { if (det[k] !== undefined && S(det[k]) !== '') n[k] = S(det[k]).replace(/[^\d]/g, ''); });
+    const BM = { 'office bearers jointly or individually as decided by the board': 'ob_either', 'office bearers - any one individually': 'ob_single', 'office bearers - jointly': 'ob_joint', 'either office bearer jointly with another': 'ob_with', 'trustees - any one individually': 'tr_single', 'trustees - jointly': 'tr_joint', 'trustees - all jointly': 'tr_all' };
+    if (det.bank_mode) n.bank_mode = BM[S(det.bank_mode).toLowerCase()] || 'ob_either';
+    if (det.bank_who) n.bank_who = S(det.bank_who).split(/\s*,\s*/).map(x => ['President', 'Vice President', 'Secretary', 'Treasurer', 'Managing Trustee'].find(o => o.toLowerCase() === x.toLowerCase())).filter(Boolean);
+    ['bank_n', 'bank_limit'].forEach(k => { if (det[k] !== undefined && S(det[k]) !== '') n[k] = S(det[k]).replace(/[^\d]/g, ''); });
+    const sd = dt(det.settle_date); if (sd) { n.settle_date = sd; }
     const ed = dt(det.exec_date); if (ed) { n.exec_date = ed; n.date_blank = false; }
     n.persons = rows(P).filter(p => S(p.name)).map(p => { const x = newPerson();
       Object.assign(x, { title: S(p.title) || 'Mr.', name: S(p.name), rel: ['S/o', 'D/o', 'W/o'].find(r => r.toLowerCase() === S(p.rel).toLowerCase()) || 'S/o', father: S(p.father), dob: dt(p.dob), aadhaar: S(p.aadhaar), pan: S(p.pan).toUpperCase(),
         address: S(p.address), mobile: S(p.mobile), email: S(p.email), occupation: S(p.occupation), founder: yes(p.founder, true), trustee: yes(p.trustee, true), position: S(p.position) || 'Trustee', signatory: yes(p.signatory, false) }); return x; });
-    if (O) { const ob = rows(O).filter(o => S(o.text)); if (ob.length) n.objects = ob.map(o => ({ id: uid(), use: yes(o.use, true), head: S(o.head), text: S(o.text) })); }
+    if (O) { const ob = rows(O).filter(o => S(o.text)); if (ob.length) n.objects = ob.map(o => ({ id: uid(), use: yes(o.use, true), head: S(o.head), text: S(o.text), order: S(o.order).replace(/[^\d]/g, '') })); }
     if (C) n.extra = rows(C).map(r => S(r.text)).filter(Boolean).join('\n');
     if (W) rows(W).slice(0, 2).forEach((w, i) => { n.witnesses[i] = { name: S(w.name), rel: S(w.rel), address: S(w.address) }; });
     if ((c.trust_name || c.persons.some(p => p.name)) && !(await ask('Replace the details on screen?', `The details on screen will be replaced by those in ${esc(f.name)}.`))) return;

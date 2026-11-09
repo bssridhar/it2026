@@ -122,12 +122,14 @@ def table(d, widths, rows, bordered=True, header=True, size=None, spacing=1.0):
 # ---------------------------------------------------------------- trust deed
 def deed():
     d = base(12, 1.5)
+    s = d.sections[0]
+    s.page_width, s.page_height = Cm(21.59), Cm(27.94)   # Letter, as in the firm's format; the tool can switch to A4 / Legal
     page_footer(d)
     para(d, "TRUST DEED OF", bold=True, align="c", after=6, size=13)
     para(d, "{trust_name_upper}", bold=True, align="c", after=18, size=13)
     para(d, "{intro}", after=10, tab=1.27)
     tag(d, "{#founders}")
-    para(d, "{n}.\t{text};", left=1.27, hanging=0.63, after=8, tab=1.27)
+    para(d, "{n}.\t{text}", left=1.27, hanging=0.63, after=8, tab=1.27)
     tag(d, "{/founders}")
     para(d, "", after=0).add_run("hereinafter called ")
     d.paragraphs[-1].add_run("{founders_called}").bold = True
@@ -149,6 +151,7 @@ def deed():
     p = para(d, "", left=2.29, hanging=1.02, after=6, tab=2.29, keep=True)
     p.add_run("{num}\t"); p.add_run("{text}").bold = True
     tag(d, "{/l2b}")
+    tag(d, "{#l2l}"); para(d, "{num}\t{text}", left=2.29, hanging=1.02, after=10, tab=2.29, align="l"); tag(d, "{/l2l}")
     # sub-objects under a heading
     tag(d, "{#l3}"); para(d, "{num}\t{text}", left=3.05, hanging=0.76, after=6, tab=3.05); tag(d, "{/l3}")
     # first trustees table
@@ -160,10 +163,11 @@ def deed():
     tag(d, "{/blocks}")
 
     para(d, "IN WITNESS WHEREOF THE {founder_word} AND THE TRUSTEE(S) HEREIN HAVE SET THEIR HANDS THIS DAY AND YEAR ABOVE MENTIONED.", bold=True, before=12, after=12)
-    para(d, "ACCEPTED", bold=True, after=8, keep=True)
-    table(d, [Cm(1.4), Cm(5.8), Cm(4.4), Cm(3.4)], [["Sl. No", "Name of the Member", "Position", "Signature"],
-                                                  ["{#signs}{n}", "{name}", "{position}", "\n\n{/signs}"]])
-    para(d, "", after=12)
+    para(d, "ACCEPTED", bold=True, after=0, keep=True)
+    tag(d, "{#signs}")
+    para(d, "({name_upper})", bold=False, align="r", before=42, after=0)
+    para(d, "{position}", align="r", after=6, size=10)
+    tag(d, "{/signs}")
     para(d, "WITNESS:-", bold=True, before=12, after=8, keep=True)
     tag(d, "{#witnesses}")
     para(d, "{n}.\t{text}", left=1.27, hanging=1.27, after=24, tab=1.27, align="l")
@@ -183,6 +187,8 @@ def letter():
     tag(d, "{#salutation}"); para(d, "{salutation}", align="l", after=8); tag(d, "{/salutation}")
     tag(d, "{#paras}"); para(d, "{.}", after=10); tag(d, "{/paras}")
     tag(d, "{#resolved}"); para(d, "{.}", left=1.0, after=10); tag(d, "{/resolved}")
+    tag(d, "{#after_head}"); para(d, "{after_head}", bold=True, align="l", before=8, after=6); tag(d, "{/after_head}")
+    tag(d, "{#after}"); para(d, "{.}", align="l", after=14, left=0.6); tag(d, "{/after}")
     tag(d, "{#closing}"); para(d, "{closing}", align="l", before=6, after=36); tag(d, "{/closing}")
     para(d, "{sign}", align="l", after=12)
     tag(d, "{#place_date}"); para(d, "{place_date}", align="l", after=10); tag(d, "{/place_date}")

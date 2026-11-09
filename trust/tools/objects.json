@@ -1,26 +1,86 @@
 [
-  {"head": "Medical Relief and Healthcare Services", "items": [
-    "To establish, maintain, and support pediatric healthcare services and facilities, including the organization of medical camps, diagnostic centers, and specialized clinics for children.",
-    "To provide financial and medical assistance for the treatment of serious and life-threatening illnesses in children belonging to underprivileged sections of society.",
-    "To facilitate early intervention programs and establish a referral mechanism with tertiary healthcare systems to ensure timely and optimal medical outcomes for neonatal and pediatric patients."]},
-  {"head": "Education and Skill Development", "items": [
-    "To promote education by providing scholarships, stipends, and financial aid to deserving students, and to distribute school supplies, books, and digital learning tools to facilitate holistic development.",
-    "To establish or support diverse learning centers and vocational training institutes that focus on nurturing children into capable and responsible citizens."]},
-  {"head": "Preventive Health and Nutrition Awareness", "items": [
-    "To conduct awareness programs for families regarding nutrition, childhood vaccinations, and hygiene, aimed at the prevention of diseases and the promotion of community health.",
-    "To publish or distribute educational material, journals, and digital content centered on pediatric wellness and early disease intervention."]},
-  {"head": "Research and Professional Training", "items": [
-    "To encourage and fund scientific research in the field of pediatric medicine and healthcare delivery systems.",
-    "To organize seminars, workshops, and training programs for medical professionals, paramedics, and caregivers to enhance capacity building and foster innovation in child healthcare."]},
-  {"head": "Collaborative Partnerships", "items": [
-    "To enter into agreements or collaborate with hospitals, schools, universities, and medical colleges both in India and abroad, to enhance the long-term healthcare infrastructure and educational well-being of children."]},
-  {"head": "", "items": ["To undertake the activity of providing support to elderly people, orphans who are in need of Emotional, medical, Psychological and by any other needs for betterment of their health."]},
-  {"head": "", "items": ["To help the poor, needy and people of destitute with Healthcare, Ambulance, health camp and Emergency care services."]},
-  {"head": "", "items": ["To print books, materials, pamphlets, magazines and distribute them to promote Charitable, educational and knowledge sharing purposes."]},
-  {"head": "", "items": ["Providing for grants, scholarships, fellowships and other forms of financial assistance to the needy and deserving students for pursuing education, vocational training, skill development etc."]},
-  {"head": "", "items": ["Granting of financial assistance to any educational institution for granting scholarships, prizes, medals, awards for excellence in studies, sports and scientific research, distribution of books and note books for poor and deserving students."]},
-  {"head": "", "items": ["Establishment, conduct, maintenance of clinical laboratories, hospitals, nursing homes, dispensaries and institutions of similar nature and providing financial assistance to the deserving persons for medical treatment, in any medical institution."]},
-  {"head": "", "items": ["Establishment, conduct, maintenance of old age homes, homes for physically challenged men, women and children and persons with similar disabilities and also for granting financial assistance to institutions performing similar activities."]},
-  {"head": "", "items": ["Providing for or contributing to education and scientific research and development."]},
-  {"head": "", "items": ["Providing relief to the poor and advancing any other object of general public utility."]}
+ {
+  "head": "",
+  "items": [
+   "To help the poor, needy and people of destitute with Healthcare, Ambulance, health camp and Emergency care services."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "To print books, materials, pamphlets, magazines and distribute them to promote Charitable, educational and knowledge sharing purposes."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "To conduct education programs for the rural youth, planning for good education for children in villages, etc."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Developing technology based solutions for conservation of resources like drinking water, oil, electricity, etc."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "To create viable solutions aiding rural population to create value and resources within their region."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Inculcating good thoughts among the country’s youth by organizing guidance programs."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Providing for grants, scholarships, fellowships and other forms of financial assistance to the needy and deserving students for pursuing education, vocational training, skill development etc."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Granting of financial assistance to any educational institution for granting scholarships, prizes, medals, awards for excellence in studies, sports and scientific research, distribution of books and note books for poor and deserving students."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Establishment, conduct, maintenance of clinical laboratories, hospitals, nursing homes, dispensaries and institutions of similar nature and providing financial assistance to the deserving persons for medical treatment, in any medical institution."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Providing financial assistance for performing annadhanam and feeding the poor directly and through other institutions."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Establishment, conduct, maintenance of old age homes, homes for physically challenged men, women and children and persons with similar disabilities and also for granting financial assistance to institutions performing similar activities."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Grant of donation to any Temple, Mosque, Church, Gurudwara and other places of worship and / or religious institutions. However, the Trust shall not undertake any religious activities."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Providing for or contributing to education and scientific research and development."
+  ]
+ },
+ {
+  "head": "",
+  "items": [
+   "Providing relief to the poor and advancing any other object of general public utility."
+  ]
+ }
 ]

@@ -10,9 +10,15 @@ Open `index.html` (or pick the tool on the home page). Everything runs in the br
 2. **Principal office** – address lines and the owner (for the NOC).
 3. **Founders and trustees** – one card per person: title, name, S/o-D/o-W/o, father's / husband's name, date of birth
    (age is printed), Aadhaar, PAN, address, position, and Founder / Trustee / Bank signatory flags.
-4. **Objects** – the objects of the firm's format are loaded; tick / untick, edit, reorder, add. Objects with the same
-   heading are printed under it as (i), (ii)…
-5. **Administration** – minimum and maximum trustees, term, meeting frequency, quorums, notice, bank operation.
+4. **Objects** – the objects of the firm's format (Vasavi Mitra Foundation deed) are loaded; tick / untick, edit,
+   move up / down, add new ones or add from the standard library (objects of the earlier format). Give **Order No.** 1 to
+   the main object, 2 to the next…; "Arrange by order No." sorts the list. The deed prints them as a), b), c)….
+5. **Administration** – minimum and maximum trustees, term of office bearers, optional meeting clauses, and the
+   **operation of the bank account**: office bearers jointly or individually as decided by the Board (firm's format),
+   any one office bearer individually, office bearers jointly (all / any two / three), either office bearer jointly with
+   another (e.g. President or Secretary with the Treasurer), trustees individually / any two jointly / all jointly, or
+   own wording; optional single-signature limit and the Board's power to authorise any trustee. The same wording is
+   used in clause 5(e) of the deed and in the bank resolution.
 6. **Execution** – place, date (or blank day with month and year), jurisdiction, additional clauses, witnesses.
 7. **Registration, PAN, bank, Form 104** – Sub-Registrar, Document No., trust PAN, bank, contact, FCRA / public trust
    registration, section 354(2) approval, note on proposed activities.
@@ -20,7 +26,8 @@ Open `index.html` (or pick the tool on the home page). Everything runs in the br
 
 ## Documents
 
-Trust Deed · NOC for the principal office · Trustees' resolution for the bank account · PAN data sheet ·
+Trust Deed (Letter / A4 / Legal) · NOC for the principal office · Resolution for opening and operating the bank account
+(as per the deed, with specimen signatures) · PAN data sheet ·
 Form No. 104 data sheet · Note on proposed activities · Formalities checklist.
 
 ## Statutory references

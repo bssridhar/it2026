@@ -43,18 +43,20 @@ TRUST = [
     ("#", "EXECUTION OF THE DEED"),
     ("exec_place", "Place of execution (with PIN)", True, "text", None),
     ("exec_date", "Date of execution (leave blank to fill in at execution)", False, "date", None),
-    ("jurisdiction", "Courts having jurisdiction (city)", True, "text", None),
+    ("settle_date", "Corpus settled on (DD/MM/YYYY) – optional", False, "date", None),
+    ("jurisdiction", "Courts having jurisdiction (city) – only if the jurisdiction clause is used", False, "text", None),
     ("sro", "Sub-Registrar office for registration", False, "text", None),
     ("#", "ADMINISTRATION"),
     ("min_trustees", "Minimum number of trustees", True, "number", None),
     ("max_trustees", "Maximum number of trustees", True, "number", None),
-    ("term_years", "Term of office bearers elected on vacancy (years)", True, "number", None),
-    ("ec_meet_months", "Executive committee meets once in (months)", True, "number", None),
-    ("ec_quorum", "Quorum for executive committee meetings", True, "number", None),
-    ("tr_meet_months", "Meeting of all trustees once in (months)", True, "number", None),
-    ("tr_quorum", "Quorum for meetings of trustees", True, "number", None),
-    ("notice_days", "Days of notice for meetings", True, "number", None),
-    ("bank_rule", "Bank account operated by", True, "text", ["Either of President or Secretary jointly with Treasurer", "Any two trustees jointly", "Managing Trustee singly", "As authorised by the Board of Trustees"]),
+    ("term_years", "Term of office of the office bearers (years)", True, "number", None),
+    ("#", "OPERATION OF THE BANK ACCOUNT"),
+    ("bank_mode", "Mode of operation", True, "text", ["Office bearers jointly or individually as decided by the Board", "Office bearers - any one individually", "Office bearers - jointly", "Either office bearer jointly with another", "Trustees - any one individually", "Trustees - jointly", "Trustees - all jointly"]),
+    ("bank_who", "Office bearers who operate (comma separated: President, Vice President, Secretary, Treasurer, Managing Trustee)", False, "text", None),
+    ("bank_with", "Jointly with (for 'Either office bearer jointly with another')", False, "text", ["Treasurer", "Secretary", "President", "Vice President", "Managing Trustee"]),
+    ("bank_n", "Number signing jointly (2 or 3)", False, "number", None),
+    ("bank_limit", "Single signature up to Rs. (optional)", False, "number", None),
+    ("acc_type", "Type of account", False, "text", ["Savings", "Current"]),
     ("#", "BANK AND PAN"),
     ("bank_name", "Bank for the trust account", False, "text", None),
     ("bank_branch", "Branch", False, "text", None),
@@ -107,7 +109,7 @@ def build():
         ("2. 'Persons': every founder and trustee, one row each, in the order they should appear in the deed. Mark Founder / Trustee and the position.", False),
         ("   The 'Check' column turns red when the Aadhaar, PAN, PIN or age looks wrong.", False),
         ("3. 'Objects': the objects clause of the deed, as in the firm's format. Set 'Use' to No to drop an object, edit the wording, or add rows.", False),
-        ("   Rows with the same 'Group heading' are printed under that heading; leave it blank for a stand-alone object.", False),
+        ("   'Order No.': 1 for the main object, 2 for the next, and so on. Objects without a number follow in the order of the rows.", False),
         ("4. 'Clauses': any additional clauses to be added to the deed.", False),
         ("5. 'Witnesses': the two witnesses (optional – can be written in at execution).", False),
         ("6. Save, and use 'Import Excel' in the Trust tool.", False),
@@ -121,8 +123,8 @@ def build():
     ws["B1"], ws["C1"], ws["D1"] = "Particulars", "Details", "Check"
     for c in (ws["B1"], ws["C1"], ws["D1"]):
         c.font, c.fill, c.border = HEAD, HEAD_FILL, BOX
-    defaults = {"min_trustees": 2, "max_trustees": 10, "term_years": 3, "ec_meet_months": 3, "ec_quorum": 3, "tr_meet_months": 6, "tr_quorum": 3,
-                "notice_days": 15, "bank_rule": "Either of President or Secretary jointly with Treasurer", "corpus": 10000, "off_state": "Tamil Nadu", "jurisdiction": "Chennai"}
+    defaults = {"min_trustees": 2, "max_trustees": 10, "term_years": 5, "bank_mode": "Office bearers jointly or individually as decided by the Board",
+                "bank_who": "President, Secretary", "bank_n": 2, "acc_type": "Savings", "corpus": 25000, "off_state": "Tamil Nadu"}
     r = 2
     for row in TRUST:
         if row[0] == "#":
@@ -143,7 +145,7 @@ def build():
             lst(ws, vc.coordinate, choices)
         if key == "off_pin":
             ws.cell(row=r, column=4, value=f'=IF(C{r}="","",IF(AND(LEN(C{r})=6,ISNUMBER(--C{r})),"OK","PIN must be 6 digits"))')
-        if key in ("min_trustees", "max_trustees", "ec_quorum", "tr_quorum", "corpus"):
+        if key in ("min_trustees", "max_trustees", "corpus"):
             dv = DataValidation(type="whole", operator="greaterThan", formula1="0", allow_blank=True, showErrorMessage=True, error="Enter a whole number above zero")
             ws.add_data_validation(dv); dv.add(vc.coordinate)
         r += 1
@@ -183,18 +185,18 @@ def build():
             pass
 
     os_ = wb.create_sheet("Objects")
-    head(os_, [("use", "Use (Yes/No)", 9, True), ("head", "Group heading (blank for a stand-alone object)", 34, False), ("text", "Object", 110, True)])
+    head(os_, [("use", "Use (Yes/No)", 9, True), ("order", "Order No. (1 = main object)", 12, False), ("head", "Heading (optional)", 24, False), ("text", "Object", 110, True)])
     lst(os_, "A3:A120", ["Yes", "No"])
     rr = 3
     with open(os.path.join(HERE, "objects.json")) as fh:
         for g in json.load(fh):
             for t in g["items"]:
-                for j, v in enumerate(("Yes", g["head"], t), 1):
+                for j, v in enumerate(("Yes", None, g["head"], t), 1):
                     c = os_.cell(row=rr, column=j, value=v)
                     c.border, c.alignment = BOX, WRAP
                 rr += 1
     for r2 in range(rr, rr + 15):
-        for j in range(1, 4):
+        for j in range(1, 5):
             os_.cell(row=r2, column=j).border = BOX
 
     cs = wb.create_sheet("Clauses")
