@@ -6,6 +6,7 @@
   - include the desk calculator: `<script src="../shared/calc.js"></script>` just before `</body>`
     (it adds the flashing "Calculator" box at the bottom right);
   - have Save / Open case file (JSON) and keep a draft in localStorage.
-- Register each tool in `home-config.js` and add a row to `README.md`.
+- Register each tool in `home-config.js` and add a row to `README.md`. The home page (`index.html`) also loads
+  `shared/calc.js`.
 - Never commit client data (sample documents with Aadhaar, PAN, etc.); test with dummy data only.
 - Outputs follow the ICAI Code of Ethics: nothing that solicits professional work.
