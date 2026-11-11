@@ -4,6 +4,10 @@ Browser-based tools that fill the firm's standard formats from one set of inputs
 **Double-click `index.html` in this folder** to open the home page and pick a tool; each tool has an
 "All tools" link back to it. Nothing is uploaded anywhere – everything runs in the browser.
 
+**Copying the kit:** keep the whole folder together. Every tool uses the common code in `shared/`, so a tool's folder
+copied on its own will not work (it shows a red "Part of the tool kit is missing" message). Copy or unzip the complete
+folder – `index.html`, `home-config.js`, `shared/` and the tool folders – to the same place.
+
 | Folder | Tool |
 |---|---|
 | `llp-docs/` | LLP Registration Tool Kit: Form 9, consent letter, subscription sheet, NOC, LLP Agreement, data sheet, print set |
