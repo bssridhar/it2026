@@ -14,7 +14,6 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
-    "New: Exchange Rate for Tax – rate and date under Rules 206 / 207, ICDS VI and GST rule 34, with SBI TT rates by date.",
     "New: Form 26AS · AIS · TIS Consolidator – reads the three PDFs and prepares the income consolidation workbook with TDS credit and review points.",
     "New: EPF and ESI Monthly Returns – ECR file, ESIC upload file, registers and portal reconciliation from the salary sheet.",
     "New: Trust Formation – deed, NOC, bank resolution, PAN and Form 104 data sheets, and a checklist of every formality.",
@@ -114,15 +113,6 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Section 393 rate chart (all Table rows) and TDS calculator with thresholds, showing the section and Table Sl. No. to select when paying TDS on the e-filing portal.",
       added: "2026-11-07"
-    },
-    {
-      id: "fxrate",
-      title: "Exchange Rate for Tax – Income-tax and GST",
-      category: "Income Tax",
-      path: "fxrate/index.html",
-      status: "available",
-      description: "Rate and date as per Rules 206 and 207 (Income-tax Rules, 2026), ICDS VI and CGST rule 34; SBI TT rates by date with statutory fallback, screenshot, working paper, register and exchange difference.",
-      added: "2026-11-12"
     },
     {
       id: "26as-ais-tis",
