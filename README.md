@@ -22,6 +22,7 @@ folder – `index.html`, `home-config.js`, `shared/` and the tool folders – to
 | `trust/` | Trust Formation: deed, NOC, resolution, PAN and Form 104 data sheets, formalities checklist |
 | `pfesi/` | EPF and ESI monthly returns: ECR file, ESIC upload file (.xls), registers, summary and reconciliation |
 | `26as-ais-tis/` | Form 26AS · AIS · TIS Consolidator: income consolidation workbook (Excel) for the computation of total income, TDS credit, review points |
+| `fxrate/` | Exchange Rate for Tax: Rules 206 / 207, ICDS VI, CGST rule 34; SBI TT rates by date, working paper |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`

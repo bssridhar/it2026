@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exchange Rate for Tax</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6;--hi:#fff3c4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d;--hi:#3d3410}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d;--hi:#3d3410}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1150px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 14px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 14px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3{font-size:.95rem;margin:14px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink);margin:0}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.num{text-align:right}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.result{border:2px solid var(--accent);border-radius:10px;padding:14px 16px}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:6px 0 10px}
+.big div{background:var(--head);border-radius:8px;padding:10px 12px}
+.big span{display:block;font-size:.78rem;color:var(--muted)}
+.big b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.basis{background:var(--lock);border-radius:8px;padding:10px 12px;font-size:.9rem;margin:8px 0}
+ol.steps{margin:6px 0;padding-left:20px;font-size:.9rem}
+table.t{border-collapse:collapse;width:100%;font-size:.86rem}
+table.t th,table.t td{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600;white-space:nowrap}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.hi td{background:var(--hi)}
+.tw{overflow-x:auto}
+.shot img{max-width:100%;max-height:260px;border:1px solid var(--line);border-radius:6px;display:block;margin-top:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Exchange Rate for Tax – Income-tax and GST</h1>
+  <p class="sub">Works out which rate and which date the law requires (Income-tax Rules, 2026 – rules 206 and 207, ICDS VI; CGST Rules – rule 34), looks up the SBI TT rate for that date, and prepares a working paper with the source.</p>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="conv" aria-selected="true">Convert a transaction</button>
+    <button type="button" role="tab" data-tab="search" aria-selected="false">Search rates by date</button>
+    <button type="button" role="tab" data-tab="reg" aria-selected="false">Register</button>
+    <button type="button" role="tab" data-tab="law" aria-selected="false">The law</button>
+  </div>
+
+  <!-- ============ convert ============ -->
+  <div data-panel="conv">
+    <section class="card">
+      <h2>1. Transaction</h2>
+      <div class="grid">
+        <div class="full"><label>Nature of the transaction / income</label><select data-f="purpose"></select></div>
+        <div><label>Client / reference</label><input data-f="ref" placeholder="e.g. ABC Pvt Ltd – Inv 12/26-27"></div>
+        <div><label>Currency</label><select data-f="currency"><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option><option value="OTHER">Other…</option></select></div>
+        <div id="curOtherW" hidden><label>Currency code</label><input data-f="cur_other" maxlength="3" style="text-transform:uppercase"></div>
+        <div><label>Amount in foreign currency</label><input data-f="amount" class="num" inputmode="decimal"></div>
+        <div data-w="txn_date"><label>Date of the transaction</label><input type="date" data-f="txn_date"></div>
+        <div data-w="event_date"><label id="evLbl">Date of the event</label><input type="date" data-f="event_date"></div>
+        <div data-w="brought_date"><label>Received in / brought into India on (if before the specified date)</label><input type="date" data-f="brought_date"></div>
+        <div data-w="inv_date"><label id="invLbl">Invoice date</label><input type="date" data-f="inv_date"></div>
+        <div data-w="supply_date"><label>Date of provision of the service</label><input type="date" data-f="supply_date"></div>
+        <div data-w="credit_date"><label>Date of credit to the payee's account</label><input type="date" data-f="credit_date"></div>
+        <div data-w="pay_date"><label id="payLbl">Date of payment</label><input type="date" data-f="pay_date"></div>
+        <div data-w="inv_date_svc" class="full"><label class="check"><input type="checkbox" data-f="inv_in_time"> Invoice issued within the period prescribed under section 31 (30 days of supply of service)</label></div>
+      </div>
+    </section>
+
+    <section class="card result" id="res" hidden>
+      <h2>2. Rate to be adopted <span class="hint" id="resLaw"></span></h2>
+      <div class="big" id="kpis"></div>
+      <div class="basis" id="basis"></div>
+      <ol class="steps" id="steps"></ol>
+      <div id="rateBox"></div>
+      <div id="notes" class="msgs" style="margin-top:8px"></div>
+      <h3>Source and screenshot for the working paper</h3>
+      <div class="bar">
+        <button type="button" id="openSrc">Open officialforexrates.com (SBI TT rates)</button>
+        <button type="button" id="shotBtn">Attach screenshot / PDF of the source</button>
+        <button type="button" class="link danger" id="shotDel" hidden>Remove</button>
+        <input type="file" id="shotFile" accept="image/*,application/pdf" hidden>
+      </div>
+      <p class="hint">On the site, choose the date shown above, take a screenshot (Windows: Win+Shift+S, then paste here with Ctrl+V or save and attach).</p>
+      <div class="shot" id="shotView"></div>
+      <div class="bar" style="margin-top:12px">
+        <button type="button" class="primary" id="wp">Working paper (PDF)</button>
+        <button type="button" id="addReg">Add to register</button>
+        <button type="button" id="saveCase">Save case file</button>
+        <button type="button" id="openCase">Open case file</button>
+        <input type="file" id="caseFile" accept=".json" hidden>
+      </div>
+      <div id="outMsgs" class="msgs" style="margin-top:8px"></div>
+    </section>
+    <div id="errBox" class="msgs"></div>
+
+    <section class="card" id="icdsCard" hidden>
+      <h2>3. Realisation and year end (ICDS VI) – exchange difference</h2>
+      <div class="grid">
+        <div><label>Date of realisation</label><input type="date" data-f="real_date"></div>
+        <div><label>Rupees realised (bank advice / FIRC)</label><input data-f="real_inr" class="num" inputmode="decimal"></div>
+        <div><label>Closing rate at the end of the tax year (if outstanding)</label><input data-f="close_rate" class="num" inputmode="decimal"><div class="hint" id="closeHint"></div></div>
+      </div>
+      <div id="icdsOut" style="margin-top:10px"></div>
+    </section>
+  </div>
+
+  <!-- ============ search ============ -->
+  <div data-panel="search" hidden>
+    <section class="card">
+      <h2>Search SBI rates by date <span class="hint" id="cover"></span></h2>
+      <div class="grid">
+        <div><label>Date</label><input type="date" id="sDate"></div>
+        <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="sPrev" checked> If not published, show the last published rate</label></div>
+      </div>
+      <div id="sOut" style="margin-top:12px"></div>
+    </section>
+    <section class="card">
+      <h2>Month-end SBI TT buying rates (Rule 206 specified dates) <span class="bar"><select id="mYear" style="width:auto"></select><button type="button" class="sm" id="mXls">Excel</button></span></h2>
+      <div class="tw"><table class="t" id="mTable"></table></div>
+      <p class="hint">Rate on the last day of each month; where none was published, the last published rate before it (date shown).</p>
+    </section>
+    <section class="card">
+      <h2>Rates added by you <span class="hint">for dates after the archive, other currencies, or Customs rates</span></h2>
+      <div class="grid">
+        <div><label>Date</label><input type="date" id="myDate"></div>
+        <div><label>Currency</label><input id="myCur" maxlength="3" style="text-transform:uppercase" placeholder="USD"></div>
+        <div><label>Rate type</label><select id="myKind"><option value="tt_buy">SBI TT buying</option><option value="tt_sell">SBI TT selling</option><option value="customs_export">CBIC Customs – export</option><option value="customs_import">CBIC Customs – import</option></select></div>
+        <div><label>Rate (INR per unit; JPY per 100)</label><input id="myRate" class="num" inputmode="decimal"></div>
+        <div class="full"><label>Source (e.g. officialforexrates.com / CBIC Notification No. … dated …)</label><input id="mySrc"></div>
+      </div>
+      <div class="bar" style="margin-top:10px"><button type="button" id="myAdd">Add rate</button></div>
+      <div class="tw" style="margin-top:10px"><table class="t" id="myTable"></table></div>
+    </section>
+  </div>
+
+  <!-- ============ register ============ -->
+  <div data-panel="reg" hidden>
+    <section class="card">
+      <h2>Register of conversions <span class="bar"><button type="button" class="sm" id="regXls">Excel</button><button type="button" class="sm" id="regPdf">Working papers (PDF)</button><button type="button" class="sm" id="regSave">Save register file</button><button type="button" class="sm" id="regOpen">Open register file</button><input type="file" id="regFile" accept=".json" hidden></span></h2>
+      <div class="tw"><table class="t" id="regTable"></table></div>
+    </section>
+  </div>
+
+  <!-- ============ law ============ -->
+  <div data-panel="law" hidden>
+    <section class="card">
+      <h2>Income-tax Rules, 2026 – Rule 206 (rate for conversion of income in foreign currency)</h2>
+      <p>SBI telegraphic transfer buying rate as on the specified date (Rule 206(1)); "telegraphic transfer buying rate" as defined in Rule 207.</p>
+      <table class="t"><thead><tr><th>Sl.</th><th>Types of income</th><th>Specified date</th></tr></thead><tbody>
+        <tr><td>1</td><td>Salaries</td><td>Last day of the month immediately preceding the month in which salary is due, or is paid in advance, or arrears</td></tr>
+        <tr><td>2</td><td>Interest on securities</td><td>Last day of the month immediately preceding the month in which the income is due</td></tr>
+        <tr><td>3</td><td>House property; business or profession (other than Sl. 4); other sources (excluding dividends and interest on securities)</td><td>Last day of the tax year of the assessee</td></tr>
+        <tr><td>4</td><td>Business of operation of ships by a non-resident</td><td>Last day of the month immediately preceding the month in which the income is deemed to arise in India</td></tr>
+        <tr><td>5</td><td>Dividends</td><td>Last day of the month immediately preceding the month in which the dividend is declared, distributed or paid</td></tr>
+        <tr><td>6</td><td>Capital gains</td><td>Last day of the month immediately preceding the month in which the capital asset is transferred</td></tr>
+      </tbody></table>
+      <ul class="hint">
+        <li>Rule 206(2)(b)(ii): income payable in foreign currency from which tax has been deducted under Rule 207 – the date on which tax was required to be deducted under Chapter XIX-B.</li>
+        <li>Rule 206(3): Rule 206(1) does not apply to Sl. 3 income received in, or brought into, India before the specified date.</li>
+      </ul>
+      <h2 style="margin-top:14px">Rule 207 (TDS on income payable in foreign currency)</h2>
+      <p>SBI TT buying rate as on the date on which tax is required to be deducted under Chapter XIX-B; where not published on that date, the last such published rate. Applies to income payable to an assessee outside India, to an IFSC unit, or by an IFSC unit to an assessee in India.</p>
+      <h2 style="margin-top:14px">ICDS VI – Foreign Currency Transactions</h2>
+      <p>Initial recognition at the rate at the date of the transaction (weekly / monthly average permitted where rates do not fluctuate significantly); monetary items restated at the closing rate at the end of the year; exchange differences recognised as income or expense.</p>
+      <h2 style="margin-top:14px">CGST Rules, rule 34</h2>
+      <p>(1) Goods: the rate notified by the Board under section 14 of the Customs Act, 1962, for the date of time of supply in terms of section 12. (2) Services: the rate determined as per generally accepted accounting principles for the date of time of supply in terms of section 13.</p>
+      <p class="hint">Rate archive: officialforexrates.com keeps an independent archive of the SBI daily forex rates ("to be used as reference rates") from 01-01-2022; it states that it is not associated with SBI. Verify against the source and keep the screenshot on file.</p>
+    </section>
+  </div>
+</main>
+
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="../shared/jspdf.plugin.autotable.min.js"></script>
+<script src="../shared/xlswrite.js"></script>
+<script src="lib/sbi_rates.js"></script>
+<script src="lib/rules.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
