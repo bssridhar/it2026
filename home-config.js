@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Depreciation under Schedule II, Companies Act, 2013 – rate and pro rata working, fixed asset register with audit checks, PPE note.",
     "New: Form 26AS · AIS · TIS Consolidator – reads the three PDFs and prepares the income consolidation workbook with TDS credit and review points.",
     "New: EPF and ESI Monthly Returns – ECR file, ESIC upload file, registers and portal reconciliation from the salary sheet.",
     "New: Trust Formation – deed, NOC, bank resolution, PAN and Form 104 data sheets, and a checklist of every formality.",
@@ -30,7 +31,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Payroll", "Office"],
+  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Company Law and Audit", "Payroll", "Office"],
 
   tools: [
     {
@@ -122,6 +123,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Reads Form 26AS, AIS and TIS PDFs; nature-wise income with 26AS vs AIS/TIS and the figure to consider, TDS credit, and points for review – downloaded as an Excel workbook.",
       added: "2026-11-09"
+    },
+    {
+      id: "depn",
+      title: "Depreciation – Schedule II (Companies Act)",
+      category: "Company Law and Audit",
+      path: "depn/index.html",
+      status: "available",
+      description: "Rate and pro rata depreciation for an asset added during the year (SLM / WDV, extra shift), life-time working, fixed asset register from Excel with audit checks, PPE note and Note 3 disclosure.",
+      added: "2026-11-12"
     },
     {
       id: "pfesi",

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depreciation – Schedule II</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.84rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--head);font-weight:600;position:sticky;top:0;z-index:1}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tfoot td{font-weight:700;background:var(--head);position:sticky;bottom:0}
+table.t input,table.t select{padding:3px 5px;font-size:.84rem}
+table.t input.w-s{width:60px} table.t input.w-m{width:110px} table.t input.w-l{width:190px} table.t input.num{text-align:right;width:90px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpis div{background:var(--head);border-radius:8px;padding:10px 12px}
+.kpis span{display:block;font-size:.78rem;color:var(--muted)}
+.kpis b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.outs button{text-align:left;padding:10px 12px}
+.outs button small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 16px}
+.tabs button{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:none;color:var(--muted);padding:8px 14px;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--card);border-color:var(--line);color:var(--ink);margin-bottom:-1px}
+.pane[hidden]{display:none}
+.steps{margin:0;padding-left:20px;font-size:.9rem}
+.steps li{margin:3px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.75rem;background:var(--head);color:var(--muted);margin-left:6px}
+td.c{background:var(--lock)}
+.radio{display:flex;gap:16px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:flex-start;color:var(--ink);font-size:.9rem;margin:0}
+.radio input{width:auto;margin-top:3px}
+ul.chk{margin:0;padding-left:20px;font-size:.88rem} ul.chk li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Depreciation – Schedule II, Companies Act, 2013</h1>
+  <p class="sub">Rate and depreciation for an asset added during the year (pro rata by days), year-by-year working over the useful life, a fixed asset register with audit checks, and the PPE note.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div class="full"><label>Company name</label><input data-f="company"></div>
+      <div><label>Financial year ends on</label><input type="date" data-f="fy_end"><div class="hint" id="fyInfo"></div></div>
+      <div class="full"><label>Company (Part A, para 3)</label>
+        <div class="radio">
+          <label><input type="radio" name="coType" value="other"> <span>Other companies – para 3(ii): useful life not longer, and residual value not higher, than Part C</span></label>
+          <label><input type="radio" name="coType" value="indas"> <span>Prescribed class of companies – para 3(i): a different life or residual value is allowed with disclosure of the justification</span></label>
+        </div></div>
+    </div>
+    <div class="bar" style="margin-top:12px">
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" id="newCase" class="danger">New case</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="single">1. Asset added during the year</button>
+    <button type="button" role="tab" data-tab="reg">2. Fixed asset register</button>
+    <button type="button" role="tab" data-tab="note">3. PPE note and audit checks</button>
+    <button type="button" role="tab" data-tab="ref">4. Schedule II – useful lives and rates</button>
+  </div>
+
+  <!-- 1. single asset -->
+  <section class="pane" data-pane="single">
+    <div class="card">
+      <h2>Asset details</h2>
+      <div class="grid">
+        <div class="full"><label>Description</label><input data-s="desc" placeholder="e.g. CNC lathe machine"></div>
+        <div class="full"><label>Class of asset (Schedule II, Part C)</label><select data-s="code" id="sCode"></select><div class="hint" id="sClassInfo"></div></div>
+        <div><label>Cost (Rs.)</label><input data-s="cost" inputmode="decimal"><div class="hint">Purchase price, duties and taxes not recoverable, and costs of bringing the asset to use.</div></div>
+        <div><label>Date put to use</label><input type="date" data-s="put_to_use"><div class="hint">Depreciation starts from this date (Note 2).</div></div>
+        <div><label>Method</label><select data-s="method"><option value="SLM">Straight line (SLM)</option><option value="WDV">Written down value (WDV)</option></select></div>
+        <div><label>Residual value (% of cost)</label><input data-s="rv_pct" inputmode="decimal"><div class="hint">Generally not more than 5% (Note 5).</div></div>
+        <div><label>Useful life used (years) – only if different</label><input data-s="life_override" inputmode="numeric" placeholder="as per Part C"></div>
+        <div><label>Days on double shift this year</label><input data-s="double_days" inputmode="numeric"></div>
+        <div><label>Days on triple shift this year</label><input data-s="triple_days" inputmode="numeric"></div>
+        <div id="sOpenWrap"><label>Accumulated depreciation at the start of the year</label><input data-s="opening_acc" inputmode="decimal"><div class="hint">Only for an asset put to use in an earlier year. <button type="button" class="link sm" id="sFillAcc">Compute from the date put to use</button></div></div>
+        <div><label>Sold / discarded on (if during the year)</label><input type="date" data-s="sold_on"></div>
+        <div><label>Sale value (Rs.)</label><input data-s="sale_value" inputmode="decimal"></div>
+      </div>
+      <div class="bar" style="margin-top:12px"><button type="button" class="primary" id="sPdf">Working (PDF)</button><button type="button" id="sToReg">Add to the fixed asset register</button><button type="button" id="sClear">Clear</button></div>
+      <div id="sMsgs" class="msgs" style="margin-top:10px"></div>
+    </div>
+    <div class="card"><h2>Rate and depreciation for the year</h2><div class="kpis" id="sKpis"></div>
+      <h2 style="margin-top:16px;font-size:.95rem">Working</h2><ol class="steps" id="sSteps"></ol>
+      <h2 style="margin-top:16px;font-size:.95rem">SLM and WDV compared – this year</h2><div class="tw" style="max-height:none"><table class="t" id="sCmp"></table></div></div>
+    <div class="card"><h2>Depreciation over the useful life <span class="pill" id="sLifeNote"></span></h2>
+      <div class="tw"><table class="t" id="sLife"></table></div>
+      <p class="hint">Assumes single shift, no disposal and no change in the estimate of useful life or residual value. Financial years end on the same day and month as the year chosen above.</p></div>
+  </section>
+
+  <!-- 2. register -->
+  <section class="pane" data-pane="reg" hidden>
+    <div class="card">
+      <h2>Fixed asset register for the year <span class="bar"><input id="q" placeholder="Search" style="width:180px"><button type="button" class="link" id="addAsset">+ Add asset</button></span></h2>
+      <div class="bar" style="margin-bottom:10px">
+        <button type="button" class="primary" id="upXlsx">Import register (Excel)</button><input type="file" id="xlsxFile" accept=".xlsx" hidden>
+        <button type="button" id="dlTpl">Download Excel template</button>
+        <button type="button" id="fillAcc">Fill opening accumulated depreciation</button>
+        <span style="flex:1"></span>
+        <button type="button" id="rollFwd">Carry forward to next year</button>
+        <button type="button" id="clearReg" class="danger">Clear register</button>
+      </div>
+      <div class="tw"><table class="t" id="reg"><thead><tr>
+        <th>#</th><th>Asset ID</th><th>Description</th><th>Class (Sch. II)</th><th>Class in PPE note</th><th>Put to use</th><th class="n">Cost</th><th class="n">Opening acc. depn</th><th>Method</th><th class="n">Life used</th><th class="n">Residual %</th>
+        <th>Sold on</th><th class="n">Sale value</th><th class="n">Double shift days</th><th class="n">Triple shift days</th><th class="n">Depn as per books</th>
+        <th class="n">Life</th><th class="n">Rate</th><th class="n">Days</th><th class="n">Depreciation</th><th class="n">Closing WDV</th><th class="n">Books – computed</th><th class="n">Profit / (loss) on sale</th><th></th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+      <p class="hint">Grey columns are computed. "Life used" – only if the company uses a life different from Part C. Blank residual % = 5%. "Fill opening accumulated depreciation" fills blank opening figures for assets of earlier years from the date put to use (same method, single shift) – use it only where the books do not give the figure, and check it.</p>
+      <div id="regMsgs" class="msgs"></div>
+    </div>
+    <div class="card"><h2>Downloads</h2>
+      <div class="outs">
+        <button type="button" class="primary" data-out="regxls">Register with depreciation (Excel)<small>Asset-wise working, PPE note and audit checks – .xls</small></button>
+        <button type="button" class="primary" data-out="regpdf">Register with depreciation (PDF)<small>Landscape, asset-wise, with totals</small></button>
+        <button type="button" data-out="notepdf">PPE note and audit checks (PDF)<small>Class-wise reconciliation, disclosure, checks</small></button>
+      </div>
+      <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- 3. note -->
+  <section class="pane" data-pane="note" hidden>
+    <div class="card"><h2>Property, plant and equipment – reconciliation of carrying amounts <span class="pill" id="noteFy"></span></h2>
+      <div class="tw" style="max-height:none"><table class="t" id="ppe"></table></div>
+      <p class="hint">Classes follow Schedule III (Land, Buildings, Plant and Equipment, Furniture and Fixtures, Vehicles, Office equipment, Others – specify nature) by default; change the "Class in PPE note" column in the register to group differently.</p></div>
+    <div class="card"><h2>Disclosure – depreciation methods and useful lives (Schedule II, Note 3)</h2><div id="discl" style="font-size:.9rem"></div></div>
+    <div class="card"><h2>Audit checks on the register</h2><div class="kpis" id="chkKpis" style="margin-bottom:10px"></div><div id="issues" class="msgs"></div></div>
+    <div class="card"><h2>Reminders for the audit of PPE</h2>
+      <ul class="chk">
+        <li>Schedule II Note 4 – a significant part with a different useful life is depreciated separately (component accounting).</li>
+        <li>Note 2 – depreciation from the date the asset is put to use (ready for use), not the date of invoice; check the installation / commissioning records for additions near the year-end.</li>
+        <li>Note 6 – extra shift depreciation only for the days actually worked on double / triple shift, and never for assets marked NESD; see the production / shift records.</li>
+        <li>Useful life and residual value reviewed at least at each financial year-end (Ind AS 16, para 51; AS 10 (Revised)); a change is a change in accounting estimate.</li>
+        <li>Part B – a life or residual value notified by a regulatory authority under an Act of Parliament or by the Central Government overrides Part C.</li>
+        <li>CARO 2020, para 3(i): (a) proper records with full particulars, quantitative details and situation of PPE (and of intangible assets); (b) physical verification at reasonable intervals and treatment of material discrepancies; (c) title deeds of immovable property in the name of the company; (d) revaluation – whether by a registered valuer, and the amount if the change is 10% or more of the net carrying value of a class; (e) proceedings under the Benami Transactions (Prohibition) Act, 1988.</li>
+        <li>Profit or loss on sale / discard: compare with the sale invoices, and the GST on the sale of the used asset.</li>
+      </ul></div>
+  </section>
+
+  <!-- 4. reference -->
+  <section class="pane" data-pane="ref" hidden>
+    <div class="card"><h2>Part C – useful lives, with the equivalent rates <span class="bar"><label style="margin:0">Residual %</label><input id="refRv" value="5" style="width:70px"><input id="refQ" placeholder="Search" style="width:200px"></span></h2>
+      <div class="tw"><table class="t" id="refT"></table></div>
+      <p class="hint">From the text of Schedule II to the Companies Act, 2013 (Part C) used for this tool; NESD = no extra shift depreciation. SLM rate = (100% − residual %) ÷ life, on cost. WDV rate = 1 − (residual ÷ cost)<sup>1 ÷ life</sup>, on the opening written down value. Check the current text of the Schedule for amendments.</p></div>
+  </section>
+</main>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/xlswrite.js"></script>
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="../shared/jspdf.plugin.autotable.min.js"></script>
+<script src="lib/templates.js"></script>
+<script src="lib/schedule2.js"></script>
+<script src="lib/engine.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
