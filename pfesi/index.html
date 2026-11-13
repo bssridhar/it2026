@@ -168,6 +168,8 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8
       <div><label>Employer's share %</label><input name="esi_er"></div>
       <div><label>Employee's share nil if average daily wage up to (Rs.)</label><input name="esi_low_daily"></div>
       <div><label>Rounding</label><select name="esi_round"><option value="up">Next higher rupee</option><option value="near">Nearest rupee</option></select></div>
+      <div class="full"><label>ESI wages for a covered employee whose gross is above the ceiling</label><select name="esi_wage_basis"><option value="actual">Actual gross wages (ESI Act – no ceiling on contribution wages)</option><option value="ceiling">Restrict to the ceiling amount</option></select>
+        <div class="hint">An employee covered at the start of a contribution period stays covered till its end, and contributions are on the actual wages. Restricting to the ceiling departs from this – use it only where you have a basis for it.</div></div>
     </div>
     <p class="hint">Check these against the latest EPFO / ESIC notifications before filing.</p>
   </div>
@@ -365,13 +367,13 @@ $('#nextMonth').onclick = async () => {
 
 /* ---------- settings ---------- */
 const ceilText = l => l.map(x => `${dmy(x.from)}, ${x.ceiling}`).join('\n');
-function fillSet(S){ const f = $('#setForm'); ['pf_ee', 'eps', 'admin', 'admin_min', 'edli', 'edli_admin', 'eps_age', 'esi_ceiling', 'esi_ee', 'esi_er', 'esi_low_daily', 'esi_round'].forEach(k => f.elements[k].value = S[k]); f.elements.pf_ceilings.value = ceilText(S.pf_ceilings); }
+function fillSet(S){ const f = $('#setForm'); ['pf_ee', 'eps', 'admin', 'admin_min', 'edli', 'edli_admin', 'eps_age', 'esi_ceiling', 'esi_ee', 'esi_er', 'esi_low_daily', 'esi_round', 'esi_wage_basis'].forEach(k => f.elements[k].value = S[k] || (k === 'esi_wage_basis' ? 'actual' : S[k])); f.elements.pf_ceilings.value = ceilText(S.pf_ceilings); }
 $('#settingsBtn').onclick = () => { fillSet(st.settings); $('#setDlg').showModal(); };
 $('#setCancel').onclick = () => $('#setDlg').close();
 $('#setReset').onclick = () => fillSet(PfEsi.DEFAULTS);
 $('#setForm').addEventListener('submit', () => { const f = $('#setForm'), S = st.settings;
   ['pf_ee', 'eps', 'admin', 'admin_min', 'edli', 'edli_admin', 'eps_age', 'esi_ceiling', 'esi_ee', 'esi_er', 'esi_low_daily'].forEach(k => { const v = Number(f.elements[k].value); if (isFinite(v)) S[k] = v; });
-  S.esi_round = f.elements.esi_round.value;
+  S.esi_round = f.elements.esi_round.value; S.esi_wage_basis = f.elements.esi_wage_basis.value;
   const list = f.elements.pf_ceilings.value.split(/\n/).map(l => l.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})\s*[,;\s]\s*([\d,]+)/)).filter(Boolean).map(m => ({ from: `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`, ceiling: Number(m[4].replace(/,/g, '')) }));
   if (list.length) S.pf_ceilings = list;
   store.set(LS.set, S); save(); recalc(); $('#topMsgs').innerHTML = '<div class="m-ok">Rates and ceilings saved.</div>'; });

@@ -13,7 +13,7 @@
     pf_ee: 12, eps: 8.33, admin: 0.5, admin_min: 500, edli: 0.5, edli_admin: 0,
     pf_ceilings: [{ from: '2014-09-01', ceiling: 15000 }, { from: '2026-09-17', ceiling: 25000 }],
     eps_age: 58,
-    esi_ceiling: 21000, esi_ee: 0.75, esi_er: 3.25, esi_low_daily: 176, esi_round: 'up',
+    esi_ceiling: 21000, esi_ee: 0.75, esi_er: 3.25, esi_low_daily: 176, esi_round: 'up', esi_wage_basis: 'actual',
   };
   const REASONS = [['0', 'Without reason'], ['1', 'On leave'], ['2', 'Left service'], ['3', 'Retired'], ['4', 'Out of coverage'], ['5', 'Expired'], ['6', 'Non-implemented area'],
     ['7', 'Compliance by immediate employer'], ['8', 'Suspension of work'], ['9', 'Strike / lockout'], ['10', 'Retrenchment'], ['11', 'No work'], ['12', 'Does not belong to this employer'], ['13', 'Duplicate IP']];
@@ -76,13 +76,16 @@
       const esiDays = e.esi_days === '' || e.esi_days === undefined ? D - ncp : Math.round(num(e.esi_days));
       let esiOn;
       if (e.esi === 'yes') esiOn = true; else if (e.esi === 'no') esiOn = false; else esiOn = !!r.ip && gross <= S.esi_ceiling;
-      r.esi = esiOn; r.esiDays = esiDays; r.esiW = esiOn ? r0(gross) : 0;
+      r.esi = esiOn; r.esiDays = esiDays;
+      const esiCap = esiOn && S.esi_wage_basis === 'ceiling' && gross > S.esi_ceiling;
+      const esiWage = esiCap ? S.esi_ceiling : gross;
+      r.esiW = esiOn ? r0(esiWage) : 0; r.esiCapped = esiCap;
       if (esiOn) {
         const rnd = S.esi_round === 'up' ? up : r0;
         const low = daysKnown && esiDays > 0 && gross / esiDays <= S.esi_low_daily;
         if (!daysKnown && gross / D <= S.esi_low_daily) issues.push(['warn', `${who}: wages are low for a full month – enter the days paid to check the Rs.${S.esi_low_daily} average daily wage rule (employee's share is nil at or below it).`]);
-        r.esiEE = low ? 0 : rnd(gross * S.esi_ee / 100);
-        r.esiER = rnd(gross * S.esi_er / 100);
+        r.esiEE = low ? 0 : rnd(esiWage * S.esi_ee / 100);
+        r.esiER = rnd(esiWage * S.esi_er / 100);
         r.lowWage = low;
         r.reason = esiDays === 0 ? String(e.reason || '0') : '';
         r.lwd = r.reason && LWD_REASONS.includes(r.reason) ? (e.lwd || '') : '';
@@ -97,6 +100,7 @@
       if (ncp > 0 && ncp >= D) issues.push(['warn', `${who}: NCP days equal the days in the month.`]);
       rows.push(r);
     });
+    if (aboveCeil.length && S.esi_wage_basis === 'ceiling') issues.push(['warn', `ESI wages restricted to Rs.${S.esi_ceiling.toLocaleString('en-IN')} (setting chosen) for ${aboveCeil.length} employee(s): ${aboveCeil.join(', ')}. The ESI Act has no wage ceiling for contributions – an employee covered for the contribution period contributes on the actual wages. Use this only where you have a basis for it.`]);
     if (aboveCeil.length) issues.push(['info', `ESI continued for ${aboveCeil.length} employee(s) whose gross is above Rs.${S.esi_ceiling.toLocaleString('en-IN')}: ${aboveCeil.join(', ')}. This is correct only till the end of the contribution period (April–September / October–March) in which they were covered; from the next period they go out of coverage.`]);
     const sum = (k, f) => rows.filter(f || (() => true)).reduce((a, r) => a + (r[k] || 0), 0);
     const pfRows = rows.filter(r => r.pf), esiRows = rows.filter(r => r.esi);
