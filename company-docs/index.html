@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company Incorporation Documents</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-ink:#ffffff; --warn-bg:#fff6e0; --warn:#8a5a00;
+  --err-bg:#fdecec; --err:#a32020; --ok-bg:#e9f6ec; --ok:#1d6b34; --field:#ffffff; --auto:#eef4fc;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+    --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-ink:#0d1117; --warn-bg:#3a2f12; --warn:#f2c46b;
+  --err-bg:#3b1d1d; --err:#f29a9a; --ok-bg:#16301f; --ok:#8fd6a4; --field:#15181d; --auto:#1a2433;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+.home:hover{text-decoration:underline}
+h1{font-size:1.45rem;margin:4px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+section.card h2{font-size:1.05rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+label .req{color:var(--err)}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+textarea{min-height:76px;resize:vertical}
+textarea[readonly]{opacity:.75}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.auto{background:var(--auto)}
+.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.counts{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.counts > div{width:200px}
+.excel,.objbox{margin-top:14px;padding:12px;border-radius:8px;background:var(--bg);display:grid;gap:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px 16px}
+.acts label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.88rem;margin:0}
+.acts input{width:auto}
+.partner{border:1px dashed var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
+.partner h3{margin:0 0 10px;font-size:.98rem}
+.uploads{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 14px;padding:12px;border-radius:8px;background:var(--bg)}
+.up label.btn{display:inline-block;cursor:pointer;padding:7px 12px;border:1px solid var(--accent);color:var(--accent);border-radius:6px;font-size:.88rem;margin:0}
+.up input[type=file]{display:none}
+.up .st{font-size:.8rem;margin-top:5px;color:var(--muted);word-break:break-word}
+.up .st.ok{color:var(--ok)} .up .st.err{color:var(--err)} .up .st.warn{color:var(--warn)}
+button{font:inherit;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)}
+.check input{width:auto}
+.msgs div{padding:10px 12px;border-radius:8px;margin:0 0 8px;font-size:.92rem}
+.m-err{background:var(--err-bg);color:var(--err)}
+.m-warn{background:var(--warn-bg);color:var(--warn)}
+.m-ok{background:var(--ok-bg);color:var(--ok)}
+#checks .none{color:var(--muted);font-size:.9rem}
+.cl-block{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px}
+.cl-block h3{font-size:.92rem;margin:0 0 6px}
+.cl-block label{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:.88rem;margin:3px 0}
+.cl-block input{width:auto;margin-top:3px}
+.cl-auto{color:var(--ok);font-size:.78rem}
+#capSummary{font-size:.88rem;color:var(--muted)}
+#outputs ul{padding-left:18px;margin:8px 0 0}
+#outputs a{color:var(--accent)}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line)}
+.footer{color:var(--muted);font-size:.82rem;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Company Incorporation Documents</h1>
+  <p class="sub">For a Private Limited Company or a One Person Company. Generates the NOC for the registered office and a data sheet for SPICe+ (with e-MoA and e-AoA). Details can be read from PAN, Aadhaar and bank statement PDFs, or loaded from Excel. Everything runs in this browser and nothing is uploaded.</p>
+
+  <form id="f" novalidate autocomplete="off">
+  <section class="card">
+    <h2>1. Type of company and persons</h2>
+    <div class="counts">
+      <div><label>Type of company <span class="req">*</span></label>
+        <select name="company_type"><option>Private Limited</option><option>One Person Company</option></select></div>
+      <div><label>Directors who are also subscribers</label><input type="number" min="0" max="15" name="ds_count" value="2"></div>
+      <div><label>Directors only</label><input type="number" min="0" max="15" name="d_count" value="0"></div>
+      <div><label>Subscribers only</label><input type="number" min="0" max="200" name="s_count" value="0"></div>
+      <button type="button" class="primary" id="setCounts">Set up forms</button>
+    </div>
+    <div class="hint" id="typeHint"></div>
+    <div class="excel">
+      <strong>Have the details in Excel instead?</strong>
+      <span class="hint">Useful when the KYC copies are scanned. Download the template, fill it in and upload it.</span>
+      <div class="bar">
+        <button type="button" id="dlExcel">Download Excel template</button>
+        <button type="button" id="upExcel">Upload filled Excel</button>
+        <input type="file" id="excelFile" accept=".xlsx" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Company details</h2>
+    <div class="grid">
+      <div class="full"><label>Proposed name 1 <span class="req">*</span></label><input name="name1" required placeholder="e.g. ABC TECHNOLOGIES PRIVATE LIMITED"></div>
+      <div class="full"><label>Proposed name 2</label><input name="name2"></div>
+      <div class="full"><label>Registered office address <span class="req">*</span></label>
+        <textarea name="ro_address" required placeholder="Door no., street&#10;Area&#10;City PIN, State"></textarea></div>
+      <div><label>Registrar of Companies at <span class="req">*</span></label><input name="roc_city" required value="Chennai"></div>
+      <div><label>E-mail id of company</label><input type="email" name="company_email"></div>
+      <div><label>Proof of identity</label><input name="id_proof" value="PAN"></div>
+      <div><label>Authorised capital (Rs.) <span class="req">*</span></label><input type="number" min="0" step="1" name="authorised" required></div>
+      <div><label>Face value per share (Rs.) <span class="req">*</span></label><input type="number" min="1" step="1" name="face_value" required value="10"></div>
+      <div class="full" id="capSummary"></div>
+    </div>
+    <div class="objbox">
+      <strong>Main objects (for e-MoA)</strong>
+      <span class="hint">Describe the business and the tool suggests a draft from standard clause wording. Edit it as needed; it goes into the data sheet for the e-MoA.</span>
+      <div class="grid" style="margin-top:6px">
+        <div class="full"><label>Type of activity</label><div id="objActs" class="acts"></div></div>
+        <div class="full"><label>Services provided</label><input name="obj_services" placeholder="e.g. software development and IT consulting"></div>
+        <div class="full"><label>Goods dealt in / made</label><input name="obj_products" placeholder="e.g. computer hardware and accessories"></div>
+        <div class="full"><label>Customers / sectors (optional)</label><input name="obj_customers"></div>
+        <div class="full"><label class="check"><input type="checkbox" name="obj_abroad"> Business in India and abroad</label></div>
+      </div>
+      <div class="bar" style="margin:6px 0"><button type="button" id="objSuggest">Suggest draft objects</button></div>
+      <div id="objNotes" class="msgs"></div>
+      <label>Main objects (one object per line; edit freely)</label>
+      <textarea name="main_objects" rows="8"></textarea>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Directors, subscribers and nominee</h2>
+    <p class="hint" style="margin-top:-6px">For each person, upload the PAN, Aadhaar and bank statement PDFs and the fields fill in automatically (shaded fields came from a document). Check every field. The address is taken from the bank statement. Scanned copies can't be read, so key those details in by hand.</p>
+    <div id="partners"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. NOC from owner of registered office premises</h2>
+    <div class="grid">
+      <div><label>Name of owner <span class="req">*</span></label><input name="owner_name" required></div>
+      <div><label>Date of NOC <span class="req">*</span></label><input type="date" name="noc_date" required></div>
+      <div class="full"><label class="check"><input type="checkbox" name="prop_same" checked> Property address is the same as the registered office address</label></div>
+      <div class="full" id="propWrap" hidden><label>Property address <span class="req">*</span></label><textarea name="property_address"></textarea></div>
+      <div class="full"><label class="check"><input type="checkbox" name="owner_same" checked> Owner's address is the same as the property address</label></div>
+      <div class="full" id="ownerWrap" hidden><label>Owner's address <span class="req">*</span></label><textarea name="owner_address"></textarea></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. Checklist</h2>
+    <p class="hint" style="margin-top:-6px">Items received from an upload or entered details tick themselves; tick the rest as they come in. Unticked items go into the data sheet and the request list for the client.</p>
+    <div id="checklist"></div>
+    <div class="bar" style="margin-top:10px">
+      <button type="button" id="dlRequest">Download request list (Word)</button>
+      <button type="button" id="copyRequest">Copy request list as text</button>
+    </div>
+  </section>
+  </form>
+
+  <section class="card" id="checks" aria-live="polite">
+    <h2>Document checks</h2>
+    <div id="checkList" class="msgs"><p class="none">Upload documents to see the checks here.</p></div>
+  </section>
+
+  <div id="messages" class="msgs" aria-live="polite"></div>
+  <div id="outputs"></div>
+
+  <div class="sticky bar">
+    <button type="button" class="primary" id="gen">Generate documents</button>
+    <button type="button" id="saveCase">Save case file</button>
+    <button type="button" id="loadCase">Open case file</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button type="button" class="danger" id="clearAll">Clear form</button>
+  </div>
+  <p class="footer">Wording of the NOC follows the firm's format. Details read from documents are a convenience, so check each generated document against the original KYC documents and current MCA requirements before it is signed or filed. The Aadhaar number is never read or stored.</p>
+</main>
+
+<template id="partnerTpl">
+  <div class="partner">
+    <h3 class="ptitle">Person</h3>
+    <div class="uploads">
+      <div class="up" data-doc="pan"><label class="btn">PAN (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="aadhaar"><label class="btn">Aadhaar (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+      <div class="up" data-doc="bank"><label class="btn">Bank statement (PDF)<input type="file" accept="application/pdf,.pdf"></label><div class="st">Not uploaded</div></div>
+    </div>
+    <div class="grid">
+      <div><label>Role</label><select data-k="role"><option>Director &amp; subscriber</option><option>Director only</option><option>Subscriber only</option><option>Nominee (OPC)</option></select></div>
+      <div><label>Title</label><select data-k="title"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option></select></div>
+      <div><label>Full name (as per PAN) <span class="req">*</span></label><input data-k="name" required></div>
+      <div><label>Relation</label><select data-k="relation"><option value="S/o">S/o (son of)</option><option value="D/o">D/o (daughter of)</option><option value="W/o">W/o (wife of)</option></select></div>
+      <div><label>Father's name (in full) <span class="req" data-req="father">*</span></label><input data-k="father_name" required></div>
+      <div><label>Husband's name (only if W/o) <span class="req" data-req="husband" hidden>*</span></label><input data-k="relation_name"></div>
+      <div><label>Date of birth <span class="req">*</span></label><input type="date" data-k="dob" required></div>
+      <div><label>Gender</label><select data-k="gender"><option value="">–</option><option>Male</option><option>Female</option><option>Transgender</option></select></div>
+      <div><label>Nationality</label><input data-k="nationality" value="Indian"></div>
+      <div><label>Resident in India</label><select data-k="resident"><option>Yes</option><option>No</option></select></div>
+      <div><label>PAN <span class="req">*</span></label><input data-k="pan" required maxlength="10" style="text-transform:uppercase"></div>
+      <div data-show="dir"><label>DIN</label><input data-k="din" maxlength="8" placeholder="Blank if not allotted"></div>
+      <div><label>Mobile no. <span class="req">*</span></label><input data-k="mobile" required placeholder="+91 9xxxxxxxxx"></div>
+      <div><label>E-mail id <span class="req">*</span></label><input type="email" data-k="email" required></div>
+      <div class="full"><label>Residential address (as per bank statement) <span class="req">*</span></label><textarea data-k="address" required></textarea></div>
+      <div><label>Occupation</label><input data-k="occupation" value="Business"></div>
+      <div data-show="ds"><label>Educational qualification</label><input data-k="education" placeholder="e.g. B.Com"></div>
+      <div data-show="ds"><label>Years at present residential address</label><input data-k="years_residence" placeholder="e.g. 5, or 2 years 6 months"></div>
+      <div><label>Proof of address</label><input data-k="address_proof" value="BANK STATEMENT" list="poa"></div>
+      <div data-show="sub"><label>Number of shares subscribed <span class="req">*</span></label><input type="number" min="1" step="1" data-k="shares" required></div>
+      <div data-show="nom"><label>Relationship with member</label><input data-k="nominee_relation" placeholder="e.g. Spouse"></div>
+    </div>
+  </div>
+</template>
+<datalist id="poa"><option value="BANK STATEMENT"><option value="AADHAR"><option value="PASSPORT"><option value="VOTER ID"><option value="DRIVING LICENCE"><option value="ELECTRICITY BILL"></datalist>
+
+<script src="../shared/pdf.worker.min.js"></script>
+<script src="../shared/pdf.min.js"></script>
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
+<script src="lib/templates.js"></script>
+<script src="../shared/extract.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/objects.js"></script>
+<script>
+(function(){
+"use strict";
+const form = document.getElementById('f');
+const partnersEl = document.getElementById('partners');
+const tpl = document.getElementById('partnerTpl');
+const DRAFT_KEY = 'company-docs-draft-v1';
+const DOC_LABEL = { pan: 'PAN', aadhaar: 'Aadhaar', bank: 'Bank statement' };
+const X = window.LLPExtract;
+const ROLE = { DS: 'Director & subscriber', D: 'Director only', S: 'Subscriber only', N: 'Nominee (OPC)' };
+const isDir = r => r === ROLE.DS || r === ROLE.D;
+const isSub = r => r === ROLE.DS || r === ROLE.S;
+const isOPC = () => form.elements.company_type.value === 'One Person Company';
+const roleOf = n => n.querySelector('[data-k=role]').value;
+
+/* ================= helpers ================= */
+const up = s => (s||'').toUpperCase();
+const fmt = isoD => isoD ? isoD.split('-').reverse().join('/') : '';
+function dmy(iso, sep){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return [d,m,y].join(sep); }
+function ageOn(dobIso, onIso){
+  if (!dobIso) return '';
+  const b = new Date(dobIso+'T00:00:00'), o = new Date(onIso+'T00:00:00');
+  let a = o.getFullYear() - b.getFullYear();
+  if (o.getMonth() < b.getMonth() || (o.getMonth() === b.getMonth() && o.getDate() < b.getDate())) a--;
+  return a;
+}
+const todayIso = () => X.iso(new Date());
+const safe = s => (s||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const lines = s => (s || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+function inWords(n){
+  n = Math.round(Number(n) || 0);
+  if (n === 0) return 'Zero';
+  const two = x => x < 20 ? ONES[x] : TENS[Math.floor(x/10)] + (x % 10 ? ' ' + ONES[x % 10] : '');
+  const three = x => x >= 100 ? ONES[Math.floor(x/100)] + ' Hundred' + (x % 100 ? ' ' + two(x % 100) : '') : two(x);
+  const out = [];
+  const crore = Math.floor(n / 1e7); n %= 1e7;
+  const lakh = Math.floor(n / 1e5); n %= 1e5;
+  const th = Math.floor(n / 1000); n %= 1000;
+  if (crore) out.push(inWords(crore) + ' Crore');
+  if (lakh) out.push(two(lakh) + ' Lakh');
+  if (th) out.push(two(th) + ' Thousand');
+  if (n) out.push(three(n));
+  return out.join(' ');
+}
+const inr = n => (Math.round(Number(n) || 0)).toLocaleString('en-IN');
+const pct = x => String(Math.round(x * 100) / 100);
+
+/* ================= person cards ================= */
+/** W/o: husband's name is required and father's name is optional; otherwise the reverse. */
+function syncRelation(node){
+  const w = node.querySelector('[data-k=relation]').value === 'W/o';
+  const f = node.querySelector('[data-k=father_name]'), h = node.querySelector('[data-k=relation_name]');
+  f.required = !w; h.required = w;
+  node.querySelector('[data-req=father]').hidden = w; node.querySelector('[data-req=husband]').hidden = !w;
+  (w ? f : h).classList.remove('invalid');
+}
+document.getElementById('partners').addEventListener('change', e => { if (e.target.dataset.k === 'relation') syncRelation(e.target.closest('.partner')); });
+function makeCard(data){
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  data = data || {};
+  for (const el of node.querySelectorAll('[data-k]')) if (data[el.dataset.k] !== undefined) el.value = data[el.dataset.k];
+  node._docs = data._docs || {}; node._auto = data._auto || {}; node._check = data._check || {}; node._excel = !!data._excel;
+  for (const [k,v] of Object.entries(node._auto)){
+    const el = node.querySelector(`[data-k="${k}"]`); if (el && el.value === v) el.classList.add('auto');
+  }
+  node.querySelectorAll('.up').forEach(upEl => {
+    const kind = upEl.dataset.doc, inp = upEl.querySelector('input');
+    inp.addEventListener('change', () => { if (inp.files[0]) handleUpload(node, kind, inp.files[0]); inp.value = ''; });
+    if (node._docs[kind]) setStatus(node, kind, node._docs[kind].statusCls, node._docs[kind].status);
+  });
+  node.addEventListener('input', e => { if (e.target.dataset.k && node._auto[e.target.dataset.k] !== e.target.value) e.target.classList.remove('auto'); });
+  syncRole(node);
+  syncRelation(node);
+  return node;
+}
+function syncRole(node){
+  const r = roleOf(node);
+  node.querySelectorAll('[data-show]').forEach(w => {
+    const show = w.dataset.show === 'dir' ? isDir(r) : w.dataset.show === 'sub' ? isSub(r) : w.dataset.show === 'ds' ? r !== ROLE.N : r === ROLE.N;
+    w.hidden = !show;
+  });
+}
+function renumber(){
+  const c = { [ROLE.DS]:0, [ROLE.D]:0, [ROLE.S]:0, [ROLE.N]:0 };
+  const label = { [ROLE.DS]:'Director & subscriber', [ROLE.D]:'Director', [ROLE.S]:'Subscriber', [ROLE.N]:'Nominee' };
+  [...partnersEl.children].forEach(node => {
+    const r = roleOf(node); c[r]++;
+    node.querySelector('.ptitle').textContent = r === ROLE.N ? 'Nominee (OPC)' : `${label[r]} ${c[r]}`;
+    syncRole(node);
+  });
+  form.elements.ds_count.value = c[ROLE.DS]; form.elements.d_count.value = c[ROLE.D]; form.elements.s_count.value = c[ROLE.S];
+  typeHint();
+}
+partnersEl.addEventListener('change', e => { if (e.target.dataset.k === 'role') { renumber(); refreshChecks(); } });
+function typeHint(){
+  document.getElementById('typeHint').textContent = isOPC()
+    ? 'One Person Company: one member (a natural person who is an Indian citizen and resident in India, with a nominee meeting the same conditions – Rule 3 of the Companies (Incorporation) Rules, 2014) and at least one director (Section 149(1)). A nominee form is added automatically.'
+    : 'Private company: at least two members (Section 3(1)(b)) and at least two directors (Section 149(1)), with at least one director resident in India (Section 149(3)), Companies Act, 2013.';
+}
+const hasData = n => [...n.querySelectorAll('[data-k=name],[data-k=pan]')].some(el => el.value.trim()) || Object.keys(n._docs||{}).length;
+function setCounts(ds, d, s, ask){
+  const cards = [...partnersEl.children];
+  const by = r => cards.filter(n => roleOf(n) === r);
+  const want = [[ROLE.DS, ds], [ROLE.D, d], [ROLE.S, s], [ROLE.N, isOPC() ? 1 : 0]];
+  const dropped = want.flatMap(([r, k]) => by(r).slice(k)).filter(hasData);
+  if (dropped.length && ask && !confirm(`${dropped.length} form(s) with details entered will be removed. Continue?`)) return;
+  const out = [];
+  for (const [r, k] of want) { const have = by(r); for (let i = 0; i < k; i++) out.push(have[i] || makeCard({ role: r })); }
+  partnersEl.replaceChildren(...out);
+  renumber(); refreshChecks(); saveDraft();
+}
+const count = n => Math.max(0, parseInt(form.elements[n].value, 10) || 0);
+document.getElementById('setCounts').addEventListener('click', () => {
+  if (count('ds_count') + count('d_count') + count('s_count') === 0) { showMessages([['m-err','Enter at least one person.']]); return; }
+  setCounts(count('ds_count'), count('d_count'), count('s_count'), true);
+});
+form.elements.company_type.addEventListener('change', () => {
+  if (isOPC() && count('ds_count') + count('s_count') > 1) { form.elements.ds_count.value = 1; form.elements.s_count.value = 0; }
+  setCounts(count('ds_count'), count('d_count'), count('s_count'), true);
+});
+
+/* ================= reading documents ================= */
+function setStatus(node, kind, cls, text){
+  const st = node.querySelector(`.up[data-doc="${kind}"] .st`);
+  st.className = 'st ' + (cls||''); st.textContent = text;
+}
+function askPassword(kind){
+  return wrong => prompt((wrong ? 'Incorrect password. ' : '') + `The ${DOC_LABEL[kind]} PDF is password protected. Enter the password:` +
+    (kind === 'aadhaar' ? '\n(For e-Aadhaar: first 4 letters of the name in CAPITALS followed by the year of birth, e.g. ANUS1993.)' : ''));
+}
+const FIELD_LABEL = { pan:'PAN', name:'name', father_name:"father's name", dob:'date of birth', address:'address', email:'e-mail', mobile:'mobile', relation:'relation', relation_person:'S/o-D/o-W/o name', gender:'gender' };
+async function handleUpload(node, kind, file){
+  setStatus(node, kind, '', 'Reading ' + file.name + ' …');
+  let doc;
+  try { doc = await X.readPdf(file, askPassword(kind)); }
+  catch(e){ setStatus(node, kind, 'err', e.message); return; }
+  if (doc.scanned){
+    node._docs[kind] = { file:file.name, scanned:true, fields:{}, notes:[], statusCls:'warn',
+      status: `${file.name}: this is a scanned image, so no text could be read. Please type the details in.` };
+    setStatus(node, kind, 'warn', node._docs[kind].status);
+    refreshChecks(); saveDraft(); return;
+  }
+  const r = kind === 'pan' ? X.parsePan(doc) : kind === 'aadhaar' ? X.parseAadhaar(doc) : X.parseBank(doc);
+  const got = Object.keys(r.fields).filter(k => r.fields[k]);
+  const rec = { file:file.name, fields:r.fields, notes:r.notes, lastTxn:r.lastTxn||'' };
+  rec.statusCls = got.length ? 'ok' : 'err';
+  rec.status = got.length ? `${file.name}: read ${got.map(k=>FIELD_LABEL[k]||k).join(', ')}` + (kind==='bank' && rec.lastTxn ? `; last transaction ${fmt(rec.lastTxn)}` : '')
+                          : `${file.name}: no details could be found. Please type them in.`;
+  node._docs[kind] = rec;
+  setStatus(node, kind, rec.statusCls, rec.status);
+  applyDocs(node);
+  refreshChecks(); saveDraft();
+}
+/** Precedence: PAN > Aadhaar for identity, bank > Aadhaar for address. Typed-over fields are kept. */
+function applyDocs(node){
+  const D = node._docs, pan = (D.pan||{}).fields||{}, aad = (D.aadhaar||{}).fields||{}, bank = (D.bank||{}).fields||{};
+  const want = {};
+  want.name = pan.name || aad.name || bank.name;
+  want.pan = pan.pan;
+  want.dob = pan.dob || aad.dob;
+  if (aad.relation && aad.relation !== 'C/o') want.relation = aad.relation;
+  if (aad.relation === 'W/o') want.relation_name = aad.relation_person;
+  want.father_name = pan.father_name || ((aad.relation === 'S/o' || aad.relation === 'D/o') ? aad.relation_person : undefined);
+  if (bank.address){ want.address = bank.address.toUpperCase(); want.address_proof = 'BANK STATEMENT'; }
+  else if (aad.address){ want.address = aad.address.toUpperCase(); want.address_proof = 'AADHAR'; }
+  want.email = bank.email;
+  want.mobile = bank.mobile || (aad.mobile ? '+91 ' + aad.mobile : undefined);
+  if (aad.gender){
+    want.gender = aad.gender;
+    const rel = want.relation || node.querySelector('[data-k=relation]').value;
+    want.title = aad.gender === 'Male' ? 'Mr.' : aad.gender === 'Female' ? (rel === 'W/o' ? 'Mrs.' : 'Ms.') : undefined;
+  }
+  for (const [k,v] of Object.entries(want)){
+    if (!v) continue;
+    const el = node.querySelector(`[data-k="${k}"]`); if (!el) continue;
+    const dflt = el.tagName === 'SELECT' ? el.options[0].value : el.defaultValue;
+    if (!el.value.trim() || el.value === node._auto[k] || el.value === dflt){ el.value = v; node._auto[k] = v; el.classList.add('auto'); el.classList.remove('invalid'); }
+  }
+  syncRelation(node);
+}
+function bankFresh(n){
+  const b = n._docs && n._docs.bank;
+  if (!b || !b.lastTxn) return null;
+  const t = new Date(); t.setHours(0,0,0,0);
+  return new Date(b.lastTxn + 'T00:00:00') >= X.monthsBefore(t, 2);
+}
+function personChecks(node, title){
+  const out = [];
+  const D = node._docs||{}, pan=(D.pan||{}).fields||{}, aad=(D.aadhaar||{}).fields||{}, bank=(D.bank||{}).fields||{};
+  for (const k of ['pan','aadhaar','bank']){
+    const r = D[k]; if (!r) continue;
+    if (r.scanned) out.push(['m-warn', `${title}: the ${DOC_LABEL[k]} PDF (${r.file}) is a scanned image. Details must be typed in and checked by hand.`]);
+    (r.notes||[]).forEach(n => out.push(['m-warn', `${title} – ${DOC_LABEL[k]}: ${n}`]));
+  }
+  if (D.bank && !D.bank.scanned){
+    if (!D.bank.lastTxn) { if (!D.bank.fromExcel) out.push(['m-warn', `${title}: no transaction dates could be found in the bank statement (${D.bank.file}). Check how recent it is by hand.`]); }
+    else if (bankFresh(node) === false) out.push(['m-err', `⚠ ${title}: the bank statement is not recent. Its last transaction is dated ${fmt(D.bank.lastTxn)}, which is more than 2 months before today (${fmt(todayIso())}). Obtain a recent statement.`]);
+    else out.push(['m-ok', `${title}: the bank statement's last transaction is dated ${fmt(D.bank.lastTxn)}, within the last 2 months.`]);
+  }
+  if (!X.sameName(pan.name, aad.name)) out.push(['m-warn', `${title}: the name on PAN (${pan.name}) differs from the name on Aadhaar (${aad.name}).`]);
+  if (!X.sameName(pan.name || aad.name, bank.name)) out.push(['m-warn', `${title}: the name in the bank statement (${bank.name}) differs from the name on ${pan.name ? 'PAN' : 'Aadhaar'} (${pan.name || aad.name}).`]);
+  if (pan.dob && aad.dob && pan.dob !== aad.dob) out.push(['m-warn', `${title}: the date of birth on PAN (${fmt(pan.dob)}) differs from Aadhaar (${fmt(aad.dob)}).`]);
+  if (pan.father_name && aad.relation_person && (aad.relation==='S/o'||aad.relation==='D/o') && !X.sameName(pan.father_name, aad.relation_person))
+    out.push(['m-warn', `${title}: the father's name on PAN (${pan.father_name}) differs from Aadhaar (${aad.relation} ${aad.relation_person}).`]);
+  if (D.pan || D.aadhaar || D.bank){
+    if (!bank.address && aad.address && node.querySelector('[data-k=address]').value === node._auto.address)
+      out.push(['m-warn', `${title}: the address was taken from Aadhaar because ${D.bank ? 'none was found in the bank statement' : 'no bank statement has been uploaded'}.`]);
+    const missing = ['pan','aadhaar','bank'].filter(k => !D[k]).map(k => DOC_LABEL[k]);
+    if (missing.length && !node._excel) out.push(['m-warn', `${title}: not uploaded yet: ${missing.join(', ')}.`]);
+  }
+  if (node._excel && !(D.bank && D.bank.lastTxn))
+    out.push(['m-warn', `${title}: no date of last bank transaction was entered in the Excel file, so check how recent the bank statement is by hand.`]);
+  return out;
+}
+function refreshChecks(){
+  renderChecklist(); capSummary();
+  const box = document.getElementById('checkList'); box.innerHTML = '';
+  const all = [];
+  [...partnersEl.children].forEach(n => all.push(...personChecks(n, n.querySelector('.ptitle').textContent)));
+  if (!all.length){ box.innerHTML = '<p class="none">Upload documents to see the checks here.</p>'; return; }
+  const rank = c => c === 'm-err' ? 0 : c === 'm-warn' ? 1 : 2;
+  all.sort((a,b) => rank(a[0]) - rank(b[0]));
+  all.forEach(([cls,t]) => { const d = document.createElement('div'); d.className = cls; d.textContent = t; box.appendChild(d); });
+}
+
+/* ================= capital ================= */
+function capital(d){
+  const fv = Number(d.face_value) || 0, auth = Number(d.authorised) || 0;
+  const subs = d.persons.filter(p => isSub(p.role));
+  const subShares = subs.reduce((a,p) => a + (Number(p.shares) || 0), 0);
+  return { fv, auth, authShares: fv ? auth / fv : 0, subShares, subscribed: subShares * fv };
+}
+function capSummary(){
+  const d = collect(), c = capital(d), el = document.getElementById('capSummary');
+  if (!c.auth || !c.fv) { el.textContent = 'Enter the authorised capital and face value to see the number of shares here.'; return; }
+  el.textContent = `Authorised: ${inr(c.authShares)} shares of Rs. ${inr(c.fv)} each (Rupees ${inWords(c.auth)} only). ` +
+    `Subscribed so far: ${inr(c.subShares)} shares = Rs. ${inr(c.subscribed)}.`;
+}
+
+/* ================= toggles ================= */
+const propSame = form.elements.prop_same, ownerSame = form.elements.owner_same;
+function syncProp(){
+  document.getElementById('propWrap').hidden = propSame.checked; form.elements.property_address.required = !propSame.checked;
+  document.getElementById('ownerWrap').hidden = ownerSame.checked; form.elements.owner_address.required = !ownerSame.checked;
+}
+propSame.addEventListener('change', syncProp); ownerSame.addEventListener('change', syncProp);
+
+/* ================= collect / restore ================= */
+let coCheck = {};
+const FIELDS = ['company_type','name1','name2','ro_address','roc_city','company_email','id_proof','authorised','face_value',
+  'obj_services','obj_products','obj_customers','main_objects','owner_name','noc_date','property_address','owner_address'];
+function collect(){
+  const o = {};
+  FIELDS.forEach(n => o[n] = form.elements[n].value.trim());
+  o.prop_same = propSame.checked; o.owner_same = ownerSame.checked; o.obj_abroad = form.elements.obj_abroad.checked;
+  o.obj_acts = [...document.querySelectorAll('#objActs input:checked')].map(c => c.value);
+  o.co_check = coCheck;
+  o.persons = [...partnersEl.children].map(node => {
+    const p = {}; node.querySelectorAll('[data-k]').forEach(el => p[el.dataset.k] = el.value.trim());
+    p._docs = node._docs || {}; p._auto = node._auto || {}; p._check = node._check || {};
+    if (node._excel) p._excel = true; return p;
+  });
+  return o;
+}
+function restore(d){
+  FIELDS.forEach(n => { if (d[n] !== undefined) form.elements[n].value = d[n]; });
+  if (d.prop_same !== undefined) propSame.checked = !!d.prop_same;
+  if (d.owner_same !== undefined) ownerSame.checked = !!d.owner_same;
+  form.elements.obj_abroad.checked = !!d.obj_abroad;
+  document.querySelectorAll('#objActs input').forEach(c => c.checked = (d.obj_acts || []).includes(c.value));
+  coCheck = Object.assign({}, d.co_check || {});
+  const list = d.persons && d.persons.length ? d.persons : [{ role: ROLE.DS }, { role: ROLE.DS }];
+  partnersEl.replaceChildren(...list.map(p => makeCard(p)));
+  renumber(); syncProp(); refreshChecks();
+}
+function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch(e){} }
+form.addEventListener('input', () => saveDraft());
+form.addEventListener('change', () => { saveDraft(); refreshChecks(); });
+
+/* ================= validation ================= */
+function validate(d){
+  const errors = [], warns = [];
+  form.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+  form.querySelectorAll('[required]').forEach(el => { if (!el.closest('[hidden]') && !el.value.trim()) el.classList.add('invalid'); });
+  if (form.querySelector('.invalid')) errors.push('Please fill in the fields marked in red.');
+  const opc = d.company_type === 'One Person Company';
+  for (const nm of [d.name1, d.name2].filter(Boolean)) {
+    if (!/PRIVATE LIMITED$/i.test(nm)) warns.push(`The name "${nm}" does not end with "Private Limited".`);
+    if (opc && !/\(OPC\)/i.test(nm)) warns.push(`The name "${nm}" does not contain "(OPC)". Check the naming convention for a One Person Company.`);
+  }
+  const dirs = d.persons.filter(p => isDir(p.role)), subs = d.persons.filter(p => isSub(p.role)), noms = d.persons.filter(p => p.role === ROLE.N);
+  if (opc) {
+    if (subs.length !== 1) errors.push('A One Person Company has exactly one member (Section 2(62), Companies Act, 2013).');
+    if (dirs.length < 1) errors.push('At least one director is needed (Section 149(1), Companies Act, 2013).');
+    if (noms.length !== 1) errors.push('A One Person Company needs one nominee.');
+    subs.concat(noms).forEach(p => { if (!/^indian$/i.test(p.nationality) || p.resident === 'No')
+      errors.push(`${p.name || 'The member / nominee'} must be a natural person who is an Indian citizen and resident in India (Rule 3 of the Companies (Incorporation) Rules, 2014).`); });
+  } else {
+    if (subs.length < 2) errors.push('A private company needs at least two members (Section 3(1)(b), Companies Act, 2013).');
+    if (subs.length > 200) errors.push('A private company can have at most 200 members (Section 2(68), Companies Act, 2013).');
+    if (dirs.length < 2) errors.push('A private company needs at least two directors (Section 149(1), Companies Act, 2013).');
+    if (noms.length) errors.push('A nominee applies only to a One Person Company. Change the role or the type of company.');
+  }
+  if (dirs.length > 15) warns.push('More than 15 directors needs a special resolution (Section 149(1), Companies Act, 2013).');
+  if (dirs.length && !dirs.some(p => p.resident !== 'No')) warns.push('No director is marked as resident in India. At least one director must be resident in India (Section 149(3), Companies Act, 2013).');
+  const c = capital(d);
+  if (c.fv && c.auth && c.auth % c.fv) errors.push('The authorised capital is not a whole multiple of the face value per share.');
+  if (c.auth && c.subscribed > c.auth) errors.push(`The shares subscribed (Rs. ${inr(c.subscribed)}) exceed the authorised capital (Rs. ${inr(c.auth)}).`);
+  const pans = new Set();
+  [...partnersEl.children].forEach((node, i) => {
+    const p = d.persons[i], n = node.querySelector('.ptitle').textContent;
+    const mark = k => node.querySelector(`[data-k="${k}"]`).classList.add('invalid');
+    if (p.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(up(p.pan))) { mark('pan'); errors.push(n + ': the PAN format looks wrong (expected AAAAA9999A).'); }
+    if (p.pan && pans.has(up(p.pan))) { mark('pan'); errors.push(n + ': the same PAN is entered twice.'); }
+    pans.add(up(p.pan));
+    if (isDir(p.role) && p.din && !/^\d{8}$/.test(p.din)) { mark('din'); errors.push(n + ': a DIN has 8 digits.'); }
+    if (isSub(p.role) && p.shares && !(Number.isInteger(Number(p.shares)) && Number(p.shares) >= 1)) { mark('shares'); errors.push(n + ': the number of shares must be a whole number of at least 1.'); }
+    if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { mark('email'); errors.push(n + ': the e-mail id looks wrong.'); }
+    if (p.mobile && p.mobile.replace(/\D/g,'').length < 10) { mark('mobile'); errors.push(n + ': the mobile number looks too short.'); }
+    if (p.address && !/\b\d{3}\s?\d{3}\b/.test(p.address)) warns.push(n + ': the address has no 6-digit PIN code.');
+    if (p.relation === 'W/o' && !p.father_name) warns.push(n + `: father's name not entered. MCA forms (SPICe+ / DIN) ask for the father's name for married women too; it will be blank in the data sheet.`);
+    if (p.dob) { const a = ageOn(p.dob, todayIso()); if (a < 18) warns.push(`${n} is ${a} years old.`); }
+  });
+  return {errors, warns};
+}
+
+/* ================= checklist and request list ================= */
+const P_ITEMS = [
+  { key:'pan', label:'PAN copy', ask:'Copy of PAN card', auto: n => !!(n._docs && n._docs.pan) },
+  { key:'aadhaar', label:'Aadhaar copy', ask:'Copy of Aadhaar (the e-Aadhaar PDF downloaded from the UIDAI website is preferred)', auto: n => !!(n._docs && n._docs.aadhaar) },
+  { key:'bank', label:'Bank statement with last transaction within 2 months', ask:'Latest bank statement showing the current residential address, with transactions up to the last two months', auto: n => bankFresh(n) === true },
+  { key:'photo', label:'Passport-size photograph', ask:'Passport-size photograph' },
+  { key:'contact', label:'Mobile no. and e-mail id', ask:'Mobile number and e-mail id', auto: n => {
+      const m = n.querySelector('[data-k=mobile]').value, e = n.querySelector('[data-k=email]').value;
+      return m.replace(/\D/g,'').length >= 10 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); } },
+  { key:'dsc', label:'Digital signature certificate (DSC)', when: r => r !== ROLE.N },
+  { key:'education', label:'Educational qualification (information only, no document)', ask:'Educational qualification (details only; no document needed)',
+    when: r => r !== ROLE.N, auto: n => !!n.querySelector('[data-k=education]').value.trim() },
+  { key:'years', label:'Number of years at present residential address (information only, no document)', ask:'Number of years at the present residential address (details only; no document needed)',
+    when: r => r !== ROLE.N, auto: n => !!n.querySelector('[data-k=years_residence]').value.trim() },
+  { key:'inc3', label:'Nominee consent (Form INC-3) signed', when: r => r === ROLE.N },
+];
+const C_ITEMS = [
+  { key:'names', label:'Proposed names and main objects confirmed', ask:'Proposed names for the company, in order of preference, and a short description of the business' },
+  { key:'ro_proof', label:'Proof of registered office (recent electricity bill or property tax receipt)', ask:'Proof of the registered office address: a recent electricity bill or property tax receipt' },
+  { key:'rent', label:'Rent / lease agreement (tick if received or not applicable)', ask:'Rent or lease agreement, if the premises are rented' },
+  { key:'noc', label:'NOC from owner signed' },
+  { key:'emoa', label:'e-MoA and e-AoA reviewed with the subscribers' },
+];
+const itemsFor = n => P_ITEMS.filter(it => !it.when || it.when(roleOf(n)));
+const pname = n => { const nm = n.querySelector('[data-k=name]').value.trim(); const t = n.querySelector('.ptitle').textContent; return nm ? `${t} (${nm})` : t; };
+function pendingItems(){
+  const out = [];
+  [...partnersEl.children].forEach(n => itemsFor(n).forEach(it => { if (!((it.auto && it.auto(n)) || n._check[it.key])) out.push(`${pname(n)}: ${it.label}`); }));
+  C_ITEMS.forEach(it => { if (!coCheck[it.key]) out.push(it.label); });
+  return out;
+}
+function renderChecklist(){
+  const box = document.getElementById('checklist'); box.innerHTML = '';
+  const block = (title, items, state, node) => {
+    const div = document.createElement('div'); div.className = 'cl-block';
+    const h = document.createElement('h3'); h.textContent = title; div.appendChild(h);
+    items.forEach(it => {
+      const lab = document.createElement('label'), cb = document.createElement('input');
+      cb.type = 'checkbox';
+      const auto = node && it.auto && it.auto(node);
+      cb.checked = !!(auto || state[it.key]); cb.disabled = !!auto;
+      cb.addEventListener('change', e => { e.stopPropagation(); state[it.key] = cb.checked; saveDraft(); renderChecklist(); });
+      const span = document.createElement('span'); span.textContent = it.label;
+      lab.append(cb, span);
+      if (auto) { const a = document.createElement('span'); a.className = 'cl-auto'; a.textContent = '(received)'; lab.appendChild(a); }
+      if (node && it.key === 'bank' && bankFresh(node) === false) { const a = document.createElement('span'); a.className = 'cl-auto'; a.style.color = 'var(--err)'; a.textContent = `(statement ends ${fmt(node._docs.bank.lastTxn)}: older than 2 months)`; lab.appendChild(a); }
+      div.appendChild(lab);
+    });
+    box.appendChild(div);
+  };
+  [...partnersEl.children].forEach(n => block(pname(n), itemsFor(n), n._check, n));
+  block('Company and registered office', C_ITEMS, coCheck, null);
+}
+function requestData(){
+  const d = collect();
+  const partner_items = [];
+  [...partnersEl.children].forEach((n, i) => {
+    const items = itemsFor(n).filter(it => it.ask && !((it.auto && it.auto(n)) || n._check[it.key])).map(it => {
+      let t = it.ask;
+      if (it.key === 'bank' && bankFresh(n) === false) t += ` (the statement received ends on ${fmt(n._docs.bank.lastTxn)})`;
+      return t;
+    });
+    if (items.length) partner_items.push({ title: d.persons[i].title || '', name_upper: up(d.persons[i].name) || n.querySelector('.ptitle').textContent.toUpperCase(),
+      designation: d.persons[i].role.replace(' only', '').replace(' (OPC)', ''), items: items.map((t, j) => ({ n: j + 1, text: t })) });
+  });
+  const llp_items = C_ITEMS.filter(it => it.ask && !coCheck[it.key]).map((it, j) => ({ n: j + 1, text: it.ask }));
+  return { name_upper: up(d.name1) || '(name to be decided)', today: fmt(todayIso()), partner_items, llp_items, has_llp_items: llp_items.length > 0 };
+}
+document.getElementById('dlRequest').addEventListener('click', () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  download(`${safe(r.name_upper)}_Request_List.docx`, new Blob([render('request_list', r)], {type: DOCX}));
+});
+document.getElementById('copyRequest').addEventListener('click', async () => {
+  const r = requestData();
+  if (!r.partner_items.length && !r.llp_items.length) { showMessages([['m-ok','Nothing is pending from the client.']]); return; }
+  const out = [`Documents and details required – proposed company: ${r.name_upper}`, ''];
+  r.partner_items.forEach(p => { out.push(`${p.title} ${p.name_upper} (${p.designation}):`); p.items.forEach(it => out.push(`${it.n}. ${it.text}`)); out.push(''); });
+  if (r.llp_items.length) { out.push('For the registered office and the company:'); r.llp_items.forEach(it => out.push(`${it.n}. ${it.text}`)); }
+  const text = out.join('\n').trim();
+  try { await navigator.clipboard.writeText(text); showMessages([['m-ok','Request list copied. You can paste it into an e-mail or message to the client.']]); }
+  catch(e){ window.prompt('Copy the request list below:', text); }
+});
+
+/* ================= generation ================= */
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+function render(name, data){
+  const doc = new window.docxtemplater(new PizZip(b64ToBytes(window.LLP_TEMPLATES[name])), { paragraphLoop:true, linebreaks:true, nullGetter: () => '' });
+  doc.render(data);
+  return doc.getZip().generate({ type:'uint8array', compression:'DEFLATE' });
+}
+function nocData(d){
+  const prop = up(d.prop_same ? d.ro_address : d.property_address);
+  return { noc_date: dmy(d.noc_date, '/'), owner_name: d.owner_name, owner_address: d.owner_same ? prop : up(d.owner_address),
+           roc_city: d.roc_city, company_name_upper: up(d.name1), property_address: prop };
+}
+function dataSheetData(d){
+  const c = capital(d), today = todayIso();
+  return {
+    today: fmt(today), company_type: d.company_type, company_name_upper: up(d.name1), name2_upper: up(d.name2) || '–',
+    ro_address: up(d.ro_address), roc_city: d.roc_city, company_email: d.company_email || '–',
+    authorised: inr(c.auth), authorised_words: inWords(c.auth), auth_shares: inr(c.authShares), face_value: inr(c.fv),
+    subscribed: inr(c.subscribed), sub_shares: inr(c.subShares),
+    n_directors: d.persons.filter(p => isDir(p.role)).length, n_subscribers: d.persons.filter(p => isSub(p.role)).length,
+    owner_name_upper: up(d.owner_name), noc_date: dmy(d.noc_date, '/'),
+    main_objects: lines(d.main_objects).map((t, i) => ({ n: i + 1, text: t })),
+    persons: d.persons.map((p, i) => {
+      const sh = Number(p.shares) || 0;
+      return {
+        n: i + 1, role: p.role.replace(' only', ''), title: p.title, name_upper: up(p.name), father_name_upper: up(p.father_name),
+        relation: p.relation, relation_name_upper: up(p.relation_name || p.father_name), dob: dmy(p.dob, '/'), age: ageOn(p.dob, today),
+        gender: p.gender || '–', nationality: p.nationality || 'Indian', resident: p.resident || 'Yes', pan: up(p.pan),
+        din: isDir(p.role) ? (p.din || 'Not allotted') : '–', mobile: p.mobile, email: p.email, address: up(p.address),
+        occupation: p.occupation || '–', education: p.role !== ROLE.N ? (p.education || '–') : '–',
+        years_residence: p.role !== ROLE.N ? (p.years_residence || '–') : '–', id_proof: up(d.id_proof || 'PAN'), address_proof: up(p.address_proof || 'BANK STATEMENT'),
+        shares_text: isSub(p.role) && sh ? `${inr(sh)} equity shares of Rs. ${inr(c.fv)} each = Rs. ${inr(sh * c.fv)}` + (c.subShares ? ` (${pct(sh * 100 / c.subShares)}%)` : '') : '–',
+        nominee_relation: p.role === ROLE.N ? (p.nominee_relation || '–') : '–',
+        bank_last_txn: (p._docs && p._docs.bank && p._docs.bank.lastTxn) ? fmt(p._docs.bank.lastTxn) : '–'
+      };
+    }),
+    pending: pendingItems()
+  };
+}
+let lastUrls = [];
+function download(name, blob){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function showMessages(list){
+  const box = document.getElementById('messages'); box.innerHTML = '';
+  list.forEach(([cls, text]) => { const div = document.createElement('div'); div.className = cls; div.textContent = text; box.appendChild(div); });
+}
+document.getElementById('gen').addEventListener('click', () => {
+  const d = collect();
+  const out = document.getElementById('outputs'); out.innerHTML = '';
+  lastUrls.forEach(u => URL.revokeObjectURL(u)); lastUrls = [];
+  refreshChecks();
+  const {errors, warns} = validate(d);
+  if (errors.length){ showMessages(errors.map(e => ['m-err', e]).concat(warns.map(w => ['m-warn', w]))); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const tag = safe(up(d.name1).replace(/\s*\(OPC\)/, '').replace(/\s*PRIVATE LIMITED$/, '')) || 'COMPANY';
+  let files;
+  try {
+    files = [
+      { name: `${tag}_1_NOC_Registered_Office.docx`, bytes: render('noc_registered_office', nocData(d)) },
+      { name: `${tag}_2_Data_Sheet_internal.docx`, bytes: render('data_sheet', dataSheetData(d)) },
+    ];
+  } catch(e) {
+    const det = (e.properties && e.properties.errors) ? e.properties.errors.map(x => x.properties.explanation).join('; ') : e.message;
+    showMessages([['m-err', 'Could not fill a template: ' + det]]); return;
+  }
+  const zip = new PizZip();
+  files.forEach(f => zip.file(f.name, f.bytes));
+  const stale = document.querySelectorAll('#checkList .m-err').length;
+  showMessages([['m-ok', `${files.length} documents generated. The ZIP file has been downloaded; you can also download each file below.`]]
+    .concat(stale ? [['m-err', `⚠ ${stale} item(s) under "Document checks" need attention before filing.`]] : [])
+    .concat(warns.map(w => ['m-warn', w])));
+  const ul = document.createElement('ul');
+  files.forEach(f => {
+    const li = document.createElement('li'), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([f.bytes], {type: DOCX})); a.download = f.name; a.textContent = f.name;
+    lastUrls.push(a.href); li.appendChild(a); ul.appendChild(li);
+  });
+  out.appendChild(ul);
+  download(`${tag}_Company_Incorporation_Docs.zip`, zip.generate({ type:'blob', mimeType:'application/zip' }));
+});
+
+/* ================= case file ================= */
+document.getElementById('saveCase').addEventListener('click', () => {
+  const d = collect();
+  download((safe(d.name1) || 'COMPANY') + '_case.json', new Blob([JSON.stringify(d, null, 2)], {type:'application/json'}));
+});
+const lf = document.getElementById('loadFile');
+document.getElementById('loadCase').addEventListener('click', () => lf.click());
+lf.addEventListener('change', async () => {
+  const file = lf.files[0]; if (!file) return;
+  try { restore(JSON.parse(await file.text())); saveDraft(); showMessages([['m-ok','Case file loaded.']]); }
+  catch(e){ showMessages([['m-err','That file could not be read as a case file.']]); }
+  lf.value = '';
+});
+document.getElementById('clearAll').addEventListener('click', () => {
+  if (!confirm('Clear all entered details?')) return;
+  try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+  form.reset(); restore({}); document.getElementById('outputs').innerHTML = ''; showMessages([]); setDefaults();
+});
+
+/* ================= objects clause ================= */
+const objActs = document.getElementById('objActs');
+LLPObjects.ACTIVITIES.forEach(a => {
+  const l = document.createElement('label'), c = document.createElement('input');
+  c.type = 'checkbox'; c.value = a.key; l.append(c, document.createTextNode(a.label)); objActs.appendChild(l);
+});
+document.getElementById('objSuggest').addEventListener('click', () => {
+  const box = document.getElementById('objNotes'); box.innerHTML = '';
+  const r = LLPObjects.draft({
+    activities: [...objActs.querySelectorAll('input:checked')].map(c => c.value),
+    goods: form.elements.obj_products.value, services: form.elements.obj_services.value,
+    customers: form.elements.obj_customers.value, abroad: form.elements.obj_abroad.checked
+  });
+  r.notes.forEach(n => { const d = document.createElement('div'); d.className = 'm-warn'; d.textContent = n; box.appendChild(d); });
+  if (!r.lines.length) return;
+  const ta = form.elements.main_objects;
+  if (ta.value.trim() && !confirm('Replace the current main objects (including any edits) with a new suggestion?')) return;
+  // a company's objects clause speaks of "the company", not a limited liability partnership
+  ta.value = r.lines.map(l => l.replace('limited liability partnership or body corporate', 'limited liability partnership, company or other body corporate')).join('\n\n');
+  const d = document.createElement('div'); d.className = 'm-ok';
+  d.textContent = 'Draft suggested from standard clause wording. Review and edit it before using it in the e-MoA.';
+  box.prepend(d);
+  saveDraft();
+});
+
+/* ================= Excel ================= */
+document.getElementById('dlExcel').addEventListener('click', () => {
+  download('Company_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.Company_data_template)],
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+});
+const xf = document.getElementById('excelFile');
+document.getElementById('upExcel').addEventListener('click', () => xf.click());
+xf.addEventListener('change', async () => {
+  const file = xf.files[0]; xf.value = ''; if (!file) return;
+  let res;
+  try { res = excelToCase(LLPXlsx.readWorkbook(new Uint8Array(await file.arrayBuffer())), file.name); }
+  catch(e){ showMessages([['m-err', 'Excel file not loaded: ' + e.message]]); return; }
+  if (res.errors.length){ showMessages(res.errors.map(e => ['m-err', e])); document.getElementById('messages').scrollIntoView({behavior:'smooth'}); return; }
+  const cur = collect();
+  if ((cur.name1 || cur.persons.some(p => p.name || p.pan)) && !confirm('Replace the details now on screen with the details from ' + file.name + '?')) return;
+  restore(res.data); saveDraft();
+  showMessages([['m-ok', `Loaded the company details and ${res.data.persons.length} person(s) from ${file.name}. Shaded fields came from the file; please check them.`]]
+    .concat(res.warns.map(w => ['m-warn', w])));
+  document.getElementById('messages').scrollIntoView({behavior:'smooth'});
+});
+function excelToCase(sheets, fname){
+  const errors = [], warns = [];
+  const C = sheets['Company'], P = sheets['Persons'];
+  if (!C || !P) return { errors: ['This does not look like the company data template (the sheets "Company" and "Persons" were not found). Use "Download Excel template".'], warns };
+  const S = LLPXlsx.str;
+  const co = {};
+  for (const ref of Object.keys(C)) { const m = ref.match(/^A(\d+)$/); if (m) co[S(C[ref])] = C['C' + m[1]]; }
+  if (!('name1' in co)) return { errors: ['The hidden column A of the "Company" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const dt = (v, label, who) => { const x = LLPXlsx.date(v); if (x === null) { warns.push(`${who}: "${S(v)}" is not a valid date for ${label}; please enter it on screen.`); return ''; } return x; };
+  const num = (v, label, who) => {
+    const t = S(v).replace(/[,\s]|Rs\.?|₹|\/-/gi, '');
+    if (!t) return '';
+    if (!/^\d+(\.\d+)?$/.test(t)) { warns.push(`${who}: "${S(v)}" is not a number for ${label}; please enter it on screen.`); return ''; }
+    return t;
+  };
+  const addr = (l1, l2, city, pin, state) => {
+    const ls = [S(l1), S(l2)].filter(Boolean);
+    const cp = [S(city), S(pin)].filter(Boolean).join(' - ');
+    if (cp) ls.push(cp);
+    if (S(state)) ls.push(S(state));
+    return ls.join('\n');
+  };
+  const data = {
+    company_type: /one person|opc/i.test(S(co.company_type)) ? 'One Person Company' : 'Private Limited',
+    name1: S(co.name1), name2: S(co.name2), ro_address: addr(co.ro_addr1, co.ro_addr2, co.ro_city, co.ro_pin, co.ro_state),
+    roc_city: S(co.roc_city), company_email: S(co.company_email), id_proof: S(co.id_proof) || 'PAN',
+    authorised: num(co.authorised, 'authorised capital', 'Company sheet'), face_value: num(co.face_value, 'face value', 'Company sheet') || '10',
+    main_objects: S(co.main_objects), owner_name: S(co.owner_name), noc_date: dt(co.noc_date, 'date of NOC', 'Company sheet'),
+    owner_same: !S(co.owner_address), owner_address: S(co.owner_address),
+    prop_same: !/^n/i.test(S(co.prop_same)), property_address: S(co.prop_addr), persons: []
+  };
+  const keyCol = {};
+  for (const ref of Object.keys(P)) { const m = ref.match(/^([A-Z]+)1$/); if (m) keyCol[S(P[ref])] = m[1]; }
+  if (!keyCol.name) return { errors: ['The hidden row 1 of the "Persons" sheet is missing or changed. Please use a fresh copy of the template.'], warns };
+  const maxRow = Math.max(0, ...Object.keys(P).map(r => +r.replace(/^[A-Z]+/, '')));
+  const REL = { 's/o':'S/o', 'so':'S/o', 'd/o':'D/o', 'do':'D/o', 'w/o':'W/o', 'wo':'W/o' };
+  for (let r = 3; r <= maxRow; r++) {
+    const g = k => keyCol[k] ? P[keyCol[k] + r] : undefined;
+    if (!S(g('name'))) continue;
+    const who = `Persons sheet row ${r} (${S(g('name'))})`;
+    const rv = S(g('role')).toLowerCase();
+    let role = /nominee/.test(rv) ? ROLE.N : /director/.test(rv) && /subscriber|member/.test(rv) ? ROLE.DS : /director/.test(rv) ? ROLE.D : /subscriber|member/.test(rv) ? ROLE.S : '';
+    if (!role) { role = ROLE.DS; warns.push(`${who}: role "${S(g('role'))}" not recognised; set to Director & subscriber.`); }
+    let rel = REL[S(g('relation')).toLowerCase().replace(/\s/g, '')];
+    if (!rel) { rel = 'S/o'; if (S(g('relation'))) warns.push(`${who}: relation "${S(g('relation'))}" not recognised; set to S/o.`); }
+    const p = {
+      role, name: S(g('name')), relation: rel, father_name: S(g('father_name')), relation_name: S(g('relation_name')),
+      dob: dt(g('dob'), 'date of birth', who), pan: S(g('pan')).toUpperCase(), din: S(g('din')).replace(/\s/g, ''),
+      mobile: S(g('mobile')), email: S(g('email')),
+      address: addr(g('addr1'), g('addr2'), g('city'), g('pin'), g('state')).toUpperCase(),
+      address_proof: S(g('address_proof')) || 'BANK STATEMENT', occupation: S(g('occupation')) || 'Business',
+      education: S(g('education')), years_residence: S(g('years_residence')), nationality: S(g('nationality')) || 'Indian',
+      resident: /^n/i.test(S(g('resident'))) ? 'No' : 'Yes',
+      title: ['Mr.','Mrs.','Ms.','Dr.'].find(t => t.toLowerCase() === S(g('title')).toLowerCase().replace(/\.?$/, '.')) || (rel === 'W/o' ? 'Mrs.' : rel === 'D/o' ? 'Ms.' : 'Mr.'),
+      gender: ['Male','Female','Transgender'].find(x => x.toLowerCase() === S(g('gender')).toLowerCase()) || '',
+      shares: num(g('shares'), 'number of shares', who), nominee_relation: S(g('nominee_relation'))
+    };
+    if (/^\d{10}$/.test(p.mobile)) p.mobile = '+91 ' + p.mobile;
+    if (S(g('pin')) && !/^\d{3}\s?\d{3}$/.test(S(g('pin')))) warns.push(`${who}: PIN code "${S(g('pin'))}" is not 6 digits.`);
+    const auto = {}; for (const [k,v] of Object.entries(p)) if (v) auto[k] = v;
+    const last = dt(g('bank_last_txn'), 'date of last bank transaction', who);
+    const docs = {};
+    if (last) docs.bank = { file: fname, fromExcel: true, fields: {}, notes: [], lastTxn: last, statusCls: 'ok', status: `From Excel: last bank transaction ${fmt(last)}` };
+    data.persons.push(Object.assign(p, { _auto: auto, _docs: docs, _excel: true }));
+  }
+  if (!data.persons.length) errors.push('No persons found in the "Persons" sheet (rows from row 3 with a name).');
+  // keep the on-screen order: directors & subscribers, directors, subscribers, nominee
+  const order = [ROLE.DS, ROLE.D, ROLE.S, ROLE.N];
+  data.persons.sort((a, b) => order.indexOf(a.role) - order.indexOf(b.role));
+  return { data, errors, warns };
+}
+
+/* ================= init ================= */
+function setDefaults(){
+  if (!form.elements.noc_date.value) form.elements.noc_date.value = todayIso();
+}
+let draft = null;
+try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch(e){}
+restore(draft || {});
+setDefaults();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Income Tax Calculator</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:900px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.card h3{font-size:.95rem;margin:16px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px;align-items:end}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+.check{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:.9rem;margin:0}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+#income{font-size:1.25rem;font-weight:600;text-align:right}
+.words{font-size:.82rem;color:var(--muted);margin-top:4px;min-height:1.2em}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:4px 0 8px}
+.big div{background:var(--head);border-radius:8px;padding:10px 12px}
+.big span{display:block;font-size:.8rem;color:var(--muted)}
+.big b{font-size:1.3rem;font-variant-numeric:tabular-nums}
+table.t{border-collapse:collapse;width:100%;font-size:.9rem}
+table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+table.t tr.zero td{color:var(--muted)}
+.formula{font-family:Consolas,Menlo,monospace;font-size:.82rem;color:var(--muted)}
+.msgs div{padding:9px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.notes{font-size:.86rem;padding-left:18px;margin:0}
+.notes li{margin:0 0 6px}
+.src{font-size:.78rem;color:var(--muted)}
+@media print{body{background:#fff;color:#000}.home,.no-print{display:none!important}.card{border:none;padding:0}main{padding:0}}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Income Tax Calculator – Tax Year 2026-27</h1>
+  <p class="sub">Tax under the new regime on income taxable at normal (slab) rates, with the working shown step by step.</p>
+
+  <section class="card no-print">
+    <div class="grid">
+      <div style="grid-column:1/-1"><label for="income">Income (Rs.)</label><input id="income" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 15,00,000"><div class="words" id="words"></div></div>
+      <div><label>Taxpayer</label><select id="who"><option value="ri">Resident individual</option><option value="nri">Non-resident individual</option><option value="huf">HUF / others</option></select></div>
+      <div><label class="check"><input type="checkbox" id="sd"> Income is salary / pension – deduct standard deduction of Rs. 75,000</label></div>
+    </div>
+    <div class="bar" style="margin-top:12px">
+      <input id="ref" placeholder="Case / client reference" style="width:220px">
+      <span style="flex:1"></span>
+      <button type="button" id="print">Print working</button>
+      <button type="button" id="copy">Copy working</button>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" class="danger" id="clear">Clear</button>
+    </div>
+  </section>
+
+  <section class="card" id="out" hidden></section>
+
+  <section class="card no-print">
+    <h2>Rates used – new regime, tax year 2026-27</h2>
+    <table class="t"><thead><tr><th>Total income</th><th class="n">Rate</th></tr></thead><tbody>
+      <tr><td>Up to Rs. 4,00,000</td><td class="n">Nil</td></tr>
+      <tr><td>Rs. 4,00,001 – 8,00,000</td><td class="n">5%</td></tr>
+      <tr><td>Rs. 8,00,001 – 12,00,000</td><td class="n">10%</td></tr>
+      <tr><td>Rs. 12,00,001 – 16,00,000</td><td class="n">15%</td></tr>
+      <tr><td>Rs. 16,00,001 – 20,00,000</td><td class="n">20%</td></tr>
+      <tr><td>Rs. 20,00,001 – 24,00,000</td><td class="n">25%</td></tr>
+      <tr><td>Above Rs. 24,00,000</td><td class="n">30%</td></tr>
+    </tbody></table>
+    <ul class="notes" style="margin-top:12px">
+      <li><b>Rebate:</b> a resident individual with total income up to Rs. 12,00,000 gets a rebate of the tax, up to Rs. 60,000. Just above Rs. 12,00,000, tax is limited to the income in excess of Rs. 12,00,000 (marginal relief).</li>
+      <li><b>Surcharge:</b> 10% above Rs. 50 lakh, 15% above Rs. 1 crore, 25% above Rs. 2 crore (the new regime caps it at 25%), with marginal relief at each threshold.</li>
+      <li><b>Health and education cess:</b> 4% of tax plus surcharge.</li>
+      <li><b>Standard deduction</b> of Rs. 75,000 for salary and pension income.</li>
+      <li>Total income and tax are rounded to the nearest ten rupees.</li>
+      <li><b>Not covered:</b> income at special rates (capital gains, lottery, etc.), the old regime, deductions other than the standard deduction and employer's NPS contribution, and relief for arrears. The rebate is not available against tax on income at special rates.</li>
+      <li>The slabs and rebate set by the Finance Act, 2025 continue for tax year 2026-27 under the Income-tax Act, 2025 (the Finance Act, 2026 did not change them). Verify against the Act before relying on the result.</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const SLABS = [[400000, 0], [800000, 5], [1200000, 10], [1600000, 15], [2000000, 20], [2400000, 25], [Infinity, 30]];
+const SD = 75000, REBATE_LIMIT = 1200000, REBATE_MAX = 60000, CESS = 4;
+const SURCH = [[5000000, 10], [10000000, 15], [20000000, 25]];          // above the threshold → rate (new regime capped at 25%)
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const inr = n => Math.round(n).toLocaleString('en-IN');
+const rs = n => 'Rs. ' + inr(n);
+const r10 = n => Math.round(n / 10) * 10;
+
+/* words, Indian style */
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+const two = x => x < 20 ? ONES[x] : TENS[Math.floor(x/10)] + (x % 10 ? ' ' + ONES[x % 10] : '');
+const three = x => x >= 100 ? ONES[Math.floor(x/100)] + ' Hundred' + (x % 100 ? ' and ' + two(x % 100) : '') : two(x);
+function words(n){ n = Math.round(n); if (!n) return 'Zero'; const o = []; const cr = Math.floor(n/1e7); n %= 1e7; const lk = Math.floor(n/1e5); n %= 1e5; const th = Math.floor(n/1000); n %= 1000;
+  if (cr) o.push((cr >= 100 ? words(cr) : two(cr)) + (cr === 1 ? ' Crore' : ' Crores')); if (lk) o.push(two(lk) + (lk === 1 ? ' Lakh' : ' Lakhs')); if (th) o.push(two(th) + ' Thousand'); if (n) o.push(three(n)); return o.join(' '); }
+
+function slabTax(ti){
+  let prev = 0, tax = 0; const rows = [];
+  for (const [upto, rate] of SLABS) {
+    const part = Math.max(0, Math.min(ti, upto) - prev);
+    rows.push({ from: prev, upto, rate, part, tax: part * rate / 100 });
+    tax += part * rate / 100; prev = upto;
+    if (ti <= upto) break;
+  }
+  return { tax, rows };
+}
+function compute(income, who, sd){
+  const sdAmt = sd ? Math.min(SD, income) : 0;
+  const ti = r10(Math.max(0, income - sdAmt));
+  const { tax, rows } = slabTax(ti);
+  let rebate = 0, rebateNote = '';
+  if (who === 'ri') {
+    if (ti <= REBATE_LIMIT) { rebate = Math.min(tax, REBATE_MAX); rebateNote = 'total income does not exceed Rs. 12,00,000'; }
+    else if (tax > ti - REBATE_LIMIT) { rebate = tax - (ti - REBATE_LIMIT); rebateNote = `marginal relief: tax limited to the income above Rs. 12,00,000 (${rs(ti - REBATE_LIMIT)})`; }
+  }
+  const afterRebate = tax - rebate;
+  let srate = 0, sthr = 0; SURCH.forEach(([t, r]) => { if (ti > t) { srate = r; sthr = t; } });
+  let surcharge = afterRebate * srate / 100, mrelief = 0;
+  if (srate) {
+    const prevRate = (SURCH.filter(([t]) => t < sthr).pop() || [0, 0])[1];
+    const atThr = slabTax(sthr).tax * (1 + prevRate / 100);
+    const limit = atThr + (ti - sthr);
+    if (afterRebate + surcharge > limit) { mrelief = afterRebate + surcharge - limit; }
+  }
+  const surchargeNet = surcharge - mrelief;
+  const cess = (afterRebate + surchargeNet) * CESS / 100;
+  const total = afterRebate + surchargeNet + cess;
+  return { income, sdAmt, ti, rows, tax, rebate, rebateNote, afterRebate, srate, sthr, surcharge, mrelief, surchargeNet, cess, total, payable: r10(total) };
+}
+
+/* state */
+const LS = 'taxcalc-ty2026-v1';
+let st; try { st = Object.assign({ income: '', who: 'ri', sd: false, ref: '' }, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) { st = { income: '', who: 'ri', sd: false, ref: '' }; }
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (e) {} };
+const parse = v => Number(String(v).replace(/[^\d.]/g, '')) || 0;
+function load(){ $('#income').value = st.income ? inr(parse(st.income)) : ''; $('#who').value = st.who; $('#sd').checked = !!st.sd; $('#ref').value = st.ref || ''; render(); }
+
+function render(){
+  const inc = parse(st.income);
+  $('#words').textContent = inc ? `Rupees ${words(inc)} only` : '';
+  const out = $('#out');
+  if (!inc) { out.hidden = true; return; }
+  const k = compute(inc, st.who, st.sd);
+  const eff = k.payable / inc * 100;
+  let h = `<h2>Tax – new regime, tax year 2026-27${st.ref ? ' – ' + esc(st.ref) : ''}</h2>
+    <div class="big"><div><span>Total income</span><b>${rs(k.ti)}</b></div><div><span>Tax payable</span><b>${rs(k.payable)}</b></div><div><span>Effective rate on income</span><b>${eff.toFixed(2)}%</b></div><div><span>Take-home (income less tax)</span><b>${rs(inc - k.payable)}</b></div></div>
+    <h3>Total income</h3><table class="t"><tbody>
+      <tr><td>Income</td><td class="n">${rs(inc)}</td></tr>
+      ${k.sdAmt ? `<tr><td>Less: standard deduction (salary / pension)</td><td class="n">${rs(k.sdAmt)}</td></tr>` : ''}
+      <tr class="tot"><td>Total income (rounded to the nearest Rs. 10)</td><td class="n">${rs(k.ti)}</td></tr></tbody></table>
+    <h3>Tax at slab rates</h3><table class="t"><thead><tr><th>Slab</th><th class="n">Income in slab</th><th class="n">Rate</th><th class="n">Tax</th></tr></thead><tbody>` +
+    k.rows.map(r => `<tr class="${r.tax ? '' : 'zero'}"><td>${r.upto === Infinity ? 'Above ' + rs(r.from) : (r.from ? rs(r.from + 1) : 'Up to ') + (r.from ? ' – ' + inr(r.upto) : rs(r.upto))}</td><td class="n">${inr(r.part)}</td><td class="n">${r.rate ? r.rate + '%' : 'Nil'}</td><td class="n">${inr(r.tax)}</td></tr>`).join('') +
+    `<tr class="tot"><td colspan="3">Tax on total income</td><td class="n">${rs(k.tax)}</td></tr></tbody></table>
+    <h3>Tax payable</h3><table class="t"><tbody>
+      <tr><td>Tax on total income</td><td class="n">${rs(k.tax)}</td></tr>
+      <tr><td>Less: rebate${k.rebateNote ? ` – ${esc(k.rebateNote)}` : st.who !== 'ri' ? ' – not available (only for resident individuals)' : ' – not available (income above Rs. 12,00,000)'}</td><td class="n">${rs(k.rebate)}</td></tr>
+      <tr><td>Tax after rebate</td><td class="n">${rs(k.afterRebate)}</td></tr>
+      ${k.srate ? `<tr><td>Add: surcharge @ ${k.srate}% (income above ${rs(k.sthr)})<div class="formula">${inr(k.afterRebate)} × ${k.srate}% = ${inr(k.surcharge)}</div></td><td class="n">${rs(k.surcharge)}</td></tr>` : ''}
+      ${k.mrelief ? `<tr><td>Less: marginal relief on surcharge (tax + surcharge limited to the tax at ${rs(k.sthr)} plus the income above it)</td><td class="n">${rs(k.mrelief)}</td></tr>` : ''}
+      <tr><td>Add: health and education cess @ 4%<div class="formula">${inr(k.afterRebate + k.surchargeNet)} × 4%</div></td><td class="n">${rs(k.cess)}</td></tr>
+      <tr><td>Total tax</td><td class="n">${rs(k.total)}</td></tr>
+      <tr class="tot"><td>Tax payable (rounded to the nearest Rs. 10)</td><td class="n">${rs(k.payable)}</td></tr></tbody></table>
+    <p class="src">Rupees ${esc(words(k.payable))} only. New regime slabs for tax year 2026-27; income taxable at special rates, other deductions and old-regime comparison not included.</p>`;
+  out.innerHTML = h; out.hidden = false;
+}
+
+$('#income').addEventListener('input', e => {
+  const el = e.target, digits = el.value.replace(/[^\d]/g, '');
+  st.income = digits; save();
+  const pos = el.value.length - el.selectionStart;
+  el.value = digits ? inr(Number(digits)) : '';
+  const p = Math.max(0, el.value.length - pos); el.setSelectionRange(p, p);
+  render();
+});
+$('#who').onchange = e => { st.who = e.target.value; save(); render(); };
+$('#sd').onchange = e => { st.sd = e.target.checked; save(); render(); };
+$('#ref').oninput = e => { st.ref = e.target.value; save(); render(); };
+$('#print').onclick = () => { if (!$('#out').hidden) window.print(); };
+$('#copy').onclick = () => {
+  if ($('#out').hidden) return;
+  const t = [...$('#out').querySelectorAll('h2,h3,.big div,tr,.src')].map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText.replace(/\n/g, ': ')).join('\n');
+  if (navigator.clipboard) navigator.clipboard.writeText(t);
+};
+$('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(st, null, 1)], { type: 'application/json' })); a.download = `${(st.ref || 'Tax_TY2026-27').replace(/[^A-Za-z0-9-]+/g, '_')}_taxcalc.json`; a.click(); };
+$('#openCase').onclick = () => $('#caseFile').click();
+$('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { const d = JSON.parse(await f.text()); if (!('income' in d)) throw 0; st = Object.assign({ income: '', who: 'ri', sd: false, ref: '' }, d); save(); load(); } catch (err) { alert('That file is not a tax calculator case file.'); } };
+$('#clear').onclick = () => { st = { income: '', who: 'ri', sd: false, ref: '' }; save(); load(); };
+window.TaxCalc = { compute };
+load();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

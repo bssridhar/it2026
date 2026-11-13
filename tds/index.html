@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TDS Rates and Calculator</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--chip:#e6eefa}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--chip:#1f2c40}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--chip:#1f2c40}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 14px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 14px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.card h3{font-size:.95rem;margin:16px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 14px;align-items:end}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+.check{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:.9rem;margin:0}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.num{text-align:right}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--err)}
+button.link{border:none;background:none;color:var(--accent);padding:0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:.86rem}
+table.t th,table.t td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600;white-space:nowrap}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.grp td{background:var(--head);font-weight:700}
+table.t tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+.code{display:inline-block;background:var(--chip);color:var(--accent);font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap}
+.muted{color:var(--muted);font-size:.8rem}
+.rif{color:var(--warn);font-weight:600}
+.msgs div{padding:9px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.portal{border:2px solid var(--accent);border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--chip)}
+.portal ol{margin:6px 0 0;padding-left:20px}
+.portal li{margin:3px 0}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:4px 0 8px}
+.big div{background:var(--head);border-radius:8px;padding:10px 12px}
+.big span{display:block;font-size:.8rem;color:var(--muted)}
+.big b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.formula{font-family:Consolas,Menlo,monospace;font-size:.82rem;color:var(--muted)}
+.notes{font-size:.86rem;padding-left:18px;margin:0}
+.notes li{margin:0 0 6px}
+.src{font-size:.78rem;color:var(--muted)}
+[hidden]{display:none!important}
+@media print{body{background:#fff;color:#000}.home,.no-print,.tabs{display:none!important}.card{border:none;padding:0}main{padding:0}#chartTab[data-print=no]{display:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>TDS – Rate Chart and Calculator (Tax Year 2026-27)</h1>
+  <p class="sub">Section 393 of the Income-tax Act, 2025 (as amended by the Finance Act, 2026). Every row shows the section and Table serial number to select when paying TDS on the e-filing portal.</p>
+
+  <div class="tabs no-print" role="tablist">
+    <button type="button" role="tab" id="tabCalc" aria-selected="true">TDS calculator</button>
+    <button type="button" role="tab" id="tabChart" aria-selected="false">Rate chart</button>
+    <button type="button" role="tab" id="tabInfo" aria-selected="false">No deduction / declarations</button>
+  </div>
+
+  <!-- ===================== calculator ===================== -->
+  <div id="calcTab">
+    <section class="card no-print">
+      <div class="grid">
+        <div class="full"><label for="nat">Nature of payment</label><select id="nat"></select></div>
+        <div id="optWrap" class="full" hidden><label for="opt">Type</label><select id="opt"></select></div>
+        <div><label for="amt" id="amtLbl">Amount of this payment / credit (Rs.)</label><input id="amt" class="num" inputmode="numeric" autocomplete="off"></div>
+        <div id="prevWrap"><label for="prev">Earlier amounts to the same payee in this tax year (Rs.)</label><input id="prev" class="num" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+        <div id="prevTdsWrap"><label class="check"><input type="checkbox" id="prevTds"> TDS already deducted on the earlier amounts</label></div>
+        <div id="monthsWrap" hidden><label for="months">Number of months (or part months) covered</label><input id="months" class="num" inputmode="numeric" value="1"></div>
+        <div id="sdvWrap" hidden><label for="sdv">Stamp duty value of the property (Rs.)</label><input id="sdv" class="num" inputmode="numeric" autocomplete="off"></div>
+        <div id="seniorWrap" hidden><label class="check"><input type="checkbox" id="senior"> Payee is a senior citizen</label></div>
+        <div id="coopWrap" hidden><label class="check"><input type="checkbox" id="coop"> Recipient is a co-operative society</label></div>
+        <div id="rateWrap" hidden><label for="rate">Rate (%) – <span class="rif">rate in force under the Finance Act; enter it</span></label><input id="rate" class="num" inputmode="decimal" autocomplete="off"></div>
+        <div><label class="check"><input type="checkbox" id="gross"> Tax to be borne by the payer – gross up [393(10)]</label></div>
+      </div>
+      <div class="bar" style="margin-top:12px">
+        <input id="ref" placeholder="Deductee / case reference" style="width:240px">
+        <span style="flex:1"></span>
+        <button type="button" id="print">Print working</button>
+        <button type="button" id="copy">Copy working</button>
+        <button type="button" id="saveCase">Save case file</button>
+        <button type="button" id="openCase">Open case file</button>
+        <input type="file" id="caseFile" accept=".json" hidden>
+        <button type="button" class="danger" id="clear">Clear</button>
+      </div>
+    </section>
+    <section class="card" id="out" hidden></section>
+  </div>
+
+  <!-- ===================== chart ===================== -->
+  <div id="chartTab" hidden>
+    <section class="card">
+      <div class="bar no-print" style="margin-bottom:12px">
+        <input id="q" placeholder="Search – e.g. rent, contract, 194J, professional, 6(iii)" style="flex:1;min-width:220px">
+        <select id="fSub" style="width:auto"><option value="">All tables</option><option value="1">393(1) – payments to residents</option><option value="3">393(3) – payments to any person</option><option value="2">393(2) – payments to non-residents</option></select>
+        <button type="button" id="printChart">Print chart</button>
+      </div>
+      <div class="tw"><table class="t" id="chart"><thead><tr><th>Select on the portal</th><th>Nature of income or sum</th><th>Payer</th><th>Rate</th><th>Threshold</th><th>1961 Act (ref.)</th></tr></thead><tbody></tbody></table></div>
+      <p class="src">"Rates in force" means the rates in the Finance Act for the year (not part of section 393). The 1961 Act section is given only for reference.</p>
+    </section>
+  </div>
+
+  <!-- ===================== info ===================== -->
+  <div id="infoTab" hidden>
+    <section class="card">
+      <h2>No deduction at source – section 393(4)</h2>
+      <div class="tw"><table class="t" id="noTdsTable"><thead><tr><th>Sl.</th><th>Provision</th><th>Condition for no deduction</th></tr></thead><tbody></tbody></table></div>
+    </section>
+    <section class="card">
+      <h2>No deduction in any case – section 393(5), (8) and (9)</h2>
+      <ul class="notes">
+        <li>Any amount payable to the Government; the Reserve Bank of India; a corporation established by a Central Act and exempt from income-tax; or a Mutual Fund [Schedule VII (Table: Sl. No. 20 or 21)] by way of interest, dividend on securities or shares it owns, or other income [393(5)].</li>
+        <li>Interest paid by an Offshore Banking Unit on borrowings or deposits on or after 01-04-2005 from a non-resident or a person not ordinarily resident [393(8)].</li>
+        <li>Payments to or on behalf of the New Pension System Trust [Schedule VII (Table: Sl. No. 41)] [393(9)].</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Declaration for no deduction – section 393(6)</h2>
+      <table class="t"><thead><tr><th>Person</th><th>Provisions</th></tr></thead><tbody>
+        <tr><td>Resident individual</td><td>Accumulated balance due to an employee [392(7)]; insurance commission [393(1) Sl. 1(i)]; rent [Sl. 2(ii)]; units [Sl. 4(i)]; interest [Sl. 5(i), (ii) and (iii)]; life insurance policy [Sl. 8(i)]; dividend [Sl. 7]</td></tr>
+        <tr><td>Any person other than a company, a firm or such an individual</td><td>The same, except dividend [Sl. No. (1).C(a) to (f)]</td></tr>
+      </tbody></table>
+      <ul class="notes" style="margin-top:10px">
+        <li>The declaration states that the tax on the estimated total income of the year will be nil. Except for a resident individual aged 60 or more, it does not apply where the income of these kinds for the year exceeds the maximum amount not chargeable to tax.</li>
+        <li>The payer delivers the declarations to the prescribed authority by the 7th of the month following the quarter [393(7)].</li>
+        <li>From 01-04-2027 the declaration may also be furnished electronically to a depository for listed units, interest on securities and dividends [393(6)(b), inserted by the Finance Act, 2026].</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Other points</h2>
+      <ul class="notes">
+        <li><b>Time of deduction:</b> at the time of credit to the payee's account or payment, whichever is earlier, unless the Table says otherwise. A credit to a suspense account is treated as a credit to the payee [393(11)].</li>
+        <li><b>Tax borne by the payer:</b> the income is grossed up so that, after deduction, it equals the net amount payable [393(10)].</li>
+        <li><b>Paying on the portal:</b> e-File → e-Pay Tax → select "Income Tax Act, 2025" (for tax year 2026-27 onwards) → New Payment → Pay TDS/TCS (challan ITNS 281N). Section codes are shown according to the residential status of the deductee; up to 20 section codes can be paid in one challan (Minor Head 200).</li>
+        <li><b>Not covered here:</b> TDS on salary (section 392), the higher rate where PAN is not furnished, surcharge and cess on payments to non-residents, lower-deduction certificates, and the "rates in force", which are in the Finance Act.</li>
+      </ul>
+      <p class="src">Source: section 393, Income-tax Act, 2025 as amended by the Finance Act, 2026 (Income Tax Department). Payment steps: ITNS 281N FAQs, incometax.gov.in.</p>
+    </section>
+  </div>
+</main>
+
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+const D = window.TDS_DATA, ROWS = D.rows;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const inr = n => Math.round(n).toLocaleString('en-IN');
+const rs = n => 'Rs. ' + inr(n);
+const parse = v => Number(String(v ?? '').replace(/[^\d.]/g, '')) || 0;
+const code = r => `393(${r.sub}) Sl. No. ${r.sl}`;
+const id = r => `${r.sub}-${r.sl}`;
+const SUBS = { '1': 'Section 393(1) – payments to residents', '3': 'Section 393(3) – payments to any person', '2': 'Section 393(2) – payments to non-residents' };
+const status = r => r.sub === '2' ? 'Non-resident' : r.sub === '1' ? 'Resident' : 'Resident or non-resident, as the case may be';
+
+/* ---------------- tabs ---------------- */
+const tabs = { tabCalc: 'calcTab', tabChart: 'chartTab', tabInfo: 'infoTab' };
+Object.keys(tabs).forEach(t => $('#' + t).onclick = () => { Object.entries(tabs).forEach(([b, p]) => { $('#' + b).setAttribute('aria-selected', b === t); $('#' + p).hidden = b !== t; }); try { localStorage.setItem('tds-tab', t); } catch (e) {} });
+try { const t = localStorage.getItem('tds-tab'); if (t && tabs[t]) $('#' + t).click(); } catch (e) {}
+
+/* ---------------- chart ---------------- */
+function renderChart(){
+  const q = $('#q').value.trim().toLowerCase(), f = $('#fSub').value;
+  let h = '';
+  ['1', '3', '2'].forEach(sub => {
+    if (f && f !== sub) return;
+    const rows = ROWS.filter(r => r.sub === sub).filter(r => !q || [code(r), r.sl, r.nature, r.payer, r.payee, r.old, r.head, r.rateText].join(' ').toLowerCase().includes(q));
+    if (!rows.length) return;
+    h += `<tr class="grp"><td colspan="6">${SUBS[sub]}</td></tr>`;
+    rows.forEach(r => {
+      h += `<tr><td><span class="code">${esc(code(r))}</span><div class="muted">${esc(r.head)}</div></td>
+        <td>${esc(r.nature)}${r.payee ? `<div class="muted">Payee: ${esc(r.payee)}</div>` : ''}${r.note ? `<div class="muted">${esc(r.note)}</div>` : ''}${(r.noTds || []).length ? `<div class="muted">No deduction: see 393(4) Sl. ${r.noTds.join(', ')}</div>` : ''}${r.decl ? '<div class="muted">Declaration for no deduction allowed [393(6)]</div>' : ''}</td>
+        <td>${esc(r.payer)}</td><td class="${typeof r.rate === 'number' ? '' : 'rif'}">${esc(r.rateText)}</td><td>${esc(r.thrText || 'No threshold')}</td><td>${esc(r.old)}</td></tr>`;
+    });
+  });
+  $('#chart tbody').innerHTML = h || '<tr><td colspan="6">No matching rows.</td></tr>';
+}
+$('#q').oninput = renderChart; $('#fSub').onchange = renderChart;
+$('#printChart').onclick = () => window.print();
+renderChart();
+$('#noTdsTable tbody').innerHTML = Object.entries(D.noTds).map(([k, v]) => `<tr><td>${k}</td><td><span class="code">${esc(v.prov)}</span></td><td>${esc(v.cond)}</td></tr>`).join('');
+
+/* ---------------- calculator ---------------- */
+$('#nat').innerHTML = '<option value="">– choose –</option>' + ['1', '3', '2'].map(sub => `<optgroup label="${SUBS[sub]}">` +
+  ROWS.filter(r => r.sub === sub).map(r => `<option value="${id(r)}">${esc(r.sl)} – ${esc(r.head)}: ${esc(r.nature.length > 90 ? r.nature.slice(0, 88) + '…' : r.nature)} (${esc(r.old)})</option>`).join('') + '</optgroup>').join('');
+
+const LS = 'tds-calc-v1';
+const blank = () => ({ nat: '', opt: 0, amt: '', prev: '', prevTds: false, months: '1', sdv: '', senior: false, coop: false, rate: '', gross: false, ref: '' });
+let st; try { st = Object.assign(blank(), JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) { st = blank(); }
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (e) {} };
+const FIELDS = ['nat', 'opt', 'amt', 'prev', 'prevTds', 'months', 'sdv', 'senior', 'coop', 'rate', 'gross', 'ref'];
+const fmtInput = el => { if (!el.classList.contains('num') || el.id === 'rate' || el.id === 'months') return; const d = el.value.replace(/[^\d]/g, ''); el.value = d ? inr(Number(d)) : ''; };
+function load(){
+  FIELDS.forEach(k => { const el = $('#' + k); if (!el) return; if (el.type === 'checkbox') el.checked = !!st[k]; else if (k !== 'opt') { el.value = st[k] ?? ''; fmtInput(el); } });
+  setRow(false); $('#opt').value = String(st.opt || 0); calc();
+}
+const row = () => ROWS.find(r => id(r) === st.nat);
+function setRow(resetOpt){
+  const r = row();
+  const opts = r && r.options;
+  $('#optWrap').hidden = !opts;
+  if (opts) { $('#opt').innerHTML = opts.map((o, i) => `<option value="${i}">${esc(o.label)}</option>`).join(''); if (resetOpt) st.opt = 0; $('#opt').value = String(st.opt || 0); }
+  const m = r ? r.mode : '';
+  $('#prevWrap').hidden = $('#prevTdsWrap').hidden = !r || !['agg', 'contract', 'excess'].includes(m);
+  $('#monthsWrap').hidden = m !== 'month';
+  $('#sdvWrap').hidden = m !== 'property';
+  $('#seniorWrap').hidden = !(r && r.senior);
+  $('#coopWrap').hidden = !(r && r.coop);
+  $('#rateWrap').hidden = !(r && (r.rate === 'rif' || r.rate === 'note2'));
+  $('#rateWrap label').innerHTML = r && r.rate === 'note2' ? 'Rate (%) – <span class="rif">20%, or the lower treaty rate if a certificate under section 159(8) is furnished</span>' : 'Rate (%) – <span class="rif">rate in force under the Finance Act; enter it</span>';
+  if (r && r.rate === 'note2' && !st.rate) { st.rate = '20'; $('#rate').value = '20'; }
+  $('#amtLbl').textContent = m === 'month' ? 'Rent for a month (Rs.)' : m === 'property' ? 'Consideration for the transfer (Rs.)' : 'Amount of this payment / credit (Rs.)';
+}
+FIELDS.forEach(k => { const el = $('#' + k); if (!el) return;
+  el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', () => {
+    if (el.type === 'checkbox') st[k] = el.checked;
+    else if (k === 'opt') st[k] = Number(el.value);
+    else { const pos = el.value.length - (el.selectionStart || 0); fmtInput(el); st[k] = el.value; if (el.classList.contains('num') && el.setSelectionRange && document.activeElement === el) { const p = Math.max(0, el.value.length - pos); el.setSelectionRange(p, p); } }
+    if (k === 'nat') { st.rate = ''; $('#rate').value = ''; setRow(true); }
+    save(); calc();
+  });
+});
+
+function calc(){
+  const r = row(), out = $('#out');
+  if (!r) { out.hidden = true; return; }
+  const o = r.options ? r.options[st.opt || 0] : null;
+  let rate = o ? o.rate : r.rate;
+  const rif = rate === 'rif' || rate === 'note2';
+  if (rif) rate = parse(st.rate);
+  let thr = o && o.thr !== undefined ? o.thr : (r.thr || 0);
+  if (r.senior) thr = st.senior ? 100000 : 50000;
+  if (r.coop) thr = st.coop ? 30000000 : 10000000;
+  const amt = parse(st.amt), prev = parse(st.prev), months = Math.max(1, parse(st.months) || 1), sdv = parse(st.sdv);
+  const lines = [], msgs = [];
+  let base = 0, liable = false, why = '';
+  switch (r.mode) {
+    case 'agg': {
+      const agg = prev + amt;
+      liable = agg > thr;
+      lines.push(['Amount of this payment / credit', rs(amt)]);
+      if (prev) lines.push(['Earlier amounts in the tax year', rs(prev)], ['Aggregate in the tax year', rs(agg)]);
+      lines.push(['Threshold', thr ? rs(thr) : 'Nil']);
+      if (liable) { base = st.prevTds || !prev ? amt : agg; why = `The ${prev ? 'aggregate' : 'amount'} exceeds the threshold, so tax is deducted on the entire amount${prev && !st.prevTds ? ', including the earlier amounts on which no tax was deducted' : ''}.`; }
+      else why = `The ${prev ? 'aggregate' : 'amount'} does not exceed the threshold – no deduction yet. Watch the aggregate for the rest of the year.`;
+      break; }
+    case 'single':
+      liable = amt > thr; base = liable ? amt : 0;
+      lines.push(['Amount of this transaction', rs(amt)], ['Threshold (single transaction)', rs(thr)]);
+      why = liable ? 'The transaction exceeds the threshold.' : 'The transaction does not exceed the threshold – no deduction.';
+      break;
+    case 'month':
+      liable = amt > thr; base = liable ? amt * months : 0;
+      lines.push(['Rent for a month', rs(amt)], ['Months (or part months)', String(months)], ['Total rent', rs(amt * months)], ['Threshold', rs(thr) + ' for a month or part of a month']);
+      why = liable ? 'Monthly rent exceeds Rs. 50,000, so tax is deducted on the rent.' : 'Monthly rent does not exceed Rs. 50,000 – no deduction.';
+      if (r.sl === '2(i)') msgs.push(['m-warn', 'Deduct at the time of credit or payment for the last month of the tax year or the last month of the tenancy, whichever is earlier (Note 1).']);
+      break;
+    case 'contract': {
+      const agg = prev + amt;
+      liable = amt > 30000 || agg > 100000;
+      lines.push(['Amount of this sum', rs(amt)]); if (prev) lines.push(['Earlier sums in the tax year', rs(prev)], ['Aggregate in the tax year', rs(agg)]);
+      lines.push(['Threshold', 'Rs. 30,000 for any single sum; Rs. 1,00,000 aggregate']);
+      if (liable) { base = st.prevTds || !prev || amt > 30000 && agg <= 100000 ? amt : agg; why = amt > 30000 && agg <= 100000 ? 'This sum exceeds Rs. 30,000.' : `The aggregate exceeds Rs. 1,00,000, so tax is deducted${prev && !st.prevTds ? ' on the earlier sums as well' : ''}.`; }
+      else why = 'Neither this sum exceeds Rs. 30,000 nor the aggregate Rs. 1,00,000 – no deduction yet.';
+      break; }
+    case 'excess': {
+      const agg = prev + amt;
+      base = Math.max(0, agg - thr) - Math.max(0, prev - thr); liable = base > 0;
+      lines.push(['Amount of this purchase', rs(amt)], ['Earlier purchases in the tax year', rs(prev)], ['Aggregate in the tax year', rs(agg)], ['Threshold', 'On the sum exceeding Rs. 50,00,000']);
+      why = liable ? `Tax is deducted on the part of the aggregate exceeding Rs. 50 lakh that falls in this payment: ${inr(Math.max(0, agg - thr))} − ${inr(Math.max(0, prev - thr))}.` : 'The aggregate does not exceed Rs. 50 lakh – no deduction.';
+      break; }
+    case 'property': {
+      const hi = Math.max(amt, sdv);
+      liable = amt >= thr || sdv >= thr; base = liable ? hi : 0;
+      lines.push(['Consideration', rs(amt)], ['Stamp duty value', sdv ? rs(sdv) : '–'], ['Higher of the two', rs(hi)], ['Threshold', 'Consideration or stamp duty value of Rs. 50,00,000 or more']);
+      why = liable ? 'The consideration or stamp duty value is Rs. 50 lakh or more: 1% of the higher of the two.' : 'Both are below Rs. 50 lakh – no deduction.';
+      msgs.push(['m-warn', 'Where there are several transferees, the threshold is tested on the aggregate paid by all of them (Note 1).']);
+      break; }
+    default:
+      liable = amt > 0; base = amt;
+      lines.push(['Amount', rs(amt)], ['Threshold', r.mode === 'nr' ? 'None' : esc(r.thrText)]);
+      why = r.mode === 'nr' ? 'Payment to a non-resident: tax on the amount at the rate in the Table.' : 'No threshold.';
+  }
+  if (rif && !(rate > 0)) msgs.unshift(['m-err', r.rate === 'note2' ? 'Enter the rate (20%, or the lower treaty rate).' : 'This row is at "rates in force" – enter the rate from the Finance Act to compute the tax.']);
+  let tds = base * (rate || 0) / 100, grossed = 0;
+  if (st.gross && liable && rate > 0 && rate < 100) { grossed = base / (1 - rate / 100); tds = grossed * rate / 100; }
+  const tdsR = Math.round(tds);
+  (r.noTds || []).forEach(n => msgs.push(['m-warn', `No deduction if: ${D.noTds[n].cond} [393(4) Sl. ${n}]`]));
+  if (r.decl) msgs.push(['m-warn', 'No deduction if the payee furnishes the declaration under section 393(6) (resident individual; for others except companies and firms, not for dividend).']);
+  if (r.note) msgs.push(['m-warn', r.note]);
+  if (r.sub === '2') msgs.push(['m-warn', 'Surcharge and health and education cess, where applicable on payments to non-residents, are not included.']);
+
+  out.innerHTML = `<h2>TDS working${st.ref ? ' – ' + esc(st.ref) : ''}</h2>
+    <div class="big"><div><span>TDS to deduct</span><b>${rs(liable ? tdsR : 0)}</b></div><div><span>Rate</span><b>${rate ? rate + '%' : '–'}</b></div><div><span>Amount payable to the payee</span><b>${rs(st.gross && grossed ? base : Math.max(0, (r.mode === 'month' ? amt * months : amt) - (liable ? tdsR : 0)))}</b></div></div>
+    <div class="portal"><b>When paying on the e-filing portal, select:</b>
+      <ol><li>e-File → e-Pay Tax → <b>Income Tax Act, 2025</b> → New Payment → <b>Pay TDS/TCS</b> (challan ITNS 281N)</li>
+      <li>Minor Head: <b>TDS/TCS payable by taxpayer (200)</b></li>
+      <li>Residential status of the deductee: <b>${esc(status(r))}</b></li>
+      <li>Section: <span class="code">${esc(code(r))}</span> – ${esc(r.head)}</li></ol>
+      <div class="muted" style="margin-top:6px">Earlier reference: section ${esc(r.old)} of the Income-tax Act, 1961.</div></div>
+    <h3>${esc(code(r))} – ${esc(r.nature)}</h3>
+    <div class="muted">Payer: ${esc(r.payer)}${r.payee ? ' · Payee: ' + esc(r.payee) : ''}${o ? ' · ' + esc(o.label) : ''}</div>
+    <table class="t" style="margin-top:8px"><tbody>
+      ${lines.map(([a, b]) => `<tr><td>${esc(a)}</td><td class="n">${b}</td></tr>`).join('')}
+      <tr><td colspan="2" class="muted">${esc(why)}</td></tr>
+      ${liable ? `<tr><td>Amount on which tax is deducted</td><td class="n">${rs(base)}</td></tr>` : ''}
+      ${grossed ? `<tr><td>Grossed up under section 393(10)<div class="formula">${inr(base)} ÷ (1 − ${rate}%)</div></td><td class="n">${rs(grossed)}</td></tr>` : ''}
+      ${liable ? `<tr class="tot"><td>TDS @ ${rate || 0}%<div class="formula">${inr(grossed || base)} × ${rate || 0}%</div></td><td class="n">${rs(tdsR)}</td></tr>` : '<tr class="tot"><td>TDS</td><td class="n">Rs. 0</td></tr>'}
+    </tbody></table>
+    <div class="msgs" style="margin-top:12px">${msgs.map(([k, t]) => `<div class="${k}">${esc(t)}</div>`).join('')}</div>
+    <p class="src">Section 393, Income-tax Act, 2025 as amended by the Finance Act, 2026. Higher rate where PAN is not furnished, lower-deduction certificates and surcharge/cess are not applied.</p>`;
+  out.hidden = false;
+}
+
+$('#print').onclick = () => { if (!$('#out').hidden) { $('#chartTab').dataset.print = 'no'; window.print(); delete $('#chartTab').dataset.print; } };
+$('#copy').onclick = () => { if ($('#out').hidden) return; const t = [...$('#out').querySelectorAll('h2,h3,.big div,.portal li,tr,.msgs div')].map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText.replace(/\n/g, ': ')).join('\n'); if (navigator.clipboard) navigator.clipboard.writeText(t); };
+$('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(st, null, 1)], { type: 'application/json' })); a.download = `${(st.ref || 'TDS').replace(/[^A-Za-z0-9-]+/g, '_')}_tds_case.json`; a.click(); };
+$('#openCase').onclick = () => $('#caseFile').click();
+$('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { const d = JSON.parse(await f.text()); if (!('nat' in d)) throw 0; st = Object.assign(blank(), d); save(); load(); } catch (err) { alert('That file is not a TDS case file.'); } };
+$('#clear').onclick = () => { st = blank(); save(); load(); };
+window.TDSCalc = { setState: s => { st = Object.assign(blank(), s); load(); return $('#out').innerText; } };
+load();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

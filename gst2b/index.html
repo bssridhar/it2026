@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GSTR-2B Analyser</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.84rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--head);font-weight:600;position:sticky;top:0;z-index:1}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tfoot td{font-weight:700;background:var(--head);position:sticky;bottom:0}
+table.t input,table.t select{padding:3px 5px;font-size:.84rem}
+table.t input.w-s{width:60px} table.t input.w-m{width:110px} table.t input.w-l{width:190px} table.t input.num{text-align:right;width:90px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpis div{background:var(--head);border-radius:8px;padding:10px 12px}
+.kpis span{display:block;font-size:.78rem;color:var(--muted)}
+.kpis b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.outs button{text-align:left;padding:10px 12px}
+.outs button small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.outs button.primary small{color:inherit;opacity:.85}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 16px}
+.tabs button{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:none;color:var(--muted);padding:8px 14px;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--card);border-color:var(--line);color:var(--ink);margin-bottom:-1px}
+.pane[hidden]{display:none}
+.steps{margin:0;padding-left:20px;font-size:.9rem}
+.steps li{margin:3px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.75rem;background:var(--head);color:var(--muted);margin-left:6px}
+td.c{background:var(--lock)}
+.radio{display:flex;gap:16px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:flex-start;color:var(--ink);font-size:.9rem;margin:0}
+.radio input{width:auto;margin-top:3px}
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--info-bg)}
+table.t td.wrap{white-space:normal;min-width:180px}
+table.t select.cat{width:190px}
+table.t input.rsn{width:260px}
+tr.changed td{background:var(--info-bg)}
+tr.flag td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.small{font-size:.76rem;color:var(--muted)}
+textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{padding:4px 10px;font-size:.8rem;border-radius:14px}
+.chips button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>GSTR-2B Analyser – ITC for GSTR-3B</h1>
+  <p class="sub">Load the GSTR-2B Excel downloaded from the GST portal. The tool sorts every invoice, note and amendment into eligible ITC, blocked credit, insurance / motor vehicle items, place-of-supply ineligibility, reverse charge and others, lets you re-mark any line with a reason, and gives the GSTR-2B working and the GSTR-3B figures in Excel. The file is read in this browser only.</p>
+
+  <div class="card">
+    <div id="drop" class="drop" tabindex="0" role="button"><b>Choose or drop the GSTR-2B Excel (.xlsx) here</b><br><span class="hint">As downloaded from the portal (Returns → GSTR-2B → Download Excel). One month at a time.</span></div>
+    <input type="file" id="xfile" accept=".xlsx" hidden>
+    <div class="bar" style="margin-top:12px">
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" id="newCase" class="danger">Clear</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <section class="card" id="infoCard" hidden>
+    <h2>Registered person <span class="pill" id="who"></span></h2>
+    <div class="grid">
+      <div><label>GSTIN</label><input id="gstin" readonly></div>
+      <div class="full"><label>Name</label><input id="legal" readonly></div>
+      <div><label>GSTR-2B for</label><input id="period" readonly></div>
+      <div><label>State of registration (for the place-of-supply check)</label><select id="home"></select></div>
+      <div class="full"><label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="claimReverse" style="width:auto"> Show blocked / ineligible credit in 4A(5) and reverse it in 4B(1) (CBIC Circular No. 170/02/2022-GST). Untick to leave it out of GSTR-3B altogether.</label></div>
+    </div>
+  </section>
+
+  <section class="card" id="sumCard" hidden>
+    <h2>Summary (Rs.)</h2>
+    <div class="two">
+      <div><h2 style="font-size:.95rem">By category</h2><div class="tw" style="max-height:none"><table class="t" id="catSum"></table></div></div>
+      <div><h2 style="font-size:.95rem">Proposed GSTR-3B</h2><div class="tw" style="max-height:none"><table class="t" id="tb3"></table></div><p class="hint" id="tb3note"></p></div>
+    </div>
+  </section>
+
+  <section class="card" id="recCard" hidden>
+    <h2>Invoices, notes and amendments <span class="bar"><input id="q" placeholder="Search supplier / GSTIN / number" style="width:240px"></span></h2>
+    <div class="chips" id="chips"></div>
+    <div class="tw"><table class="t" id="recs"></table></div>
+    <p class="hint">Change the category of any line and give the reason. <b>All of supplier</b> applies the line's category and reason to every line of that GSTIN in this month; <b>Remember</b> keeps it as a rule for this supplier in future months of this client. Lines shaded blue were changed from the automatic category; a mark at the left edge means a point to check (see Checks).</p>
+  </section>
+
+  <section class="card" id="chkCard" hidden>
+    <h2>Checks</h2>
+    <div id="issues" class="msgs"></div>
+  </section>
+
+  <section class="card" id="outCard" hidden>
+    <h2>Download</h2>
+    <div class="outs">
+      <button type="button" class="primary" id="dlXlsx">GSTR-2B working (Excel)<small>Gstr-2B Working · 2B data · Supplier-wise · Checks</small></button>
+    </div>
+    <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>Rules for the automatic sorting <button type="button" class="link" id="toggleRules">Show</button></h2>
+    <div id="rulesBox" hidden>
+      <p class="hint" style="margin-top:0">One rule per line: <code>WORD IN SUPPLIER NAME | reason</code>. Matching is on whole words, ignoring case. These rules are kept in this browser for all clients.</p>
+      <div class="two">
+        <div><label>Insurance / motor vehicle related</label><textarea class="rules" id="r_insmot"></textarea></div>
+        <div><label>Blocked credit – section 17(5) (other)</label><textarea class="rules" id="r_blocked"></textarea></div>
+      </div>
+      <div class="bar" style="margin-top:8px"><button type="button" class="primary" id="saveRules">Save rules and re-sort</button><button type="button" id="resetRules">Restore the default rules</button></div>
+      <h2 style="font-size:.95rem;margin-top:16px">Suppliers remembered for this client</h2>
+      <div id="supRules" class="hint">None.</div>
+    </div>
+  </section>
+</main>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/exceljs.min.js"></script>
+<script src="lib/read2b.js"></script>
+<script src="lib/book.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
