@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: GSTR-2B Analyser – sorts the ITC in GSTR-2B (blocked credit, insurance / motor vehicle, place of supply, RCM) and gives the GSTR-3B figures.",
     "New: GSTR-9 / 9C Working – reads GSTR-1 and GSTR-3B PDFs and prepares the GSTR reconciliation, GSTR-9 draft and 9C summary in Excel.",
     "New: Depreciation under Schedule II, Companies Act, 2013 – rate and pro rata working, fixed asset register with audit checks, PPE note.",
     "New: Form 26AS · AIS · TIS Consolidator – reads the three PDFs and prepares the income consolidation workbook with TDS credit and review points.",
@@ -124,6 +125,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Reads Form 26AS, AIS and TIS PDFs; nature-wise income with 26AS vs AIS/TIS and the figure to consider, TDS credit, and points for review – downloaded as an Excel workbook.",
       added: "2026-11-09"
+    },
+    {
+      id: "gst2b",
+      title: "GSTR-2B Analyser (ITC for GSTR-3B)",
+      category: "GST",
+      path: "gst2b/index.html",
+      status: "available",
+      description: "Reads the GSTR-2B Excel from the portal and sorts the ITC: eligible, blocked u/s 17(5), insurance / motor vehicle, place of supply, RCM, notes and amendments; mark any line ineligible with a reason; GSTR-2B working and GSTR-3B figures in Excel.",
+      added: "2026-11-13"
     },
     {
       id: "gst9",
