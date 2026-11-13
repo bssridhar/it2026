@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: GSTR-9 / 9C Working – reads GSTR-1 and GSTR-3B PDFs and prepares the GSTR reconciliation, GSTR-9 draft and 9C summary in Excel.",
     "New: Depreciation under Schedule II, Companies Act, 2013 – rate and pro rata working, fixed asset register with audit checks, PPE note.",
     "New: Form 26AS · AIS · TIS Consolidator – reads the three PDFs and prepares the income consolidation workbook with TDS credit and review points.",
     "New: EPF and ESI Monthly Returns – ECR file, ESIC upload file, registers and portal reconciliation from the salary sheet.",
@@ -31,7 +32,7 @@ window.HOME_CONFIG = {
   ],
 
   // Tool categories, in the order they are shown.
-  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "Company Law and Audit", "Payroll", "Office"],
+  categories: ["Registration", "Agreements", "Certificates", "Income Tax", "GST", "Company Law and Audit", "Payroll", "Office"],
 
   tools: [
     {
@@ -123,6 +124,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Reads Form 26AS, AIS and TIS PDFs; nature-wise income with 26AS vs AIS/TIS and the figure to consider, TDS credit, and points for review – downloaded as an Excel workbook.",
       added: "2026-11-09"
+    },
+    {
+      id: "gst9",
+      title: "GSTR-9 / 9C Working",
+      category: "GST",
+      path: "gst9/index.html",
+      status: "available",
+      description: "Reads the GSTR-1 and GSTR-3B PDFs for the year (any number of months) and prepares the GSTR reconciliation working with formulas, month-wise data, a GSTR-9 draft (Tables 4 to 9), books-vs-returns summary for 9C, filing dates and checks.",
+      added: "2026-11-13"
     },
     {
       id: "depn",
