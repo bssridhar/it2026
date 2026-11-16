@@ -13,6 +13,10 @@ flagged so a missing part is noticed. Split files from the portal carry no "Read
 month are then taken from the file name (MMYYYY_GSTIN_GSTR2B_DDMMYYYY_part.xlsx). Large months are shown 200 lines at a
 time on screen; the Excel has every line.
 
+The lines table has Excel-style filters and sorting on each column heading (▾). The category (with a reason, and
+optionally remembering the supplier) can be set for all the lines shown, for ticked lines only, or line by line;
+"Undo last change" reverses a bulk change.
+
 Excel: **Gstr-2B Working** (blocks in the firm's layout with a "Reason for ineligible" column, amendments with the ITC
 claimed earlier, summary vs GSTR-2B, proposed GSTR-3B), **2B data**, **Supplier-wise**, **Checks**.
 Blocked credit is shown in 4A(5) and reversed in 4B(1), and place-of-supply ineligibility in 4D(2) (CBIC Circular

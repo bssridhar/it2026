@@ -53,6 +53,7 @@ async function loadFiles(files) {
       else if (marksOnly) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); msgs.push(['info', 'Your earlier marks for this month have been applied again.']); }
       else { st = Object.assign(blank(), { parts, file: parts.map(p => p.file).join(', '), data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true } }); st.supplierRules = get(LS.sup + data.info.gstin, {}); }
       st.lastKey = kk(data.info);
+      colF = {}; sortBy = null; selected.clear(); undoStack = [];
       save(); render();
       if (draftNote) msgs.push(['info', draftNote]);
       msgs.push(['ok', `GSTR-2B of ${data.info.legal || data.info.gstin} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
@@ -118,32 +119,138 @@ function renderChips() {
   $('#chips').innerHTML = list.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${esc(l)}</button>`).join('');
   $$('#chips [data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; pageN = PAGE; renderChips(); renderRows(); });
 }
-function renderRows() {
+/* ---------- lines table: Excel-style column filters and sorting, selection and bulk change of category ---------- */
+const NOREASON = ['elig', 'rcm', 'imp', 'isd', 'hold'];
+const dkey = s => { const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s || ''); return m ? m[3] + m[2] + m[1] : s || ''; };
+const COLS = [
+  { k: 'sheet', label: 'Section', v: r => r.sheet },
+  { k: 'supplier', label: 'Supplier', v: r => `${r.name || '(no name)'}${r.gstin ? ' – ' + r.gstin : ''}` },
+  { k: 'date', label: 'Number / date', v: r => r.date || '(blank)', sort: r => dkey(r.date) },
+  { k: 'pos', label: 'Place of supply', v: r => r.pos || '(blank)' },
+  { k: 'rcm', label: 'RCM', v: r => r.rcm || '(blank)' },
+  { k: 'txval', label: 'Taxable', n: true }, { k: 'igst', label: 'IGST', n: true }, { k: 'cgst', label: 'CGST', n: true }, { k: 'sgst', label: 'SGST', n: true }, { k: 'cess', label: 'Cess', n: true },
+  { k: 'cat', label: 'Category', v: r => CAT[r.cat][1] },
+  { k: 'reason', label: 'Reason for ineligible / remarks', v: r => r.reason || '(blank)' },
+  { k: 'src', label: 'Set by', v: r => r.src === 'user' ? 'Marked' : r.src === 'supplier' ? 'Supplier rule' : 'Automatic', hidden: true },
+];
+const COL = Object.fromEntries(COLS.map(c => [c.k, c]));
+COLS.forEach(c => { if (c.n) { c.v = r => fmt(r[c.k]); c.sort = r => r[c.k]; } if (!c.sort) c.sort = c.v; });
+let colF = {}, sortBy = null, selected = new Set(), undoStack = [];
+
+function baseRows() {
   const q = ($('#q').value || '').toLowerCase();
-  const all = rows.filter(r => (filter === 'all' || r.cat === filter || (filter === 'inel' && ['blocked', 'insmot', 'pos', 'notavl', 'inelig'].includes(r.cat)) || (filter === 'amend' && r.amend) || (filter === 'flag' && r.flags.length))
+  return rows.filter(r => (filter === 'all' || r.cat === filter || (filter === 'inel' && ['blocked', 'insmot', 'pos', 'notavl', 'inelig'].includes(r.cat)) || (filter === 'amend' && r.amend) || (filter === 'flag' && r.flags.length))
     && (!q || `${r.name} ${r.gstin} ${r.docno}`.toLowerCase().includes(q)));
+}
+const passes = (r, except) => Object.entries(colF).every(([k, set]) => k === except || set.has(COL[k].v(r)));
+function filteredRows() {
+  const list = baseRows().filter(r => passes(r));
+  if (sortBy) { const c = COL[sortBy.k], d = sortBy.dir; list.sort((a, b) => { const x = c.sort(a), y = c.sort(b); return (x < y ? -1 : x > y ? 1 : 0) * d; }); }
+  return list;
+}
+
+function renderRows() {
+  const all = filteredRows(), show = all.slice(0, pageN);
   const opts = sel => CATS.map(c => `<option value="${c[0]}"${c[0] === sel ? ' selected' : ''}>${esc(c[1])}</option>`).join('');
-  const show = all.slice(0, pageN);
-  $('#recs').innerHTML = `<thead><tr><th>#</th><th>Section</th><th>Supplier</th><th>Number / date</th><th>Place of supply</th><th>RCM</th><th class="n">Taxable</th><th class="n">IGST</th><th class="n">CGST</th><th class="n">SGST</th><th class="n">Cess</th><th>Category</th><th>Reason for ineligible / remarks</th><th></th></tr></thead><tbody>${show.map(r => {
-    const i = rows.indexOf(r), cls = [r.cat !== r.auto.cat ? 'changed' : '', r.flags.length ? 'flag' : ''].join(' ');
-    return `<tr class="${cls}" title="${esc(r.flags.join('\n'))}"><td>${i + 1}</td><td class="small">${esc(r.sheet)}${r.amend ? `<br>orig. ${esc(r.orig.no)}` : ''}</td><td class="wrap">${esc(r.name)}<br><span class="small">${esc(r.gstin)}</span></td>
+  const th = c => `<th class="${c.n ? 'n ' : ''}${colF[c.k] ? 'filtered' : ''}">${esc(c.label)} <button type="button" class="fb" data-fcol="${c.k}" title="Filter / sort">${colF[c.k] ? '▼' : '▾'}${sortBy && sortBy.k === c.k ? (sortBy.dir > 0 ? '↑' : '↓') : ''}</button></th>`;
+  const allSel = all.length > 0 && all.every(r => selected.has(r.id));
+  $('#recs').innerHTML = `<thead><tr><th><input type="checkbox" id="selAll" title="Select all ${all.length} filtered lines"${allSel ? ' checked' : ''}></th><th>#</th>${COLS.filter(c => !c.hidden).map(th).join('')}<th></th></tr></thead><tbody>${show.map(r => {
+    const i = rows.indexOf(r), cls = [r.cat !== r.auto.cat ? 'changed' : '', r.flags.length ? 'flag' : '', selected.has(r.id) ? 'sel' : ''].join(' ');
+    return `<tr class="${cls}" title="${esc(r.flags.join('\n'))}"><td><input type="checkbox" class="rsel" data-i="${i}"${selected.has(r.id) ? ' checked' : ''}></td><td>${i + 1}</td><td class="small">${esc(r.sheet)}${r.amend ? `<br>orig. ${esc(r.orig.no)}` : ''}</td><td class="wrap">${esc(r.name)}<br><span class="small">${esc(r.gstin)}</span></td>
       <td>${esc(r.docno)}<br><span class="small">${esc(r.date)} ${r.sign < 0 ? '· credit note' : /debit/i.test(r.doctype) ? '· debit note' : ''}</span></td><td>${esc(r.pos)}</td><td>${esc(r.rcm)}</td>
       ${['txval', ...HEADS].map(h => `<td class="n">${fmt(r[h])}</td>`).join('')}
       <td><select class="cat" data-i="${i}">${opts(r.cat)}</select>${r.src !== 'auto' ? `<div class="small">${r.src === 'user' ? 'marked' : 'supplier rule'} · auto: ${esc(CAT[r.auto.cat][1])}</div>` : ''}</td>
-      <td><input class="rsn" data-i="${i}" value="${esc(r.reason)}" placeholder="${['elig', 'rcm', 'imp', 'isd'].includes(r.cat) ? 'optional remarks' : 'reason for ineligible'}"></td>
-      <td style="white-space:nowrap">${r.gstin ? `<button type="button" class="link sm" data-all="${i}" title="Apply this category and reason to every line of this supplier">All of supplier</button><br><button type="button" class="link sm" data-rem="${i}" title="Use this category for this supplier in future months">${st.supplierRules[r.gstin] ? 'Remembered ✓' : 'Remember'}</button>` : ''}${r.src === 'user' ? `<br><button type="button" class="link sm" data-undo="${i}">Undo</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="14" class="hint">Nothing to show.</td></tr>'}</tbody>${all.length > show.length ? `<tfoot><tr><td colspan="14">Showing ${show.length} of ${all.length} lines – <button type="button" class="link" id="more">show ${Math.min(PAGE, all.length - show.length)} more</button> · <button type="button" class="link" id="moreAll">show all</button> (use the category buttons or search to narrow down)</td></tr></tfoot>` : ''}`;
+      <td><input class="rsn" data-i="${i}" value="${esc(r.reason)}" placeholder="${NOREASON.includes(r.cat) ? 'optional remarks' : 'reason for ineligible'}"></td>
+      <td style="white-space:nowrap">${r.gstin ? `<button type="button" class="link sm" data-all="${i}" title="Apply this category and reason to every line of this supplier">All of supplier</button><br><button type="button" class="link sm" data-rem="${i}" title="Use this category for this supplier in future months">${st.supplierRules[r.gstin] ? 'Remembered ✓' : 'Remember'}</button>` : ''}${r.src === 'user' ? `<br><button type="button" class="link sm" data-undo="${i}">Undo</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="16" class="hint">Nothing to show.</td></tr>'}</tbody>${all.length > show.length ? `<tfoot><tr><td colspan="16">Showing ${show.length} of ${all.length} lines – <button type="button" class="link" id="more">show ${Math.min(PAGE, all.length - show.length)} more</button> · <button type="button" class="link" id="moreAll">show all</button></td></tr></tfoot>` : ''}`;
   if ($('#more')) { $('#more').onclick = () => { pageN += PAGE; renderRows(); }; $('#moreAll').onclick = () => { pageN = all.length; renderRows(); }; }
-  $$('#recs select.cat').forEach(el => el.onchange = () => { const r = rows[+el.dataset.i]; const o = st.overrides[r.id] = st.overrides[r.id] || {}; o.cat = el.value;
-    if (o.reason === undefined || o.reason === r.auto.reason) o.reason = el.value === r.auto.cat ? r.auto.reason : (['elig', 'rcm', 'imp', 'isd', 'hold'].includes(el.value) ? '' : (o.reason || ''));
-    if (el.value === r.auto.cat && (o.reason === r.auto.reason)) delete st.overrides[r.id]; save(); refresh(); });
+  renderBulk(all);
+  $('#selAll').onchange = e => { all.forEach(r => e.target.checked ? selected.add(r.id) : selected.delete(r.id)); renderRows(); };
+  $$('#recs .rsel').forEach(el => el.onchange = () => { const r = rows[+el.dataset.i]; el.checked ? selected.add(r.id) : selected.delete(r.id); el.closest('tr').classList.toggle('sel', el.checked); renderBulk(filteredRows()); const sa = $('#selAll'); sa.checked = all.length > 0 && all.every(x => selected.has(x.id)); });
+  $$('#recs [data-fcol]').forEach(b => b.onclick = e => { e.stopPropagation(); openFilter(b.dataset.fcol, b); });
+  $$('#recs select.cat').forEach(el => el.onchange = () => { const r = rows[+el.dataset.i]; applyCat([r], el.value, null, false); });
   $$('#recs input.rsn').forEach(el => el.onchange = () => { const r = rows[+el.dataset.i]; const o = st.overrides[r.id] = st.overrides[r.id] || {}; o.reason = el.value.trim(); if (!o.cat) o.cat = r.cat; save(); refresh(); });
-  $$('#recs [data-all]').forEach(b => b.onclick = () => { const r = rows[+b.dataset.all]; let n = 0; rows.forEach(x => { if (x.gstin === r.gstin && x !== r && !['rejected', 'rev37a', 'imp', 'isd'].includes(x.cat)) { st.overrides[x.id] = { cat: r.cat, reason: r.reason }; n++; } });
-    save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-ok">${n} other line(s) of ${esc(r.name)} set to "${esc(CAT[r.cat][1])}".</div>`; });
+  $$('#recs [data-all]').forEach(b => b.onclick = () => { const r = rows[+b.dataset.all]; const others = rows.filter(x => x.gstin === r.gstin && x !== r && !['rejected', 'rev37a', 'imp', 'isd'].includes(x.cat));
+    applyCat(others, r.cat, r.reason, false); $('#topMsgs').innerHTML = `<div class="m-ok">${others.length} other line(s) of ${esc(r.name)} set to "${esc(CAT[r.cat][1])}".</div>`; });
   $$('#recs [data-rem]').forEach(b => b.onclick = () => { const r = rows[+b.dataset.rem];
     if (st.supplierRules[r.gstin]) delete st.supplierRules[r.gstin]; else st.supplierRules[r.gstin] = { cat: r.cat, reason: r.reason, name: r.name };
     set(supKey(), st.supplierRules); save(); refresh(); });
   $$('#recs [data-undo]').forEach(b => b.onclick = () => { delete st.overrides[rows[+b.dataset.undo].id]; save(); refresh(); });
 }
+
+/* category (and reason) for a set of lines; reason null = keep / suggest */
+function applyCat(list, cat, reason, remember) {
+  const before = {}; list.forEach(r => { before[r.id] = st.overrides[r.id] ? Object.assign({}, st.overrides[r.id]) : null; });
+  undoStack.push({ before, supplierRules: JSON.parse(JSON.stringify(st.supplierRules)), label: `${list.length} line(s) to "${CAT[cat][1]}"` });
+  if (undoStack.length > 20) undoStack.shift();
+  list.forEach(r => {
+    let rs = reason;
+    if (rs === null || rs === undefined || rs === '') rs = cat === r.cat ? r.reason : cat === r.auto.cat ? r.auto.reason : (NOREASON.includes(cat) ? '' : (st.overrides[r.id] && st.overrides[r.id].reason) || '');
+    if (cat === r.auto.cat && rs === r.auto.reason) delete st.overrides[r.id]; else st.overrides[r.id] = { cat, reason: rs };
+    if (remember && r.gstin) st.supplierRules[r.gstin] = { cat, reason: rs, name: r.name };
+  });
+  if (remember) set(supKey(), st.supplierRules);
+  save(); refresh();
+}
+
+function renderBulk(all) {
+  const nSel = selected.size, nF = Object.keys(colF).length;
+  const fl = Object.entries(colF).map(([k, s]) => `${COL[k].label}: ${s.size === 1 ? [...s][0] : s.size + ' values'}`).join(' · ');
+  const tot = all.reduce((t, r) => { HEADS.forEach(h => t[h] += r[h]); t.txval += r.txval; return t; }, { txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0 });
+  $('#bulk').innerHTML = `<div class="bar" style="margin-bottom:6px"><b>${all.length}</b>&nbsp;line(s) shown${nF ? ` – filtered by ${esc(fl)} <button type="button" class="link sm" id="clrF">clear filters</button>` : ''}${sortBy ? ` <button type="button" class="link sm" id="clrS">clear sort</button>` : ''}
+      <span class="small">· taxable ${fmt(tot.txval)} · IGST ${fmt(tot.igst)} · CGST ${fmt(tot.cgst)} · SGST ${fmt(tot.sgst)}${tot.cess ? ' · cess ' + fmt(tot.cess) : ''}</span>${nSel ? ` · <b>${nSel}</b>&nbsp;selected <button type="button" class="link sm" id="clrSel">clear selection</button>` : ''}</div>
+    <div class="bar">Set category of <select id="bTarget"><option value="filtered">all ${all.length} line(s) shown</option>${nSel ? `<option value="sel" selected>the ${nSel} selected line(s)</option>` : ''}</select>
+      to <select id="bCat">${CATS.map(c => `<option value="${c[0]}">${esc(c[1])}</option>`).join('')}</select>
+      <input id="bReason" placeholder="reason (optional – blank keeps / suggests one)" style="width:280px">
+      <label style="display:flex;gap:6px;align-items:center;margin:0;color:var(--ink)"><input type="checkbox" id="bRemember" style="width:auto"> remember for the supplier(s)</label>
+      <button type="button" class="primary" id="bApply"${all.length || nSel ? '' : ' disabled'}>Apply</button>
+      ${undoStack.length ? `<button type="button" id="bUndo" title="Undo: ${esc(undoStack[undoStack.length - 1].label)}">Undo last change</button>` : ''}</div>`;
+  if ($('#clrF')) $('#clrF').onclick = () => { colF = {}; pageN = PAGE; renderRows(); };
+  if ($('#clrS')) $('#clrS').onclick = () => { sortBy = null; renderRows(); };
+  if ($('#clrSel')) $('#clrSel').onclick = () => { selected.clear(); renderRows(); };
+  $('#bApply').onclick = async () => {
+    const target = $('#bTarget').value === 'sel' ? rows.filter(r => selected.has(r.id)) : all;
+    const cat = $('#bCat').value, rsn = $('#bReason').value.trim(), rem = $('#bRemember').checked;
+    if (!target.length) return;
+    if (target.length > 1 && !(await ask(`Set ${target.length} line(s) to "${CAT[cat][1]}"?`, `${rsn ? `Reason: <b>${esc(rsn)}</b>.` : 'No reason entered – the present reason is kept, or a suggested one is used.'}${rem ? ' The supplier(s) will also be remembered for future months.' : ''} You can undo this with "Undo last change".`))) return;
+    applyCat(target, cat, rsn || null, rem); selected.clear();
+    $('#topMsgs').innerHTML = `<div class="m-ok">${target.length} line(s) set to "${esc(CAT[cat][1])}".</div>`; refresh();
+  };
+  if ($('#bUndo')) $('#bUndo').onclick = () => { const u = undoStack.pop(); if (!u) return; Object.entries(u.before).forEach(([id, o]) => { if (o) st.overrides[id] = o; else delete st.overrides[id]; }); st.supplierRules = u.supplierRules; set(supKey(), st.supplierRules); save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-info">Undone: ${esc(u.label)}.</div>`; };
+}
+
+/* Excel-like filter box for a column */
+function openFilter(k, btn) {
+  closeFilter();
+  const c = COL[k], pool = baseRows().filter(r => passes(r, k)), cnt = new Map();
+  pool.forEach(r => { const v = c.v(r); cnt.set(v, (cnt.get(v) || 0) + 1); });
+  let vals = [...cnt.keys()]; const sk = new Map(pool.map(r => [c.v(r), c.sort(r)]));
+  vals.sort((a, b) => { const x = sk.get(a), y = sk.get(b); return x < y ? -1 : x > y ? 1 : 0; });
+  const cur = colF[k];
+  const box = document.createElement('div'); box.className = 'fpop'; box.id = 'fpop';
+  box.innerHTML = `<div class="bar" style="gap:6px"><button type="button" class="sm" data-s="1">Sort A→Z / smallest first</button><button type="button" class="sm" data-s="-1">Sort Z→A / largest first</button></div>
+    <input id="fq" placeholder="Search values" style="margin-top:8px">
+    <label style="margin-top:6px"><input type="checkbox" id="fAll"> <b>(Select all)</b></label>
+    <div class="lst">${vals.map((v, i) => `<label data-v="${i}"><input type="checkbox" value="${i}"${!cur || cur.has(v) ? ' checked' : ''}> <span>${esc(v)}</span> <span class="small">(${cnt.get(v)})</span></label>`).join('')}</div>
+    <div class="bar" style="justify-content:flex-end"><button type="button" class="sm" id="fClr">Clear filter</button><button type="button" class="sm" id="fCancel">Cancel</button><button type="button" class="sm primary" id="fOk">OK</button></div>`;
+  document.body.appendChild(box);
+  const rc = btn.getBoundingClientRect(); box.style.top = (window.scrollY + rc.bottom + 4) + 'px'; box.style.left = Math.max(8, Math.min(window.scrollX + rc.left - 120, window.scrollX + document.documentElement.clientWidth - box.offsetWidth - 8)) + 'px';
+  const boxes = () => Array.from(box.querySelectorAll('.lst input')), visible = () => boxes().filter(x => x.closest('label').style.display !== 'none');
+  const syncAll = () => { const v = visible(); $('#fAll').checked = v.length > 0 && v.every(x => x.checked); };
+  syncAll();
+  $('#fAll').onchange = e => visible().forEach(x => x.checked = e.target.checked);
+  box.querySelector('.lst').onchange = syncAll;
+  $('#fq').oninput = e => { const q = e.target.value.toLowerCase(); boxes().forEach(x => { const l = x.closest('label'); const show = !q || vals[+x.value].toLowerCase().includes(q); l.style.display = show ? '' : 'none'; if (q) x.checked = show; }); syncAll(); };
+  box.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { sortBy = { k, dir: +b.dataset.s }; closeFilter(); renderRows(); });
+  $('#fClr').onclick = () => { delete colF[k]; closeFilter(); pageN = PAGE; renderRows(); };
+  $('#fCancel').onclick = closeFilter;
+  $('#fOk').onclick = () => { const on = boxes().filter(x => x.checked).map(x => vals[+x.value]); if (on.length === vals.length) delete colF[k]; else colF[k] = new Set(on); closeFilter(); pageN = PAGE; renderRows(); };
+  setTimeout(() => document.addEventListener('mousedown', outside), 0);
+  $('#fq').focus();
+}
+function outside(e) { const b = $('#fpop'); if (b && !b.contains(e.target)) closeFilter(); }
+function closeFilter() { const b = $('#fpop'); if (b) b.remove(); document.removeEventListener('mousedown', outside); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFilter(); });
+
 function renderChecks() {
   const order = { err: 0, warn: 1, info: 2, ok: 3 };
   $('#issues').innerHTML = G2BBook.checks(ctx()).sort((a, b) => order[a[0]] - order[b[0]]).map(([k, t]) => `<div class="m-${k}">${esc(t)}</div>`).join('');

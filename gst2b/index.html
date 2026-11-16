@@ -72,6 +72,15 @@ td.c{background:var(--lock)}
 .radio input{width:auto;margin-top:3px}
 .two{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
 @media (max-width:800px){.two{grid-template-columns:1fr}}
+.fpop{position:absolute;z-index:60;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.2);padding:10px;width:300px}
+.fpop .lst{max-height:260px;overflow:auto;margin:6px 0;border-top:1px solid var(--line);padding-top:4px}
+.fpop label{display:flex;gap:6px;align-items:flex-start;color:var(--ink);font-size:.84rem;margin:3px 0}
+.fpop input[type=checkbox]{width:auto;margin-top:2px}
+table.t th .fb{border:none;background:none;padding:0 2px;color:var(--muted);cursor:pointer;font-size:.8rem}
+table.t th.filtered{color:var(--accent)} table.t th.filtered .fb{color:var(--accent);font-weight:700}
+tr.sel td{background:var(--warn-bg)}
+#bulk{background:var(--head);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.88rem}
+#bulk select,#bulk input:not([type=checkbox]){width:auto;padding:4px 6px}
 .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
 .drop.over{border-color:var(--accent);background:var(--info-bg)}
 table.t td.wrap{white-space:normal;min-width:180px}
@@ -129,8 +138,9 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
   <section class="card" id="recCard" hidden>
     <h2>Invoices, notes and amendments <span class="bar"><input id="q" placeholder="Search supplier / GSTIN / number" style="width:240px"></span></h2>
     <div class="chips" id="chips"></div>
+    <div id="bulk"></div>
     <div class="tw"><table class="t" id="recs"></table></div>
-    <p class="hint">Change the category of any line and give the reason. <b>All of supplier</b> applies the line's category and reason to every line of that GSTIN in this month; <b>Remember</b> keeps it as a rule for this supplier in future months of this client. Lines shaded blue were changed from the automatic category; a mark at the left edge means a point to check (see Checks).</p>
+    <p class="hint">Use ▾ in a column heading to filter (tick the values, as in Excel) or sort; the filters work together with the category buttons and the search. Then set the category of all the lines shown, or tick lines and set the category of the selected ones only – with a reason, and optionally remembering the supplier. "Undo last change" reverses a bulk change. You can also change the category of any line and give the reason. <b>All of supplier</b> applies the line's category and reason to every line of that GSTIN in this month; <b>Remember</b> keeps it as a rule for this supplier in future months of this client. Lines shaded blue were changed from the automatic category; a mark at the left edge means a point to check (see Checks).</p>
   </section>
 
   <section class="card" id="chkCard" hidden>
