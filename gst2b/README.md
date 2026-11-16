@@ -9,7 +9,9 @@ other section 17(5) words → eligible. Any line can be re-marked with a reason;
 
 A large GSTR-2B that the portal splits into several files: choose all the files together (or add a part later) – parts of the
 same GSTIN and month are combined, repeated records are counted once, and a shortfall against the GSTR-2B summary is
-flagged so a missing part is noticed.
+flagged so a missing part is noticed. Split files from the portal carry no "Read me" or summary sheets – the GSTIN and
+month are then taken from the file name (MMYYYY_GSTIN_GSTR2B_DDMMYYYY_part.xlsx). Large months are shown 200 lines at a
+time on screen; the Excel has every line.
 
 Excel: **Gstr-2B Working** (blocks in the firm's layout with a "Reason for ineligible" column, amendments with the ITC
 claimed earlier, summary vs GSTR-2B, proposed GSTR-3B), **2B data**, **Supplier-wise**, **Checks**.

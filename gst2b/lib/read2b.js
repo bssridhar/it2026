@@ -172,9 +172,21 @@
     return out;
   }
 
-  function read(sheets) {
+  /* portal file name: MMYYYY_GSTIN_GSTR2B_DDMMYYYY[_part].xlsx, e.g. 102026_33AABCT0551H1ZR_GSTR2B_15112026_1.xlsx */
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function infoFromName(name) {
+    const m = /(\d{2})(\d{4})_(\d{2}[0-9A-Z]{13})_GSTR-?2B_(\d{2})(\d{2})(\d{4})(?:_(\d+))?/i.exec(name || '');
+    if (!m || +m[1] < 1 || +m[1] > 12) return null;
+    const mo = +m[1], y = +m[2], fy0 = mo >= 4 ? y : y - 1;
+    return { gstin: m[3].toUpperCase(), period: MONTHS[mo - 1], fy: `${fy0}-${String(fy0 + 1).slice(2)}`, generated: `${m[4]}/${m[5]}/${m[6]}`, part: m[7] ? +m[7] : null };
+  }
+
+  function read(sheets, fileName) {
     const info = readInfo(sheets);
-    if (!info.gstin && !sheets['B2B']) throw new Error('this does not look like a GSTR-2B downloaded from the GST portal (no "Read me" / "B2B" sheet)');
+    const fn = infoFromName(fileName);
+    if (fn) { info.part = fn.part;
+      if (!info.gstin) { Object.assign(info, { gstin: fn.gstin, period: fn.period, fy: fn.fy, generated: info.generated || fn.generated }); info.fromName = true; } }
+    if (!info.gstin && !Object.keys(sheets).some(sheetKind)) throw new Error('this does not look like a GSTR-2B downloaded from the GST portal (no "Read me" sheet and no B2B / CDNR sheets)');
     let records = [];
     Object.keys(sheets).forEach(n => { records = records.concat(readSheet(n, sheets[n])); });
     return { info, records, summary: readSummary(sheets) };
@@ -183,8 +195,10 @@
   /* Several files of the same GSTR-2B (the portal splits a large GSTR-2B into parts): one data set.
      parts: [{ file, data }] -> { info, records, summary, files, notes }  – throws if GSTIN / period differ */
   function merge(parts) {
+    parts = parts.slice().sort((a, b) => (a.data.info.part || 0) - (b.data.info.part || 0));
     const withInfo = parts.filter(p => p.data.info.gstin);
-    const base = (withInfo[0] || parts[0]).data.info;
+    const base = Object.assign({}, (withInfo.find(p => !p.data.info.fromName) || withInfo[0] || parts[0]).data.info);
+    if (withInfo.some(p => p.data.info.fromName)) base.fromName = !withInfo.some(p => !p.data.info.fromName);
     const key = i => `${i.gstin}|${i.period}|${i.fy}`;
     const odd = withInfo.filter(p => key(p.data.info) !== key(base));
     if (odd.length) throw new Error(`${odd.map(p => p.file).join(', ')}: GSTIN / period ${odd.map(p => `${p.data.info.gstin} ${p.data.info.period} ${p.data.info.fy}`).join('; ')} differs from ${base.gstin} ${base.period} ${base.fy} – load the parts of one GSTR-2B together`);
@@ -197,6 +211,7 @@
         seen.set(c, k); let id = r.id; while (ids.has(id)) id += '#' + k; ids.add(id); records.push(Object.assign({}, r, { part: p.file, id })); });
       if (dup) notes.push(['warn', `${p.file}: ${dup} record(s) already in an earlier part – counted once.`]);
       if (!p.data.info.gstin && parts.length > 1) notes.push(['info', `${p.file}: no "Read me" sheet – taken as part of ${base.gstin} ${base.period} ${base.fy}.`]);
+      if (p.data.info.fromName) notes.push(['info', `${p.file}: no "Read me" sheet – GSTIN ${p.data.info.gstin} and period ${p.data.info.period} ${p.data.info.fy} taken from the file name${p.data.info.part ? ` (part ${p.data.info.part})` : ''}.`]);
     });
     // summary: the portal may repeat the full summary in each part, or give part-wise figures
     const sums = parts.map(p => p.data.summary).filter(s => s && s.length), sig = s => JSON.stringify(s.map(x => [x.sheet, x.part, x.no, x.igst, x.cgst, x.sgst, x.cess]));
@@ -247,5 +262,5 @@
     });
   }
 
-  root.G2B = { read, merge, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
+  root.G2B = { read, merge, infoFromName, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -11,9 +11,19 @@ const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 const blank = () => ({ kind: 'gst2b-case', file: '', data: null, settings: { home: '', claimReverse: true }, overrides: {}, supplierRules: {} });
 let st = Object.assign(blank(), get(LS.cur, {}));
 if (st.data && !st.parts) st.parts = [{ file: st.file || 'GSTR-2B', data: st.data }];
+if (st.parts && st.parts.length) { try { st.data = G2B.merge(st.parts); } catch (e) { st.data = null; } }
+let draftNote = '';
 let rules = Object.assign({}, G2B.DEFAULT_RULES, get(LS.rules, {}));
 let rows = [], filter = 'all';
-const save = () => set(LS.cur, st);
+const PAGE = 200; let pageN = PAGE;
+/* the draft keeps the files read and the marks; a very large GSTR-2B may not fit in the browser's storage –
+   then only the marks and settings are kept (they are applied again when the same files are loaded) */
+const save = () => {
+  const full = Object.assign({}, st, { data: null });
+  try { localStorage.setItem(LS.cur, JSON.stringify(full)); draftNote = ''; return; } catch (e) { /* too large */ }
+  try { localStorage.setItem(LS.cur, JSON.stringify(Object.assign({}, full, { parts: null }))); } catch (e) { /* not kept */ }
+  draftNote = 'This GSTR-2B is too large to keep in the browser as a draft. Your marks and reasons are kept and will be applied again when you load the same files – or use "Save case file" to keep everything.';
+};
 const supKey = () => LS.sup + ((st.data && st.data.info.gstin) || 'none');
 
 /* ---------- load (one GSTR-2B may come in several parts) ---------- */
@@ -22,7 +32,7 @@ async function loadFiles(files) {
   const msgs = [], fresh = [];
   for (const f of files) {
     if (!/\.xlsx$/i.test(f.name)) { msgs.push(['err', `${f.name}: choose the GSTR-2B Excel (.xlsx) downloaded from the portal.`]); continue; }
-    try { const data = G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())));
+    try { const data = G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())), f.name);
       if (!data.records.length && !data.summary.length) throw new Error('no invoices or notes were found in the file');
       fresh.push({ file: f.name, data }); }
     catch (e) { msgs.push(['err', `${f.name}: ${e.message || e}`]); }
@@ -30,18 +40,22 @@ async function loadFiles(files) {
   if (fresh.length) {
     const cur = st.parts || [], k0 = fresh.find(p => p.data.info.gstin);
     const same = cur.length && st.data && (!k0 || kk(k0.data.info) === kk(st.data.info));
+    const marksOnly = !st.data && st.lastKey && k0 && kk(k0.data.info) === st.lastKey;
     let parts;
     if (same) parts = cur.filter(p => !fresh.some(q => q.file === p.file)).concat(fresh);
     else {
-      if (st.data && Object.keys(st.overrides).length && !(await ask('Replace the GSTR-2B on screen?', `The lines marked for ${esc(st.data.info.period)} ${esc(st.data.info.fy)} will be cleared. Save the case file first if you need it. Suppliers you asked to remember are kept.`))) { show(msgs); return; }
+      if (!marksOnly && st.data && Object.keys(st.overrides).length && !(await ask('Replace the GSTR-2B on screen?', `The lines marked for ${esc(st.data.info.period)} ${esc(st.data.info.fy)} will be cleared. Save the case file first if you need it. Suppliers you asked to remember are kept.`))) { show(msgs); return; }
       parts = fresh;
     }
     try {
       const data = G2B.merge(parts);
       if (same) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); }
+      else if (marksOnly) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); msgs.push(['info', 'Your earlier marks for this month have been applied again.']); }
       else { st = Object.assign(blank(), { parts, file: parts.map(p => p.file).join(', '), data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true } }); st.supplierRules = get(LS.sup + data.info.gstin, {}); }
+      st.lastKey = kk(data.info);
       save(); render();
-      msgs.push(['ok', `GSTR-2B of ${data.info.legal || ''} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
+      if (draftNote) msgs.push(['info', draftNote]);
+      msgs.push(['ok', `GSTR-2B of ${data.info.legal || data.info.gstin} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
       data.notes.forEach(n => msgs.push(n));
       const gap = shortfall(); if (gap) msgs.push(['warn', gap]);
     } catch (e) { msgs.push(['err', e.message || String(e)]); }
@@ -95,20 +109,21 @@ function renderSummary() {
   $('#tb3').innerHTML = `<thead><tr><th>Table</th><th class="n">IGST</th><th class="n">CGST</th><th class="n">SGST</th><th class="n">Cess</th><th class="n">2B summary (total tax)</th></tr></thead><tbody>
     ${line('3.1(d) RCM liability (taxable ' + fmt(b.d31.txval) + ')', b.d31)}${line('4A(1) Import of goods', b.a1, sf.has && sf.a1)}${line('4A(3) Reverse charge', b.a3, sf.has && sf.a3)}${line('4A(4) ISD', b.a4, sf.has && sf.a4)}${line('4A(5) All other ITC', b.a5, sf.has && sf.a5)}
     ${line('4B(1) Reversed – 17(5) etc.', b.b1)}${line('4B(2) Reversed – others', b.b2, sf.has && sf.b2)}${line('4C Net ITC', b.c, null, true)}${line('4D(2) Ineligible – POS / 16(4)', b.d2, sf.has && sf.d2)}${line('Not claimed this month', b.notClaimed)}</tbody>`;
-  $('#tb3note').textContent = 'Amendments are counted here at their revised value; in the Excel only the difference over the ITC claimed on the original is taken (enter it in the yellow cells).';
+  $('#tb3note').textContent = 'Amendments are counted here at their revised value; in the Excel only the difference over the ITC claimed on the original is taken (enter it in the yellow cells).' + (st.data.summary.length ? '' : ' The files loaded have no summary sheets ("ITC Available" etc.), so the comparison with the GSTR-2B summary is not shown – compare the totals with the summary on the portal.');
 }
 function renderChips() {
   const T = G2BBook.totals(rows);
   const list = [['all', `All (${rows.length})`], ['inel', 'All ineligible / blocked']].concat(CATS.filter(c => T[c[0]]).map(c => [c[0], `${c[1]} (${T[c[0]].n})`])).concat(rows.some(r => r.amend) ? [['amend', 'Amendments']] : []).concat(rows.some(r => r.flags.length) ? [['flag', 'Points to check']] : []);
   if (!list.some(x => x[0] === filter)) filter = 'all';
   $('#chips').innerHTML = list.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${esc(l)}</button>`).join('');
-  $$('#chips [data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; renderChips(); renderRows(); });
+  $$('#chips [data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; pageN = PAGE; renderChips(); renderRows(); });
 }
 function renderRows() {
   const q = ($('#q').value || '').toLowerCase();
-  const show = rows.filter(r => (filter === 'all' || r.cat === filter || (filter === 'inel' && ['blocked', 'insmot', 'pos', 'notavl', 'inelig'].includes(r.cat)) || (filter === 'amend' && r.amend) || (filter === 'flag' && r.flags.length))
+  const all = rows.filter(r => (filter === 'all' || r.cat === filter || (filter === 'inel' && ['blocked', 'insmot', 'pos', 'notavl', 'inelig'].includes(r.cat)) || (filter === 'amend' && r.amend) || (filter === 'flag' && r.flags.length))
     && (!q || `${r.name} ${r.gstin} ${r.docno}`.toLowerCase().includes(q)));
   const opts = sel => CATS.map(c => `<option value="${c[0]}"${c[0] === sel ? ' selected' : ''}>${esc(c[1])}</option>`).join('');
+  const show = all.slice(0, pageN);
   $('#recs').innerHTML = `<thead><tr><th>#</th><th>Section</th><th>Supplier</th><th>Number / date</th><th>Place of supply</th><th>RCM</th><th class="n">Taxable</th><th class="n">IGST</th><th class="n">CGST</th><th class="n">SGST</th><th class="n">Cess</th><th>Category</th><th>Reason for ineligible / remarks</th><th></th></tr></thead><tbody>${show.map(r => {
     const i = rows.indexOf(r), cls = [r.cat !== r.auto.cat ? 'changed' : '', r.flags.length ? 'flag' : ''].join(' ');
     return `<tr class="${cls}" title="${esc(r.flags.join('\n'))}"><td>${i + 1}</td><td class="small">${esc(r.sheet)}${r.amend ? `<br>orig. ${esc(r.orig.no)}` : ''}</td><td class="wrap">${esc(r.name)}<br><span class="small">${esc(r.gstin)}</span></td>
@@ -116,7 +131,8 @@ function renderRows() {
       ${['txval', ...HEADS].map(h => `<td class="n">${fmt(r[h])}</td>`).join('')}
       <td><select class="cat" data-i="${i}">${opts(r.cat)}</select>${r.src !== 'auto' ? `<div class="small">${r.src === 'user' ? 'marked' : 'supplier rule'} · auto: ${esc(CAT[r.auto.cat][1])}</div>` : ''}</td>
       <td><input class="rsn" data-i="${i}" value="${esc(r.reason)}" placeholder="${['elig', 'rcm', 'imp', 'isd'].includes(r.cat) ? 'optional remarks' : 'reason for ineligible'}"></td>
-      <td style="white-space:nowrap">${r.gstin ? `<button type="button" class="link sm" data-all="${i}" title="Apply this category and reason to every line of this supplier">All of supplier</button><br><button type="button" class="link sm" data-rem="${i}" title="Use this category for this supplier in future months">${st.supplierRules[r.gstin] ? 'Remembered ✓' : 'Remember'}</button>` : ''}${r.src === 'user' ? `<br><button type="button" class="link sm" data-undo="${i}">Undo</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="14" class="hint">Nothing to show.</td></tr>'}</tbody>`;
+      <td style="white-space:nowrap">${r.gstin ? `<button type="button" class="link sm" data-all="${i}" title="Apply this category and reason to every line of this supplier">All of supplier</button><br><button type="button" class="link sm" data-rem="${i}" title="Use this category for this supplier in future months">${st.supplierRules[r.gstin] ? 'Remembered ✓' : 'Remember'}</button>` : ''}${r.src === 'user' ? `<br><button type="button" class="link sm" data-undo="${i}">Undo</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="14" class="hint">Nothing to show.</td></tr>'}</tbody>${all.length > show.length ? `<tfoot><tr><td colspan="14">Showing ${show.length} of ${all.length} lines – <button type="button" class="link" id="more">show ${Math.min(PAGE, all.length - show.length)} more</button> · <button type="button" class="link" id="moreAll">show all</button> (use the category buttons or search to narrow down)</td></tr></tfoot>` : ''}`;
+  if ($('#more')) { $('#more').onclick = () => { pageN += PAGE; renderRows(); }; $('#moreAll').onclick = () => { pageN = all.length; renderRows(); }; }
   $$('#recs select.cat').forEach(el => el.onchange = () => { const r = rows[+el.dataset.i]; const o = st.overrides[r.id] = st.overrides[r.id] || {}; o.cat = el.value;
     if (o.reason === undefined || o.reason === r.auto.reason) o.reason = el.value === r.auto.cat ? r.auto.reason : (['elig', 'rcm', 'imp', 'isd', 'hold'].includes(el.value) ? '' : (o.reason || ''));
     if (el.value === r.auto.cat && (o.reason === r.auto.reason)) delete st.overrides[r.id]; save(); refresh(); });
@@ -138,7 +154,7 @@ function renderSupRules() {
   $$('[data-forget]').forEach(b => b.onclick = () => { delete st.supplierRules[b.dataset.forget]; set(supKey(), st.supplierRules); save(); refresh(); });
 }
 function refresh() { const y = window.scrollY; render(); window.scrollTo(0, y); }
-$('#q').oninput = renderRows;
+$('#q').oninput = () => { pageN = PAGE; renderRows(); };
 $('#home').onchange = e => { st.settings.home = e.target.value; save(); refresh(); };
 $('#claimReverse').onchange = e => { st.settings.claimReverse = e.target.checked; save(); refresh(); };
 $('#toggleRules').onclick = () => { const b = $('#rulesBox'); b.hidden = !b.hidden; $('#toggleRules').textContent = b.hidden ? 'Show' : 'Hide'; };
@@ -153,10 +169,10 @@ $('#dlXlsx').onclick = async () => {
     $('#outMsgs').innerHTML = '<div class="m-ok">Workbook downloaded.' + (rows.some(r => r.amend) ? ' Enter the ITC claimed on the original documents in the yellow cells of the Amendments block.' : '') + '</div>'; }
   catch (e) { $('#outMsgs').innerHTML = `<div class="m-err">Not downloaded: ${esc(e.message || e)}</div>`; }
 };
-$('#saveCase').onclick = () => { if (!st.data) return; download(`GSTR2B_${tag()}.json`, JSON.stringify(Object.assign({}, st, { rules })), 'application/json'); };
+$('#saveCase').onclick = () => { if (!st.data) return; download(`GSTR2B_${tag()}.json`, JSON.stringify(Object.assign({}, st, { rules, data: null })), 'application/json'); };
 $('#openCase').onclick = () => $('#caseFile').click();
 $('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const d = JSON.parse(await f.text()); if (d.kind !== 'gst2b-case' || !d.data) throw 0; st = Object.assign(blank(), d); delete st.rules; if (!st.parts) st.parts = [{ file: st.file || f.name, data: st.data }]; save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
+  try { const d = JSON.parse(await f.text()); if (d.kind !== 'gst2b-case' || !(d.data || (d.parts && d.parts.length))) throw 0; st = Object.assign(blank(), d); delete st.rules; if (!st.parts) st.parts = [{ file: st.file || f.name, data: st.data }]; st.data = G2B.merge(st.parts); save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
   catch (err) { $('#topMsgs').innerHTML = '<div class="m-err">That file is not a GSTR-2B analyser case file.</div>'; } };
 $('#newCase').onclick = async () => { if (await ask('Clear?', 'The GSTR-2B and the lines marked will be cleared from this screen (remembered suppliers and rules are kept).')) { st = blank(); save(); refresh(); $('#topMsgs').innerHTML = ''; } };
 function ask(title, html) { return new Promise(done => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg'); const end = v => { dl.close(); done(v); }; $('#askYes').onclick = () => end(true); $('#askNo').onclick = () => end(false); dl.oncancel = () => done(false); dl.showModal(); }); }
