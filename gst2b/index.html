@@ -81,6 +81,12 @@ table.t th.filtered{color:var(--accent)} table.t th.filtered .fb{color:var(--acc
 tr.sel td{background:var(--warn-bg)}
 #bulk{background:var(--head);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.88rem}
 #bulk select,#bulk input:not([type=checkbox]){width:auto;padding:4px 6px}
+.mcols{max-height:120px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--field)}
+.mcols label{display:flex;gap:6px;color:var(--ink);font-size:.8rem;margin:1px 0}
+.mcols input,.chkrow input{width:auto}
+.chkrow{display:flex;flex-wrap:wrap;gap:6px 18px}.chkrow label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.85rem;margin:0}
+tr.st-ok td:first-child{box-shadow:inset 3px 0 0 var(--ok)} tr.st-warn td:first-child{box-shadow:inset 3px 0 0 var(--warn)} tr.st-bad td:first-child{box-shadow:inset 3px 0 0 var(--err)}
+details>summary{cursor:pointer}
 .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
 .drop.over{border-color:var(--accent);background:var(--info-bg)}
 table.t td.wrap{white-space:normal;min-width:180px}
@@ -143,6 +149,26 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
     <p class="hint">Use ▾ in a column heading to filter (tick the values, as in Excel) or sort; the filters work together with the category buttons and the search. Then set the category of all the lines shown, or tick lines and set the category of the selected ones only – with a reason, and optionally remembering the supplier. "Undo last change" reverses a bulk change. You can also change the category of any line and give the reason. <b>All of supplier</b> applies the line's category and reason to every line of that GSTIN in this month; <b>Remember</b> keeps it as a rule for this supplier in future months of this client. Lines shaded blue were changed from the automatic category; a mark at the left edge means a point to check (see Checks).</p>
   </section>
 
+  <section class="card" id="recoCard" hidden>
+    <h2>Reconciliation – GSTR-2B vs purchase register (books)</h2>
+    <div class="bar">
+      <button type="button" class="primary" id="bkLoad">Load purchase register</button>
+      <input type="file" id="bkFile" accept=".xlsx,.csv,.txt,.xml,.xls" hidden>
+      <button type="button" id="bkTpl">Download the standard template</button>
+      <span class="hint" id="bkInfo"></span>
+      <button type="button" class="link danger" id="bkClear">remove</button>
+    </div>
+    <p class="hint">Accepted: the standard template of this tool; a register exported from Tally to Excel (.xlsx) or CSV – Purchase Register / columnar register / GSTR-2 – the columns are recognised from the headings and can be changed; Tally XML export of the Purchase and Debit Note vouchers. An old .xls file: open it in Excel and save as .xlsx.</p>
+    <div id="bkMsgs" class="msgs"></div>
+    <div id="bkMap" style="margin:8px 0"></div>
+    <div id="bkOpts" style="margin:8px 0"></div>
+    <div id="recoSum"></div>
+    <div class="bar" style="margin:12px 0 8px"><div class="chips" id="recoChips" style="margin:0"></div><span style="flex:1"></span><input id="recoQ" placeholder="Search supplier / GSTIN / invoice / voucher" style="width:280px" hidden></div>
+    <div class="tw"><table class="t" id="recoT"></table></div>
+    <p class="hint">Probable matches: <b>Accept</b> or <b>Reject</b>. Any pair can be undone with <b>Unpair</b>; a line in GSTR-2B only can be paired with a books invoice of the same supplier from the list. The Excel (Download) has the full reconciliation.</p>
+    <div id="recoSup" style="margin-top:8px"></div>
+  </section>
+
   <section class="card" id="chkCard" hidden>
     <h2>Checks</h2>
     <div id="issues" class="msgs"></div>
@@ -151,7 +177,7 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
   <section class="card" id="outCard" hidden>
     <h2>Download</h2>
     <div class="outs">
-      <button type="button" class="primary" id="dlXlsx">GSTR-2B working (Excel)<small>Gstr-2B Working · 2B data · Supplier-wise · Checks</small></button>
+      <button type="button" class="primary" id="dlXlsx">GSTR-2B working (Excel)<small>Gstr-2B Working · 2B data · Supplier-wise · Checks · and, with a purchase register, the reconciliation sheets</small></button>
     </div>
     <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
   </section>
@@ -179,7 +205,10 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
 <script src="../shared/exceljs.min.js"></script>
 <script src="lib/read2b.js"></script>
 <script src="lib/book.js"></script>
+<script src="lib/books.js"></script>
+<script src="lib/reco.js"></script>
 <script src="lib/app.js"></script>
+<script src="lib/recoui.js"></script>
 <script src="../shared/calc.js"></script>
 </body>
 </html>

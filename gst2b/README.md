@@ -21,3 +21,24 @@ Excel: **Gstr-2B Working** (blocks in the firm's layout with a "Reason for ineli
 claimed earlier, summary vs GSTR-2B, proposed GSTR-3B), **2B data**, **Supplier-wise**, **Checks**.
 Blocked credit is shown in 4A(5) and reversed in 4B(1), and place-of-supply ineligibility in 4D(2) (CBIC Circular
 170/02/2022-GST) – this can be switched off on the page.
+
+## Reconciliation with the purchase register (books)
+
+Load the purchase register in the "Reconciliation" section:
+- the **standard template** (download it from the page);
+- a register **exported from Tally to Excel (.xlsx) or CSV** – Purchase Register, columnar register or GSTR-2 export: the
+  heading row is found automatically, columns are recognised from their headings (rate-wise tax columns are added up)
+  and can be changed on screen; several rows of one invoice are added up;
+- **Tally XML** export of vouchers (UTF-8 / UTF-16): choose the voucher types (Purchase, Debit Note …); taxes are read
+  from IGST / CGST / SGST / UTGST / Cess ledgers, the GSTIN from the voucher or the ledger master.
+An old .xls file must be saved as .xlsx first.
+
+Matching (one-to-one), with options on screen: amount tolerance (Rs. and/or %), date window, invoice number
+normalisation (case, spaces, "/", "-" always; financial-year part and leading zeros optionally), invoice numbers that
+differ by a character or two or only in non-digits, GSTIN missing / different in books, GSTIN filled from GSTR-2B by
+supplier name. Statuses: matched, matched – invoice no. differs, matched – GSTIN differs, matched manually, amount
+difference, probable (accept / reject), in GSTR-2B only, in books only. Pairs can be undone and lines paired by hand.
+
+The Excel then has **Reco summary**, **Reco details** (side by side, with differences and filters) and **Reco
+supplier-wise**, and the eligible-ITC block of the working is split into "Purchase reflected in GSTR-2B and accounted in
+books" and "Additional input – in GSTR-2B, not accounted in books".

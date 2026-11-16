@@ -110,9 +110,25 @@
       put(W, 'W' + r, x.sheet + (x.src === 'user' ? ' · marked' : x.src === 'supplier' ? ' · supplier rule' : ''));
       r++;
     };
+    const recoOf = {};
+    if (ctx.reco) { ctx.reco.pairs.forEach(p => { recoOf[p.a.id] = p; }); }
+    const subBlock = (ttl, list, fill) => {
+      const tc = W.getCell('B' + r); tc.value = ttl; tc.font = { bold: true, size: 11, color: { argb: 'FF1F5FAE' } }; r += 1;
+      header('Remarks / books'); const from = r;
+      list.forEach(x => { recRow(x, fill); const p = recoOf[x.id]; if (p) { const c = W.getCell('V' + (r - 1)); c.value = [x.reason, `Books: ${p.b.invno} ${p.b.vno ? '(vch ' + p.b.vno + ')' : ''}${Math.abs(p.d.tax) >= 0.01 ? ' – tax difference ' + fmt(p.d.tax) : ''}`].filter(Boolean).join('; '); } });
+      if (!list.length) { W.getCell('B' + r).value = 'Nil'; W.getCell('B' + r).font = { italic: true, color: { argb: 'FF5B6475' } }; r++; }
+      const to = r - 1; put(W, 'B' + r, 'Total', { bold: true }); ['F', 'I', 'J', 'K', 'L', 'M'].forEach(c => put(W, c + r, `=SUM(${c}${from}:${c}${to})`, { bold: true, fill: GREY })); const t = r; r += 2; return t;
+    };
     BLOCKS.forEach(([cat, ttl, always]) => {
       const list = ctx.rows.filter(x => x.cat === cat && !x.amend);
       if (!list.length && !always) return;
+      if (cat === 'elig' && ctx.reco) {
+        const tc = W.getCell('B' + r); tc.value = `${ttl}  (${CAT[cat][2]})`; tc.font = { bold: true, size: 12, color: { argb: 'FF1F5FAE' } }; r += 1;
+        const t1 = subBlock('Purchase reflected in GSTR-2B and accounted in books', list.filter(x => recoOf[x.id]), null);
+        const t2 = subBlock('Additional input – in GSTR-2B, not accounted in books', list.filter(x => !recoOf[x.id]), null);
+        put(W, 'B' + r, 'Total eligible ITC', { bold: true }); ['F', 'I', 'J', 'K', 'L', 'M'].forEach(c => put(W, c + r, `=${c}${t1}+${c}${t2}`, { bold: true, fill: GREY }));
+        blockTot[cat] = r; r += 3; return;
+      }
       const tc = W.getCell('B' + r); tc.value = `${ttl}  (${CAT[cat][2]})`; tc.font = { bold: true, size: 12, color: { argb: 'FF1F5FAE' } }; r += 1;
       header(cat === 'elig' || cat === 'rcm' || cat === 'imp' || cat === 'isd' ? 'Remarks' : 'Reason for ineligible');
       const from = r;
@@ -195,6 +211,45 @@
     const by = {}; ctx.rows.filter(x => x.cat !== 'rejected').forEach(x => { const k = x.gstin || x.name; const o = by[k] = by[k] || { gstin: x.gstin, name: x.name, n: 0, txval: 0, igst: 0, cgst: 0, sgst: 0, cess: 0, cats: new Set() }; o.n++; ['txval', ...HEADS].forEach(h => o[h] += x[h]); o.cats.add(CAT[x.cat][1]); });
     Object.values(by).sort((a, b) => (b.igst + b.cgst + b.sgst) - (a.igst + a.cgst + a.sgst)).forEach((o, i) => { const rr = 5 + i;
       [o.gstin, o.name, o.n, o.txval, o.igst, o.cgst, o.sgst, o.cess].forEach((v, k) => put(SW, SW.getCell(rr, k + 1).address, v)); SW.getCell(rr, 3).numFmt = '0'; put(SW, 'I' + rr, `=SUM(E${rr}:H${rr})`); put(SW, 'J' + rr, [...o.cats].join(', ')); });
+
+    /* ===== Reconciliation with the purchase register ===== */
+    if (ctx.reco) {
+      const RC = ctx.reco, RT = root.G2BReco, STL = Object.fromEntries(RT.STATUS.map(x => [x[0], x])), o = RC.opts, sm = RT.summary(RC);
+      const RS = wb.addWorksheet('Reco summary'); title(RS, 'GSTR-2B vs purchase register (books)');
+      [44, 12, 16, 16, 16, 16, 16, 70].forEach((w, i) => RS.getColumn(i + 1).width = w);
+      ['Status', 'Documents', '2B taxable', '2B tax', 'Books taxable', 'Books tax', 'Difference in tax', 'Meaning'].forEach((t, i) => head(RS, RS.getCell(4, i + 1).address, t));
+      RT.STATUS.forEach(([k, l, m], i) => { const rr = 5 + i, x = sm[k]; [l, x.n, x.aTx, x.aTax, x.bTx, x.bTax].forEach((v, j) => put(RS, RS.getCell(rr, j + 1).address, v)); RS.getCell(rr, 2).numFmt = '0'; put(RS, 'G' + rr, `=D${rr}-F${rr}`); const c = put(RS, 'H' + rr, m); c.alignment = { wrapText: true }; });
+      const tr = 5 + RT.STATUS.length; put(RS, 'A' + tr, 'Total', { bold: true }); ['B', 'C', 'D', 'E', 'F', 'G'].forEach(c => put(RS, c + tr, `=SUM(${c}5:${c}${tr - 1})`, { bold: true, fill: GREY })); RS.getCell('B' + tr).numFmt = '0';
+      const nt = RS.getCell('A' + (tr + 2)); nt.value = `Matching: GSTIN + supplier invoice number${o.ignoreFY ? ' (financial-year part ignored)' : ''}${o.ignoreZeros ? ', leading zeros ignored' : ''}; amount tolerance Rs.${o.tolAbs}${o.tolPct ? ' or ' + o.tolPct + '%' : ''} on the taxable value and each tax; invoice number may differ by ${o.maxEdit} character(s)${o.useDigits ? ' or only in non-digits' : ''}; date window ${o.dateDays || 'any'} day(s) for similar / probable matches. Books: ${ctx.booksFile || ''}.`;
+      nt.alignment = { wrapText: true }; nt.font = { italic: true, size: 9 }; RS.mergeCells(`A${tr + 2}:H${tr + 4}`);
+      // details
+      const RD = wb.addWorksheet('Reco details', { views: [{ state: 'frozen', ySplit: 4, xSplit: 2 }] }); title(RD, 'document-wise – filter on Status');
+      const H = ['Status', 'GSTIN', 'Supplier (2B)', '2B section', '2B number', '2B date', '2B taxable', '2B IGST', '2B CGST', '2B SGST', '2B cess', '2B category', 'Supplier (books)', 'Books invoice no.', 'Books invoice date', 'Voucher no.', 'Voucher date', 'Books taxable', 'Books IGST', 'Books CGST', 'Books SGST', 'Books cess', 'Diff. taxable', 'Diff. IGST', 'Diff. CGST', 'Diff. SGST', 'Diff. cess', 'Diff. total tax', 'Notes'];
+      H.forEach((t, i) => head(RD, RD.getCell(4, i + 1).address, t)); RD.getRow(4).height = 30;
+      [26, 17, 30, 10, 18, 11, 13, 11, 11, 11, 9, 20, 30, 18, 11, 12, 11, 13, 11, 11, 11, 9, 12, 11, 11, 11, 9, 12, 60].forEach((w, i) => RD.getColumn(i + 1).width = w);
+      const dmy = iso => iso ? iso.split('-').reverse().join('/') : '';
+      const lines = RC.pairs.map(p => ({ s: p.status, a: p.a, b: p.b, f: p.flags })).concat(RC.only2b.map(a => ({ s: 'only2b', a, f: [] })), RC.onlyBooks.map(b => ({ s: 'onlybooks', b, f: b.gFill ? [b.gFill] : [] })));
+      const order = Object.fromEntries(RT.STATUS.map((x, i) => [x[0], i])); lines.sort((p, q) => order[p.s] - order[q.s] || String((p.a || p.b).name).localeCompare(String((q.a || q.b).name)));
+      lines.forEach((x, i) => { const rr = 5 + i, a = x.a, b = x.b;
+        const v = [STL[x.s][1], (a || b).gstin || (b && b.gstinRaw) || '', a ? a.name : '', a ? a.sheet : '', a ? a.docno : '', a ? a.date : '', a ? a.txval : null, a ? a.igst : null, a ? a.cgst : null, a ? a.sgst : null, a ? a.cess : null, a ? CAT[a.cat][1] : '',
+          b ? b.name : '', b ? b.invno : '', b ? dmy(b.invdate) : '', b ? b.vno : '', b ? dmy(b.vdate) : '', b ? b.txval : null, b ? b.igst : null, b ? b.cgst : null, b ? b.sgst : null, b ? b.cess : null];
+        v.forEach((val, j) => { const c = put(RD, RD.getCell(rr, j + 1).address, val === '' ? null : val); if ([6, 7, 8, 9, 10, 17, 18, 19, 20, 21].includes(j)) c.numFmt = NUM; });
+        ['G', 'H', 'I', 'J', 'K'].forEach((c, k) => put(RD, ['W', 'X', 'Y', 'Z', 'AA'][k] + rr, `=N(${c}${rr})-N(${['R', 'S', 'T', 'U', 'V'][k]}${rr})`));
+        put(RD, 'AB' + rr, `=SUM(X${rr}:AA${rr})`); const c = put(RD, 'AC' + rr, x.f.join('; ') || null); c.alignment = { wrapText: false };
+        if (['mismatch', 'onlybooks'].includes(x.s)) RD.getCell('A' + rr).fill = RED; else if (['probable', 'only2b'].includes(x.s)) RD.getCell('A' + rr).fill = YEL; });
+      const lr = 5 + lines.length; put(RD, 'C' + lr, 'Total of the rows shown', { bold: true });
+      ['G', 'H', 'I', 'J', 'K', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB'].forEach(c => put(RD, c + lr, `=SUBTOTAL(9,${c}5:${c}${lr - 1})`, { bold: true, fill: GREY }));
+      RD.autoFilter = { from: 'A4', to: `AC${Math.max(5, lr - 1)}` };
+      // supplier-wise
+      const RSu = wb.addWorksheet('Reco supplier-wise'); title(RSu, 'GSTR-2B vs books, supplier-wise');
+      ['GSTIN', 'Supplier', '2B documents', '2B taxable', '2B tax', 'Books invoices', 'Books taxable', 'Books tax', 'Difference – taxable', 'Difference – tax', 'Only in 2B', 'Only in books'].forEach((t, i) => head(RSu, RSu.getCell(4, i + 1).address, t));
+      [17, 36, 10, 15, 14, 10, 15, 14, 15, 14, 10, 10].forEach((w, i) => RSu.getColumn(i + 1).width = w);
+      RC.suppliers.slice().sort((p, q) => Math.abs((q.a.tax - q.b.tax)) - Math.abs((p.a.tax - p.b.tax))).forEach((x, i) => { const rr = 5 + i;
+        [x.gstin || '', x.name, x.a.n, x.a.txval, x.a.tax, x.b.n, x.b.txval, x.b.tax].forEach((v, j) => put(RSu, RSu.getCell(rr, j + 1).address, v === '' ? null : v)); RSu.getCell(rr, 3).numFmt = '0'; RSu.getCell(rr, 6).numFmt = '0';
+        put(RSu, 'I' + rr, `=D${rr}-G${rr}`); put(RSu, 'J' + rr, `=E${rr}-H${rr}`); put(RSu, 'K' + rr, x.open2b || null); put(RSu, 'L' + rr, x.openBooks || null); });
+      const sr = 5 + RC.suppliers.length; put(RSu, 'B' + sr, 'Total', { bold: true }); ['C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].forEach(c => put(RSu, c + sr, `=SUBTOTAL(9,${c}5:${c}${sr - 1})`, { bold: true, fill: GREY }));
+      RSu.autoFilter = { from: 'A4', to: `L${Math.max(5, sr - 1)}` };
+    }
 
     /* ===== Checks ===== */
     const C = wb.addWorksheet('Checks'); title(C, 'points for review'); C.getColumn(1).width = 12; C.getColumn(2).width = 150;

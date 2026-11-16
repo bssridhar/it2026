@@ -51,7 +51,7 @@ async function loadFiles(files) {
       const data = G2B.merge(parts);
       if (same) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); }
       else if (marksOnly) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); msgs.push(['info', 'Your earlier marks for this month have been applied again.']); }
-      else { st = Object.assign(blank(), { parts, file: parts.map(p => p.file).join(', '), data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true } }); st.supplierRules = get(LS.sup + data.info.gstin, {}); }
+      else { st = Object.assign(blank(), { parts, file: parts.map(p => p.file).join(', '), data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true }, books: st.data && kk(st.data.info).split('|')[0] === data.info.gstin ? st.books : undefined, recoOpts: st.recoOpts, recoMan: { links: [], rejects: [] } }); st.supplierRules = get(LS.sup + data.info.gstin, {}); }
       st.lastKey = kk(data.info);
       colF = {}; sortBy = null; selected.clear(); undoStack = [];
       save(); render();
@@ -81,7 +81,7 @@ $('#xfile').onchange = e => { const f = Array.from(e.target.files); e.target.val
 drop.addEventListener('drop', e => { const f = Array.from(e.dataTransfer.files || []); if (f.length) loadFiles(f); });
 
 /* ---------- render ---------- */
-const ctx = () => ({ info: st.data.info, rows, summary: st.data.summary, settings: st.settings });
+const ctx = () => ({ info: st.data.info, rows, summary: st.data.summary, settings: st.settings, reco: window.G2BRecoUI && st.books ? G2BRecoUI.result() : null, booksFile: st.books ? st.books.file : '' });
 function classify() { rows = st.data ? G2B.classify(st.data, { home: st.settings.home, rules }, st.overrides, st.supplierRules) : []; }
 function render() {
   const has = !!st.data;
@@ -100,6 +100,7 @@ function render() {
   $$('[data-part]').forEach(b => b.onclick = () => { st.parts.splice(+b.dataset.part, 1); st.data = G2B.merge(st.parts); st.file = st.parts.map(p => p.file).join(', '); save(); refresh(); });
   const gap = shortfall(); $('#gapMsg').innerHTML = gap ? `<div class="m-warn">${esc(gap)}</div>` : '';
   renderSummary(); renderChips(); renderRows(); renderChecks();
+  if (window.G2BRecoUI) G2BRecoUI.render();
 }
 function renderSummary() {
   const T = G2BBook.totals(rows);
@@ -273,7 +274,7 @@ function download(name, data, type) { const a = document.createElement('a'); a.h
 const tag = () => { const I = st.data.info; return `${(I.trade || I.legal || 'GSTIN').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 30)}_${I.period}_${I.fy}`; };
 $('#dlXlsx').onclick = async () => {
   try { const wb = G2BBook.build(ExcelJS, ctx()); const buf = await wb.xlsx.writeBuffer(); download(`GSTR2B_working_${tag()}.xlsx`, buf, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    $('#outMsgs').innerHTML = '<div class="m-ok">Workbook downloaded.' + (rows.some(r => r.amend) ? ' Enter the ITC claimed on the original documents in the yellow cells of the Amendments block.' : '') + '</div>'; }
+    $('#outMsgs').innerHTML = '<div class="m-ok">Workbook downloaded.' + (st.books ? ' It includes the reconciliation with the purchase register.' : '') + (rows.some(r => r.amend) ? ' Enter the ITC claimed on the original documents in the yellow cells of the Amendments block.' : '') + '</div>'; }
   catch (e) { $('#outMsgs').innerHTML = `<div class="m-err">Not downloaded: ${esc(e.message || e)}</div>`; }
 };
 $('#saveCase').onclick = () => { if (!st.data) return; download(`GSTR2B_${tag()}.json`, JSON.stringify(Object.assign({}, st, { rules, data: null })), 'application/json'); };
@@ -284,6 +285,6 @@ $('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.val
 $('#newCase').onclick = async () => { if (await ask('Clear?', 'The GSTR-2B and the lines marked will be cleared from this screen (remembered suppliers and rules are kept).')) { st = blank(); save(); refresh(); $('#topMsgs').innerHTML = ''; } };
 function ask(title, html) { return new Promise(done => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg'); const end = v => { dl.close(); done(v); }; $('#askYes').onclick = () => end(true); $('#askNo').onclick = () => end(false); dl.oncancel = () => done(false); dl.showModal(); }); }
 
-window.G2BTool = { state: () => st, rows: () => rows };
+window.G2BTool = { state: () => st, rows: () => rows, save, refresh, ask, download };
 render();
 })();
