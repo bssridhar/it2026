@@ -180,6 +180,34 @@
     return { info, records, summary: readSummary(sheets) };
   }
 
+  /* Several files of the same GSTR-2B (the portal splits a large GSTR-2B into parts): one data set.
+     parts: [{ file, data }] -> { info, records, summary, files, notes }  – throws if GSTIN / period differ */
+  function merge(parts) {
+    const withInfo = parts.filter(p => p.data.info.gstin);
+    const base = (withInfo[0] || parts[0]).data.info;
+    const key = i => `${i.gstin}|${i.period}|${i.fy}`;
+    const odd = withInfo.filter(p => key(p.data.info) !== key(base));
+    if (odd.length) throw new Error(`${odd.map(p => p.file).join(', ')}: GSTIN / period ${odd.map(p => `${p.data.info.gstin} ${p.data.info.period} ${p.data.info.fy}`).join('; ')} differs from ${base.gstin} ${base.period} ${base.fy} – load the parts of one GSTR-2B together`);
+    const notes = [], seen = new Map(), records = [], ids = new Set();
+    const ck = r => [r.sheet, r.gstin, r.docno, r.date, r.doctype, r.txval, r.igst, r.cgst, r.sgst, r.cess].join('|');
+    parts.forEach((p, k) => {
+      let dup = 0;
+      p.data.records.forEach(r => { const c = ck(r), at = seen.get(c);
+        if (at !== undefined && at !== k) { dup++; return; }
+        seen.set(c, k); let id = r.id; while (ids.has(id)) id += '#' + k; ids.add(id); records.push(Object.assign({}, r, { part: p.file, id })); });
+      if (dup) notes.push(['warn', `${p.file}: ${dup} record(s) already in an earlier part – counted once.`]);
+      if (!p.data.info.gstin && parts.length > 1) notes.push(['info', `${p.file}: no "Read me" sheet – taken as part of ${base.gstin} ${base.period} ${base.fy}.`]);
+    });
+    // summary: the portal may repeat the full summary in each part, or give part-wise figures
+    const sums = parts.map(p => p.data.summary).filter(s => s && s.length), sig = s => JSON.stringify(s.map(x => [x.sheet, x.part, x.no, x.igst, x.cgst, x.sgst, x.cess]));
+    let summary = sums[0] || [];
+    if (sums.length > 1 && !sums.every(s => sig(s) === sig(sums[0]))) {
+      summary = sums[0].map(x => Object.assign({}, x)); sums.slice(1).forEach(s => s.forEach(y => { const t = summary.find(x => x.sheet === y.sheet && x.part === y.part && x.no === y.no); if (t) ['igst', 'cgst', 'sgst', 'cess'].forEach(h => t[h] += y[h]); else summary.push(Object.assign({}, y)); }));
+      notes.push(['info', 'The summary sheets differ between the parts – the part-wise summaries have been added together. Compare with the GSTR-2B summary on the portal.']);
+    }
+    return { info: base, records, summary, files: parts.map(p => ({ file: p.file, n: p.data.records.length })), notes };
+  }
+
   /* ---------- classification ---------- */
   function parseRules(text) {
     return String(text || '').split(/\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#')).map(l => { const [k, ...r] = l.split('|'); const kw = k.trim();
@@ -219,5 +247,5 @@
     });
   }
 
-  root.G2B = { read, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
+  root.G2B = { read, merge, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
 })(typeof window !== 'undefined' ? window : globalThis);

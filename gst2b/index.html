@@ -93,8 +93,8 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
   <p class="sub">Load the GSTR-2B Excel downloaded from the GST portal. The tool sorts every invoice, note and amendment into eligible ITC, blocked credit, insurance / motor vehicle items, place-of-supply ineligibility, reverse charge and others, lets you re-mark any line with a reason, and gives the GSTR-2B working and the GSTR-3B figures in Excel. The file is read in this browser only.</p>
 
   <div class="card">
-    <div id="drop" class="drop" tabindex="0" role="button"><b>Choose or drop the GSTR-2B Excel (.xlsx) here</b><br><span class="hint">As downloaded from the portal (Returns → GSTR-2B → Download Excel). One month at a time.</span></div>
-    <input type="file" id="xfile" accept=".xlsx" hidden>
+    <div id="drop" class="drop" tabindex="0" role="button"><b>Choose or drop the GSTR-2B Excel (.xlsx) here</b><br><span class="hint">As downloaded from the portal (Returns → GSTR-2B → Download Excel), one month at a time. Where the portal gives the month in more than one file (large GSTR-2B), choose all the files together, or add the next part later – parts of the same GSTIN and month are combined.</span></div>
+    <input type="file" id="xfile" accept=".xlsx" multiple hidden>
     <div class="bar" style="margin-top:12px">
       <span style="flex:1"></span>
       <button type="button" id="saveCase">Save case file</button>
@@ -111,6 +111,8 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
       <div><label>GSTIN</label><input id="gstin" readonly></div>
       <div class="full"><label>Name</label><input id="legal" readonly></div>
       <div><label>GSTR-2B for</label><input id="period" readonly></div>
+      <div class="full hint" id="parts"></div>
+      <div class="full" id="gapMsg"></div>
       <div><label>State of registration (for the place-of-supply check)</label><select id="home"></select></div>
       <div class="full"><label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="claimReverse" style="width:auto"> Show blocked / ineligible credit in 4A(5) and reverse it in 4B(1) (CBIC Circular No. 170/02/2022-GST). Untick to leave it out of GSTR-3B altogether.</label></div>
     </div>

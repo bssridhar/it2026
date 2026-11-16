@@ -181,13 +181,13 @@
     /* ===== 2B data ===== */
     const D = wb.addWorksheet('2B data', { views: [{ state: 'frozen', ySplit: 4 }] });
     title(D, 'every record read, with the category given');
-    const DH = ['Section', 'GSTIN', 'Name', 'Number', 'Type', 'Date', 'Value', 'Place of supply', 'Reverse charge', 'Taxable value', 'IGST', 'CGST', 'SGST', 'Cess', 'Period', 'Filing date', 'ITC availability', '2B reason', 'Original no.', 'Original date', 'Category', 'GSTR-3B', 'Reason for ineligible / remarks', 'Set by', 'Flags'];
+    const DH = ['Section', 'GSTIN', 'Name', 'Number', 'Type', 'Date', 'Value', 'Place of supply', 'Reverse charge', 'Taxable value', 'IGST', 'CGST', 'SGST', 'Cess', 'Period', 'Filing date', 'ITC availability', '2B reason', 'Original no.', 'Original date', 'Category', 'GSTR-3B', 'Reason for ineligible / remarks', 'Set by', 'Flags', 'File'];
     DH.forEach((t, i) => head(D, D.getCell(4, i + 1).address, t)); [14, 17, 32, 18, 12, 11, 12, 13, 8, 13, 11, 11, 11, 9, 9, 11, 9, 14, 14, 11, 26, 18, 50, 12, 40].forEach((w, i) => D.getColumn(i + 1).width = w);
     ctx.rows.forEach((x, i) => { const rr = 5 + i;
-      [x.sheet, x.gstin, x.name, x.docno, x.doctype, x.date, x.value, x.pos, x.rcm, x.txval, x.igst, x.cgst, x.sgst, x.cess, x.period, x.fdate, x.avail, x.reason2bOrig || '', x.orig.no, x.orig.date, CAT[x.cat][1], CAT[x.cat][2], x.reason, x.src === 'user' ? 'Marked' : x.src === 'supplier' ? 'Supplier rule' : 'Auto', x.flags.join('; ')]
+      [x.sheet, x.gstin, x.name, x.docno, x.doctype, x.date, x.value, x.pos, x.rcm, x.txval, x.igst, x.cgst, x.sgst, x.cess, x.period, x.fdate, x.avail, x.reason2bOrig || '', x.orig.no, x.orig.date, CAT[x.cat][1], CAT[x.cat][2], x.reason, x.src === 'user' ? 'Marked' : x.src === 'supplier' ? 'Supplier rule' : 'Auto', x.flags.join('; '), x.part || '']
         .forEach((v, k) => { const c = put(D, D.getCell(rr, k + 1).address, v === '' ? null : v); if ([6, 9, 10, 11, 12, 13].includes(k)) c.numFmt = NUM; }); });
     const dl = 5 + ctx.rows.length; put(D, 'C' + dl, 'Total', { bold: true }); ['G', 'J', 'K', 'L', 'M', 'N'].forEach(c => put(D, c + dl, `=SUBTOTAL(9,${c}5:${c}${dl - 1})`, { bold: true, fill: GREY }));
-    D.autoFilter = { from: 'A4', to: `Y${Math.max(5, dl - 1)}` };
+    D.autoFilter = { from: 'A4', to: `Z${Math.max(5, dl - 1)}` };
 
     /* ===== Supplier-wise ===== */
     const SW = wb.addWorksheet('Supplier-wise'); title(SW, 'supplier-wise totals');

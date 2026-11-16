@@ -10,32 +10,60 @@ const get = (k, d) => { try { const v = localStorage.getItem(k); return v === nu
 const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* not kept */ } };
 const blank = () => ({ kind: 'gst2b-case', file: '', data: null, settings: { home: '', claimReverse: true }, overrides: {}, supplierRules: {} });
 let st = Object.assign(blank(), get(LS.cur, {}));
+if (st.data && !st.parts) st.parts = [{ file: st.file || 'GSTR-2B', data: st.data }];
 let rules = Object.assign({}, G2B.DEFAULT_RULES, get(LS.rules, {}));
 let rows = [], filter = 'all';
 const save = () => set(LS.cur, st);
 const supKey = () => LS.sup + ((st.data && st.data.info.gstin) || 'none');
 
-/* ---------- load ---------- */
-async function loadFile(f) {
-  if (!/\.xlsx$/i.test(f.name)) { $('#topMsgs').innerHTML = '<div class="m-err">Choose the GSTR-2B Excel (.xlsx) downloaded from the portal.</div>'; return; }
-  try {
-    const data = G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())));
-    if (!data.records.length) throw new Error('no invoices or notes were found in the file');
-    if (st.data && Object.keys(st.overrides).length && !(await ask('Replace the GSTR-2B on screen?', `The lines marked for ${esc(st.data.info.period)} ${esc(st.data.info.fy)} will be cleared. Save the case file first if you need it. Suppliers you asked to remember are kept.`))) return;
-    st = Object.assign(blank(), { file: f.name, data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true } });
-    st.supplierRules = get(LS.sup + data.info.gstin, {});
-    save(); render();
-    const kinds = {}; data.records.forEach(r => kinds[r.sheet] = (kinds[r.sheet] || 0) + 1);
-    $('#topMsgs').innerHTML = `<div class="m-ok">${esc(f.name)}: GSTR-2B of ${esc(data.info.legal || '')} for ${esc(data.info.period)} ${esc(data.info.fy)} – ${data.records.length} records (${Object.entries(kinds).map(([k, n]) => `${esc(k)} ${n}`).join(', ')}).</div>`;
-  } catch (e) { $('#topMsgs').innerHTML = `<div class="m-err">${esc(f.name)}: ${esc(e.message || e)}</div>`; }
+/* ---------- load (one GSTR-2B may come in several parts) ---------- */
+const kk = i => `${i.gstin}|${i.period}|${i.fy}`;
+async function loadFiles(files) {
+  const msgs = [], fresh = [];
+  for (const f of files) {
+    if (!/\.xlsx$/i.test(f.name)) { msgs.push(['err', `${f.name}: choose the GSTR-2B Excel (.xlsx) downloaded from the portal.`]); continue; }
+    try { const data = G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())));
+      if (!data.records.length && !data.summary.length) throw new Error('no invoices or notes were found in the file');
+      fresh.push({ file: f.name, data }); }
+    catch (e) { msgs.push(['err', `${f.name}: ${e.message || e}`]); }
+  }
+  if (fresh.length) {
+    const cur = st.parts || [], k0 = fresh.find(p => p.data.info.gstin);
+    const same = cur.length && st.data && (!k0 || kk(k0.data.info) === kk(st.data.info));
+    let parts;
+    if (same) parts = cur.filter(p => !fresh.some(q => q.file === p.file)).concat(fresh);
+    else {
+      if (st.data && Object.keys(st.overrides).length && !(await ask('Replace the GSTR-2B on screen?', `The lines marked for ${esc(st.data.info.period)} ${esc(st.data.info.fy)} will be cleared. Save the case file first if you need it. Suppliers you asked to remember are kept.`))) { show(msgs); return; }
+      parts = fresh;
+    }
+    try {
+      const data = G2B.merge(parts);
+      if (same) { st.parts = parts; st.data = data; st.file = parts.map(p => p.file).join(', '); }
+      else { st = Object.assign(blank(), { parts, file: parts.map(p => p.file).join(', '), data, settings: { home: G2B.stateOf(data.info.gstin), claimReverse: true } }); st.supplierRules = get(LS.sup + data.info.gstin, {}); }
+      save(); render();
+      msgs.push(['ok', `GSTR-2B of ${data.info.legal || ''} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
+      data.notes.forEach(n => msgs.push(n));
+      const gap = shortfall(); if (gap) msgs.push(['warn', gap]);
+    } catch (e) { msgs.push(['err', e.message || String(e)]); }
+  }
+  show(msgs);
+}
+function show(msgs) { $('#topMsgs').innerHTML = msgs.map(([k, t]) => `<div class="m-${k}">${esc(t)}</div>`).join(''); }
+/* records read vs the GSTR-2B summary (ITC available, other than reverse charge) – flags a part not loaded */
+function shortfall() {
+  if (!st.data || !st.data.summary.length) return '';
+  const sf = G2BBook.summaryFig({ info: st.data.info, rows: [], summary: st.data.summary, settings: st.settings });
+  const want = HEADS.reduce((s, h) => s + (sf.a5[h] || 0), 0);
+  const got = st.data.records.filter(r => ['inv', 'note'].includes(r.kind) && !r.amend && !/^y/i.test(r.rcm) && !/^no$/i.test(r.avail)).reduce((s, r) => s + HEADS.reduce((t, h) => t + r[h], 0), 0);
+  return Math.abs(want - got) > 1 ? `ITC (other than reverse charge and amendments) in the records read is ${fmt(got)} against ${fmt(want)} in the GSTR-2B summary – difference ${fmt(want - got)}. If the portal gave this GSTR-2B in more than one file, load the remaining part(s) too (they are added to this month). A difference can also come from amendments.` : '';
 }
 const drop = $('#drop');
 drop.onclick = () => $('#xfile').click();
 drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#xfile').click(); } };
-$('#xfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f); };
+$('#xfile').onchange = e => { const f = Array.from(e.target.files); e.target.value = ''; if (f.length) loadFiles(f); };
 ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => { const f = (e.dataTransfer.files || [])[0]; if (f) loadFile(f); });
+drop.addEventListener('drop', e => { const f = Array.from(e.dataTransfer.files || []); if (f.length) loadFiles(f); });
 
 /* ---------- render ---------- */
 const ctx = () => ({ info: st.data.info, rows, summary: st.data.summary, settings: st.settings });
@@ -52,6 +80,10 @@ function render() {
   $('#home').innerHTML = Object.values(G2B.STATES).map(s => `<option${s === st.settings.home ? ' selected' : ''}>${esc(s)}</option>`).join('');
   $('#claimReverse').checked = !!st.settings.claimReverse;
   $('#who').textContent = `${rows.length} records · generated ${I.generated || ''}`;
+  const P = st.parts || [];
+  $('#parts').innerHTML = P.length ? 'Files: ' + P.map((p, k) => `${esc(p.file)} (${p.data.records.length} records)${P.length > 1 ? ` <button type="button" class="link sm danger" data-part="${k}">remove</button>` : ''}`).join(' · ') : '';
+  $$('[data-part]').forEach(b => b.onclick = () => { st.parts.splice(+b.dataset.part, 1); st.data = G2B.merge(st.parts); st.file = st.parts.map(p => p.file).join(', '); save(); refresh(); });
+  const gap = shortfall(); $('#gapMsg').innerHTML = gap ? `<div class="m-warn">${esc(gap)}</div>` : '';
   renderSummary(); renderChips(); renderRows(); renderChecks();
 }
 function renderSummary() {
@@ -124,7 +156,7 @@ $('#dlXlsx').onclick = async () => {
 $('#saveCase').onclick = () => { if (!st.data) return; download(`GSTR2B_${tag()}.json`, JSON.stringify(Object.assign({}, st, { rules })), 'application/json'); };
 $('#openCase').onclick = () => $('#caseFile').click();
 $('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const d = JSON.parse(await f.text()); if (d.kind !== 'gst2b-case' || !d.data) throw 0; st = Object.assign(blank(), d); delete st.rules; save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
+  try { const d = JSON.parse(await f.text()); if (d.kind !== 'gst2b-case' || !d.data) throw 0; st = Object.assign(blank(), d); delete st.rules; if (!st.parts) st.parts = [{ file: st.file || f.name, data: st.data }]; save(); refresh(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
   catch (err) { $('#topMsgs').innerHTML = '<div class="m-err">That file is not a GSTR-2B analyser case file.</div>'; } };
 $('#newCase').onclick = async () => { if (await ask('Clear?', 'The GSTR-2B and the lines marked will be cleared from this screen (remembered suppliers and rules are kept).')) { st = blank(); save(); refresh(); $('#topMsgs').innerHTML = ''; } };
 function ask(title, html) { return new Promise(done => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg'); const end = v => { dl.close(); done(v); }; $('#askYes').onclick = () => end(true); $('#askNo').onclick = () => end(false); dl.oncancel = () => done(false); dl.showModal(); }); }
