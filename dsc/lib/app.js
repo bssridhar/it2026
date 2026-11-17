@@ -11,7 +11,7 @@ const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 const blank = () => ({ kind: 'dsc-register', version: 1, updated: '', updatedBy: '', records: [] });
 let reg = Object.assign(blank(), get(LS.draft, {}));
 let mode = 'local';            // 'local' | 'rw' (folder, editing) | 'ro' (folder, read only – another person has it open)
-let otherLock = null, beatTimer = null, filter = 'all', pendingSave = false;
+let otherLock = null, beatTimer = null, filter = 'all', savedAt = null, savedWhere = '';
 const user = () => ($('#user').value || '').trim();
 $('#user').value = get(LS.user, '');
 $('#user').onchange = () => set(LS.user, user());
@@ -33,9 +33,11 @@ async function persist(note) {
     try {
       const r = await S.write(reg);
       if (r.conflict) { conflict(r.other); return false; }
+      savedAt = Date.now(); savedWhere = 'folder'; showSaved();
       msg('ok', `${note ? note + ' – ' : ''}saved in the folder at ${stamp(Date.now())}.`);
     } catch (e) { msg('err', `Not saved in the folder: ${e.message || e}. Your change is kept in this browser; try again.`); return false; }
-  } else if (mode === 'local' && note) msg('ok', `${note} – kept in this browser. Use "Save a copy (JSON)" to keep it in a file${S.supported ? ', or choose the folder of the register' : ''}.`);
+  } else if (mode === 'local') { savedAt = Date.now(); savedWhere = 'browser'; showSaved(); }
+  if (mode === 'local' && note) msg('ok', `${note} – kept in this browser. Use "Save a copy (JSON)" to keep it in a file${S.supported ? ', or choose the folder of the register' : ''}.`);
   return true;
 }
 function conflict(other) {
@@ -51,9 +53,9 @@ function msg(k, t) { $('#topMsgs').innerHTML = t ? `<div class="m-${k}">${esc(t)
 async function openFolder(silent) {
   if (!user()) { $('#user').focus(); msg('warn', 'Enter your name first – it is shown to others who open the register while you have it open.'); return; }
   set(LS.user, user());
-  clearInterval(beatTimer);
+  clearInterval(beatTimer); document.body.classList.remove('closed');
   const lk = await S.acquire(user(), false);
-  if (lk.busy) { mode = 'ro'; otherLock = lk.lock; }
+  savedAt = null; if (lk.busy) { mode = 'ro'; otherLock = lk.lock; }
   let note = '';
   if (lk.busy) { /* read only */ } else { mode = 'rw'; otherLock = null; if (lk.stale) note = ` ${lk.stale.user} had left it open without closing (last active ${stamp(lk.stale.beat)}); it is now open for you.`; }
   const r = await S.read();
@@ -80,7 +82,9 @@ function showMode() {
   const ro = mode === 'ro';
   document.body.classList.toggle('readonly', ro);
   $$('.edit-only').forEach(b => b.classList.toggle('ro-hide', ro));
-  $('#where').textContent = mode === 'local' ? 'in this browser only' : `folder: ${S.dirName()}${ro ? ' · read only' : ''}`;
+  $('#where').textContent = mode === 'local' ? 'in this browser only' : `folder: ${S.dirName()}${ro ? ' · read only' : mode === 'closed' ? ' · closed' : ''}`;
+  $$('.edit-only').forEach(b => b.classList.toggle('ro-hide', ro || mode === 'closed'));
+  showSaved();
   $('#folderInfo').innerHTML = mode === 'local' ? '' : `<span class="hint">File <b>${S.FILE}</b> in the folder <b>${esc(S.dirName())}</b>${reg.updated ? ` · last saved ${stamp(reg.updated)} by ${esc(reg.updatedBy || '–')}` : ''}. A backup of the previous version is kept in its <b>backup</b> folder once a day.</span>`;
   if (ro) {
     const l = otherLock || {}, free = !l.beat || Date.now() - l.beat >= S.STALE_MS;
@@ -91,7 +95,7 @@ function showMode() {
   } else banner();
   $('#modeHint').textContent = mode === 'local'
     ? (S.supported ? 'Choose the folder where the register is to be kept (e.g. a shared office folder). The tool remembers it; whoever opens the tool uses the same file, and only one person can edit at a time.' : 'This browser cannot keep the register in a folder (use Chrome or Edge for that). The register is kept in this browser – use "Save a copy (JSON)" and "Open a JSON file" to keep it in a file.')
-    : (mode === 'rw' ? 'Every change is saved in the folder immediately. Close this page when you finish, so that others can edit.' : '');
+    : (mode === 'rw' ? 'Every change is saved in the folder as soon as it is made. When you finish, click "Save and close" so that others can edit.' : '');
 }
 $('#chooseFolder').onclick = async () => {
   if (!S.supported) { msg('warn', 'Keeping the register in a folder needs Chrome or Edge. In this browser use "Save a copy (JSON)".'); return; }
@@ -100,6 +104,34 @@ $('#chooseFolder').onclick = async () => {
 };
 $('#reconnect').onclick = async () => { try { const p = await S.permit(); if (p === 'granted') { $('#reconnect').hidden = true; await openFolder(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
 window.addEventListener('pagehide', () => { if (mode === 'rw') S.release(); });
+
+function showSaved() {
+  const el = $('#savedAt'); if (!el) return;
+  if (mode === 'closed') { el.className = 'saved'; el.textContent = 'Saved and closed.'; return; }
+  if (mode === 'ro') { el.className = 'saved warn'; el.textContent = 'Read only – not editing.'; return; }
+  if (!savedAt) { el.className = 'saved'; el.textContent = mode === 'rw' ? 'All changes are saved in the folder automatically.' : ''; return; }
+  el.className = savedWhere === 'browser' ? 'saved warn' : 'saved';
+  el.textContent = savedWhere === 'browser' ? `Saved in this browser only at ${stamp(savedAt)} – choose a folder or save a copy to keep it in a file.` : `All changes saved in the folder – last at ${stamp(savedAt)}.`;
+}
+$('#saveBtn').onclick = async () => {
+  if (mode === 'ro' || mode === 'closed') return msg('warn', mode === 'ro' ? 'The register is open with someone else – it is read only for you.' : 'The register is closed – click "Open again" to edit.');
+  if (mode === 'local') {
+    if (S.supported && await ask('Where should the register be saved?', 'The register is now kept only in this browser. Choose a folder to keep it as a file there (recommended – it is then saved there after every change), or Cancel to download a copy (JSON) instead.')) { $('#chooseFolder').click(); return; }
+    $('#saveJson').click(); savedAt = Date.now(); savedWhere = 'browser'; showSaved(); msg('ok', 'A copy (JSON) has been downloaded – keep it in a safe folder; open it next time with "Open a JSON file".'); return;
+  }
+  if (await persist('')) showSaved();
+};
+$('#closeBtn').onclick = async () => {
+  if (mode === 'closed') return;
+  if (mode === 'local') { $('#saveBtn').click(); return; }
+  if (mode === 'rw') { const ok = await persist(''); if (!ok) return; }
+  clearInterval(beatTimer);
+  if (mode === 'rw') await S.release();
+  mode = 'closed'; document.body.classList.add('closed'); banner();
+  showMode(); showSaved(); render();
+  $('#banner').innerHTML = `<div class="banner info">The register is saved and closed${S.dirName() ? ` (folder "${esc(S.dirName())}")` : ''}. Others can now open it for editing. You can close this page. <button type="button" id="reopen">Open again</button></div>`;
+  $('#reopen').onclick = () => { document.body.classList.remove('closed'); openFolder(); };
+};
 
 /* ---------- table ---------- */
 function purposeText(r) { return (r.purposes || []).concat(r.purposeOther ? [r.purposeOther] : []); }
@@ -142,7 +174,7 @@ function edit(id) {
   $('#editForm button[type=submit]').hidden = mode === 'ro';
   $('#editDlg').showModal();
 }
-$('#addBtn').onclick = () => edit(null);
+$('#addBtn').onclick = () => { if (mode !== 'closed') edit(null); };
 $('#editCancel').onclick = () => $('#editDlg').close();
 $('#editForm').addEventListener('submit', async () => {
   if (mode === 'ro') return;

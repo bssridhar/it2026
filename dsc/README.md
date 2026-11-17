@@ -7,6 +7,10 @@ example a folder on the office server that everyone can reach. The register is s
 after every change; the tool remembers the folder (the browser asks for permission once per visit – "Reconnect").
 In other browsers the register is kept in the browser; use "Save a copy (JSON)" / "Open a JSON file".
 
+**Save / Save and close.** Every change is saved at once (in the folder, or in the browser if no folder is chosen); the
+status next to the buttons shows when it was last saved. "Save and close" saves, releases the register for others and
+shows "Open again". Without a folder, "Save" offers to choose a folder or downloads a copy (JSON).
+
 **One person edits at a time.** While the register is open, the tool keeps a small file `dsc_register.lock` in the
 folder with the user's name, refreshed every 30 seconds. Anyone else who opens the tool sees "The register is open
 with <name> (since …, last active …)" and gets it read only, refreshed every 30 seconds. "Take over editing" is

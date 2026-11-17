@@ -81,6 +81,8 @@ td.d-exp{color:var(--err);font-weight:700} td.d-30{color:var(--err)} td.d-60{col
 .chk{display:flex;flex-wrap:wrap;gap:4px 14px}.chk label{display:flex;gap:6px;align-items:center;color:var(--ink);margin:0;font-size:.88rem}.chk input{width:auto}
 fieldset[disabled] button.edit-only{opacity:.4}
 .ro-hide{display:none !important}
+.saved{font-size:.85rem;color:var(--ok)} .saved.warn{color:var(--warn)}
+body.closed #valCard{opacity:.55;pointer-events:none}
 </style>
 </head>
 <body>
@@ -100,6 +102,9 @@ fieldset[disabled] button.edit-only{opacity:.4}
     <div class="bar" style="margin-top:10px">
       <button type="button" class="primary" id="chooseFolder">Choose the folder of the register</button>
       <button type="button" id="reconnect" hidden>Reconnect to the folder</button>
+      <button type="button" class="primary" id="saveBtn">Save</button>
+      <button type="button" id="closeBtn">Save and close</button>
+      <span class="saved" id="savedAt"></span>
       <span style="flex:1"></span>
       <button type="button" id="importX">Import from Excel</button><input type="file" id="importFile" accept=".xlsx" hidden>
       <button type="button" id="exportX">Export to Excel</button>
@@ -110,7 +115,7 @@ fieldset[disabled] button.edit-only{opacity:.4}
     <div id="topMsgs" class="msgs"></div>
   </div>
 
-  <section class="card">
+  <section class="card" id="valCard">
     <h2>Validity <span class="bar"><input id="q" placeholder="Search company / name / mobile / PAN" style="width:260px"><button type="button" class="primary edit-only" id="addBtn">+ Add DSC</button></span></h2>
     <div class="kpis" id="kpis" style="margin-bottom:12px"></div>
     <div class="chips" id="chips"></div>
