@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: DSC Register – validity of clients’ DSCs, token in / out, renewal reminders; one register file in a shared folder.",
     "New: GSTR-2B Analyser – sorts the ITC in GSTR-2B (blocked credit, insurance / motor vehicle, place of supply, RCM) and gives the GSTR-3B figures.",
     "New: GSTR-9 / 9C Working – reads GSTR-1 and GSTR-3B PDFs and prepares the GSTR reconciliation, GSTR-9 draft and 9C summary in Excel.",
     "New: Depreciation under Schedule II, Companies Act, 2013 – rate and pro rata working, fixed asset register with audit checks, PPE note.",
@@ -170,6 +171,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Payment voucher as a PDF in the voucher-book format with the firm's name: Cash / Cheque / UPI, automatic numbering, amount in words, office and payee copies, and a register of vouchers.",
       added: "2026-11-08"
+    },
+    {
+      id: "dsc",
+      title: "DSC Register",
+      category: "Office",
+      path: "dsc/index.html",
+      status: "available",
+      description: "Clients' Digital Signature Certificates: validity and days left, purpose, token in / out with acknowledgment, renewal reminders, Excel import / export. Kept as a JSON file in a shared folder, with a warning when someone else has it open.",
+      added: "2026-11-17"
     }
   ]
 };
