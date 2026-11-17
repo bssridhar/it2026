@@ -7,7 +7,7 @@ const fmt = n => Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits:
 const dmy = iso => iso ? iso.split('-').reverse().join('/') : '';
 const R = G2BReco, Bk = G2BBooks, ST = Object.fromEntries(R.STATUS.map(s => [s[0], s]));
 let res = null, chip = 'all', pageN = 200, optsOpen = false, mapOpen = null;
-const later = () => setTimeout(render, 0);  // re-draw after the change / blur of the field has finished
+const later = () => setTimeout(T.refresh, 0);  // re-draw after the change / blur of the field has finished
 const st = () => T.state();
 
 /* ---------- loading the register ---------- */
@@ -33,7 +33,7 @@ $('#bkFile').onchange = async e => {
       msg(miss.length ? 'warn' : 'ok', `${f.name}: sheet "${t.sheet}", heading row ${t.headerRow}, ${S.books.raw.length} row(s) read.${miss.length ? ' Not recognised: ' + miss.join(', ') + ' – choose the columns below.' : ' Check the columns recognised below.'}`);
     }
     S.recoMan = S.recoMan || { links: [], rejects: [] };
-    T.save(); render();
+    T.save(); T.refresh();
   } catch (err) { msg('err', `${f.name}: ${err.message || err}`); }
 };
 $('#bkClear').onclick = async () => { if (await T.ask('Remove the purchase register?', 'The reconciliation and the pairs you made will be cleared.')) { const S = st(); delete S.books; S.recoMan = { links: [], rejects: [] }; T.save(); T.refresh(); } };
@@ -59,10 +59,10 @@ function renderMap() {
   }
   h += `<div class="bar" style="margin-top:8px"><label style="margin:0">Voucher date from</label><input type="date" id="bkFrom" value="${esc(b.from || '')}" style="width:auto"><label style="margin:0">to</label><input type="date" id="bkTo" value="${esc(b.to || '')}" style="width:auto"><span class="hint">blank = all rows of the register</span></div>`;
   $('#bkMap').innerHTML = h;
-  if ($('#bkSheet')) $('#bkSheet').onchange = e => { b.sheet = e.target.value; const t = b.tables.find(x => x.sheet === b.sheet); b.map = Bk.guessMap(t.headers); b.raw = Bk.applyMap(t, b.map); T.save(); render(); };
+  if ($('#bkSheet')) $('#bkSheet').onchange = e => { b.sheet = e.target.value; const t = b.tables.find(x => x.sheet === b.sheet); b.map = Bk.guessMap(t.headers); b.raw = Bk.applyMap(t, b.map); T.save(); T.refresh(); };
   if ($('#bkApply')) $('#bkApply').onclick = () => { const map = {}; $$('[data-sk]').forEach(s => { if (s.value) map[s.dataset.sk] = s.value; });
     $$('[data-mk]').forEach(c => { if (c.checked) (map[c.dataset.mk] = map[c.dataset.mk] || []).push(c.value); });
-    const t = b.tables.find(x => x.sheet === b.sheet) || b.tables[0]; b.map = map; b.raw = Bk.applyMap(t, map); T.save(); render(); $('#bkMsgs').innerHTML = `<div class="m-ok">${b.raw.length} row(s) read with the columns chosen.</div>`; };
+    const t = b.tables.find(x => x.sheet === b.sheet) || b.tables[0]; b.map = map; b.raw = Bk.applyMap(t, map); T.save(); T.refresh(); $('#bkMsgs').innerHTML = `<div class="m-ok">${b.raw.length} row(s) read with the columns chosen.</div>`; };
   if ($('#mapDet')) $('#mapDet').ontoggle = e => { mapOpen = e.target.open; };
   $$('[data-vt]').forEach(c => c.onchange = () => { b.typeOn[c.dataset.vt] = c.checked; T.save(); later(); });
   $('#bkFrom').onchange = e => { b.from = e.target.value; T.save(); later(); };
@@ -145,9 +145,9 @@ function renderTable() {
       <td class="n">${x.d ? fmt(x.d.txval) : ''}</td><td class="n">${x.d ? fmt(x.d.tax) : ''}</td><td class="small" style="white-space:normal;min-width:160px">${esc((x.flags || []).join('; '))}</td><td style="white-space:nowrap">${act}</td></tr>`; }).join('') || '<tr><td colspan="12" class="hint">Nothing to show.</td></tr>'}</tbody>${all.length > show.length ? `<tfoot><tr><td colspan="12">Showing ${show.length} of ${all.length} – <button type="button" class="link" id="recoMore">show more</button></td></tr></tfoot>` : ''}`;
   if ($('#recoMore')) $('#recoMore').onclick = () => { pageN += 200; renderTable(); };
   const man = () => { S.recoMan = S.recoMan || { links: [], rejects: [] }; return S.recoMan; };
-  $$('[data-acc]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.acc.split('>'); man().links.push([ai, bi]); T.save(); render(); });
-  $$('[data-rej]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.rej.split('>'); man().rejects.push([ai, bi]); T.save(); render(); });
-  $$('[data-unl]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.unl.split('>'); const m = man(); m.links = m.links.filter(l => !(l[0] === ai && l[1] === bi)); m.rejects.push([ai, bi]); T.save(); render(); });
+  $$('[data-acc]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.acc.split('>'); man().links.push([ai, bi]); T.save(); T.refresh(); });
+  $$('[data-rej]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.rej.split('>'); man().rejects.push([ai, bi]); T.save(); T.refresh(); });
+  $$('[data-unl]').forEach(b => b.onclick = () => { const [ai, bi] = b.dataset.unl.split('>'); const m = man(); m.links = m.links.filter(l => !(l[0] === ai && l[1] === bi)); m.rejects.push([ai, bi]); T.save(); T.refresh(); });
   $$('.pairsel').forEach(s => s.onchange = () => { if (!s.value) return; man().links.push([s.dataset.a, s.value]); T.save(); later(); });
 }
 function renderSup() {

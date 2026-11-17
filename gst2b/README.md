@@ -42,3 +42,14 @@ difference, probable (accept / reject), in GSTR-2B only, in books only. Pairs ca
 The Excel then has **Reco summary**, **Reco details** (side by side, with differences and filters) and **Reco
 supplier-wise**, and the eligible-ITC block of the working is split into "Purchase reflected in GSTR-2B and accounted in
 books" and "Additional input – in GSTR-2B, not accounted in books".
+
+## IMS (Invoice Management System)
+
+Before acting on IMS, load the IMS download (IMS_B2B_<GSTIN>_<DDMMYYYY>.csv, and the files of the other sections)
+instead of the GSTR-2B. The GSTIN comes from the file name and the month from the "Source Return Period" column; the IMS
+status of each record (No Action / Accepted / Rejected / Pending) is read – rejected records go to "Rejected on IMS" and
+pending ones to "Held". Every record gets a **suggested IMS action** (a suggestion only – the action is taken on the
+portal): matched with the purchase register → Accept; amount difference, probable match, not in books, or place of
+supply outside the State → Pending; blocked / ineligible credit → Accept and do not claim / reverse the ITC. The
+suggestion is shown under the category of each line, summarised on screen, and listed in the Excel ("IMS actions").
+IMS files and a GSTR-2B of the same month should not be loaded together (an invoice would be counted twice).

@@ -251,6 +251,23 @@
       RSu.autoFilter = { from: 'A4', to: `L${Math.max(5, sr - 1)}` };
     }
 
+    /* ===== IMS actions ===== */
+    if (ctx.ims && ctx.ims.length) {
+      const IM = wb.addWorksheet('IMS actions', { views: [{ state: 'frozen', ySplit: 4, xSplit: 2 }] }); title(IM, 'suggested action for each IMS record – take the action on the GST portal');
+      const IH = ['GSTIN', 'Supplier', 'Section', 'Number', 'Type', 'Date', 'Value', 'Place of supply', 'Taxable value', 'IGST', 'CGST', 'SGST', 'Cess', 'Supplier filing', 'IMS status (in the file)', 'Category', 'Books', 'Suggested IMS action', 'Why', 'Status differs?'];
+      IH.forEach((t, i) => head(IM, IM.getCell(4, i + 1).address, t)); IM.getRow(4).height = 30;
+      [17, 32, 10, 18, 10, 11, 12, 13, 13, 11, 11, 11, 8, 18, 14, 26, 22, 12, 70, 10].forEach((w, i) => IM.getColumn(i + 1).width = w);
+      const RT = root.G2BReco, STL = RT ? Object.fromEntries(RT.STATUS.map(x => [x[0], x[1]])) : {};
+      const ord = { Pending: 0, Reject: 1, Accept: 2 };
+      ctx.ims.slice().sort((p, q) => ord[p.act] - ord[q.act] || String(p.r.name).localeCompare(q.r.name)).forEach((x, i) => { const r = x.r, rr = 5 + i;
+        [r.gstin, r.name, r.sheet, r.docno, r.doctype, r.date, r.value, r.pos, r.txval, r.igst, r.cgst, r.sgst, r.cess, [r.period, r.fdate].filter(Boolean).join(' · '), x.cur, CAT[r.cat][1], x.books ? STL[x.books] || x.books : (ctx.reco ? '' : 'not checked'), x.act, x.why, x.differs ? 'Yes' : '']
+          .forEach((v, k) => { const c = put(IM, IM.getCell(rr, k + 1).address, v === '' ? null : v); if ([6, 8, 9, 10, 11, 12].includes(k)) c.numFmt = NUM; });
+        IM.getCell('R' + rr).font = { bold: true, color: { argb: x.act === 'Accept' ? 'FF1D6B34' : x.act === 'Pending' ? 'FF8A5A00' : 'FFA32020' } };
+        if (x.differs) IM.getCell('T' + rr).fill = YEL; });
+      const lr = 5 + ctx.ims.length; put(IM, 'B' + lr, 'Total of the rows shown', { bold: true }); ['G', 'I', 'J', 'K', 'L', 'M'].forEach(c => put(IM, c + lr, `=SUBTOTAL(9,${c}5:${c}${lr - 1})`, { bold: true, fill: GREY }));
+      IM.autoFilter = { from: 'A4', to: `T${Math.max(5, lr - 1)}` };
+    }
+
     /* ===== Checks ===== */
     const C = wb.addWorksheet('Checks'); title(C, 'points for review'); C.getColumn(1).width = 12; C.getColumn(2).width = 150;
     head(C, 'A4', 'Type'); head(C, 'B4', 'Point');

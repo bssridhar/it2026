@@ -87,6 +87,7 @@ tr.sel td{background:var(--warn-bg)}
 .chkrow{display:flex;flex-wrap:wrap;gap:6px 18px}.chkrow label{display:flex;gap:6px;align-items:center;color:var(--ink);font-size:.85rem;margin:0}
 tr.st-ok td:first-child{box-shadow:inset 3px 0 0 var(--ok)} tr.st-warn td:first-child{box-shadow:inset 3px 0 0 var(--warn)} tr.st-bad td:first-child{box-shadow:inset 3px 0 0 var(--err)}
 details>summary{cursor:pointer}
+.ims-accept{color:var(--ok)} .ims-pending{color:var(--warn)} .ims-reject{color:var(--err)}
 .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
 .drop.over{border-color:var(--accent);background:var(--info-bg)}
 table.t td.wrap{white-space:normal;min-width:180px}
@@ -108,8 +109,8 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
   <p class="sub">Load the GSTR-2B Excel downloaded from the GST portal. The tool sorts every invoice, note and amendment into eligible ITC, blocked credit, insurance / motor vehicle items, place-of-supply ineligibility, reverse charge and others, lets you re-mark any line with a reason, and gives the GSTR-2B working and the GSTR-3B figures in Excel. The file is read in this browser only.</p>
 
   <div class="card">
-    <div id="drop" class="drop" tabindex="0" role="button"><b>Choose or drop the GSTR-2B Excel (.xlsx) here</b><br><span class="hint">As downloaded from the portal (Returns → GSTR-2B → Download Excel), one month at a time. Where the portal gives the month in more than one file (large GSTR-2B), choose all the files together, or add the next part later – parts of the same GSTIN and month are combined.</span></div>
-    <input type="file" id="xfile" accept=".xlsx" multiple hidden>
+    <div id="drop" class="drop" tabindex="0" role="button"><b>Choose or drop the GSTR-2B Excel (.xlsx) – or the IMS download (.csv) – here</b><br><span class="hint">As downloaded from the portal (Returns → GSTR-2B → Download Excel), one month at a time. Where the portal gives the month in more than one file (large GSTR-2B), choose all the files together, or add the next part later – parts of the same GSTIN and month are combined. Before acting on IMS, load the IMS files (IMS_B2B_…csv and the other sections) instead of the GSTR-2B – each line then gets a suggested IMS action.</span></div>
+    <input type="file" id="xfile" accept=".xlsx,.csv" multiple hidden>
     <div class="bar" style="margin-top:12px">
       <span style="flex:1"></span>
       <button type="button" id="saveCase">Save case file</button>
@@ -139,6 +140,7 @@ textarea.rules{font:12px/1.4 ui-monospace,Consolas,monospace;min-height:160px}
       <div><h2 style="font-size:.95rem">By category</h2><div class="tw" style="max-height:none"><table class="t" id="catSum"></table></div></div>
       <div><h2 style="font-size:.95rem">Proposed GSTR-3B</h2><div class="tw" style="max-height:none"><table class="t" id="tb3"></table></div><p class="hint" id="tb3note"></p></div>
     </div>
+    <div id="imsBox"></div>
   </section>
 
   <section class="card" id="recCard" hidden>

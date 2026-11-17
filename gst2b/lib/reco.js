@@ -122,5 +122,26 @@
     return out;
   }
 
-  root.G2BReco = { DEFAULTS, STATUS, normInv, similar, run, summary, tax };
+
+  /* Suggested IMS action for each IMS record – a suggestion only; the decision and the action on the portal are the user's.
+     reco: result of run() or null (no purchase register loaded) */
+  function imsActions(rows, reco) {
+    const pairOf = {}; if (reco) { reco.pairs.forEach(p => { pairOf[p.a.id] = p; }); reco.only2b.forEach(a => { pairOf[a.id] = { status: 'only2b' }; }); }
+    return rows.filter(r => r.imsStatus !== undefined).map(r => {
+      const p = pairOf[r.id], ps = p ? p.status : null; let act, why;
+      if (r.cat === 'rejected') { act = 'Reject'; why = 'Already rejected on IMS'; }
+      else if (r.cat === 'hold') { act = 'Pending'; why = r.reason || 'Held / kept pending'; }
+      else if (r.cat === 'pos') { act = 'Pending'; why = 'Place of supply outside the State – ask the supplier to correct the invoice; ITC not available as it stands'; }
+      else if (reco && ['mismatch'].includes(ps)) { act = 'Pending'; why = `Amount differs from books (tax ${(p.d.tax || 0).toFixed(2)}) – get it corrected; reject only if the invoice is wrong`; }
+      else if (reco && ps === 'probable') { act = 'Pending'; why = 'Probable match with books – review the pairing first'; }
+      else if (reco && ps === 'only2b') { act = 'Pending'; why = 'Not in the purchase register – check receipt of goods / services; reject if not your purchase'; }
+      else if (['blocked', 'insmot', 'inelig'].includes(r.cat)) { act = 'Accept'; why = 'Purchase is yours but ITC is blocked / ineligible – accept, and do not claim / reverse the ITC (4B(1)); reject only if it is not your purchase'; }
+      else if (reco && ['matched', 'invdiff', 'gstindiff', 'manual'].includes(ps)) { act = 'Accept'; why = 'Matched with the purchase register' + (ps === 'invdiff' ? ' (invoice no. differs slightly)' : ps === 'gstindiff' ? ' (GSTIN differs in books – correct the books)' : ''); }
+      else { act = 'Accept'; why = reco ? 'Accepted' : 'No purchase register loaded – check with the books before accepting'; }
+      const differs = !/^no action$/i.test(r.imsStatus || 'No Action') && !new RegExp('^' + act, 'i').test(r.imsStatus);
+      return { r, act, why, books: ps, differs, cur: r.imsStatus || 'No Action' };
+    });
+  }
+
+  root.G2BReco = { DEFAULTS, STATUS, normInv, similar, run, summary, tax, imsActions };
 })(typeof window !== 'undefined' ? window : globalThis);

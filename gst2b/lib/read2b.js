@@ -174,6 +174,54 @@
 
   /* portal file name: MMYYYY_GSTIN_GSTR2B_DDMMYYYY[_part].xlsx, e.g. 102026_33AABCT0551H1ZR_GSTR2B_15112026_1.xlsx */
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  /* ---------- IMS download (CSV) ----------
+     IMS_<section>_<GSTIN>_<DDMMYYYY>.csv: two title lines, a heading row ("GSTIN of Supplier, ... Status ...") and the records. */
+  function csvRows(text) {
+    const rows = []; let row = [], cur = '', q = false;
+    for (let i = 0; i < text.length; i++) { const ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true; else if (ch === ',') { row.push(cur); cur = ''; } else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; } else if (ch !== '\r') cur += ch; }
+    if (cur || row.length) { row.push(cur); rows.push(row); }
+    return rows.map(r => r.map(x => x.trim()));
+  }
+  function readIms(text, fileName) {
+    const rows = csvRows(String(text).replace(/^﻿/, ''));
+    if (!/IMS/i.test((rows[0] || []).join(' ')) && !/^IMS_/i.test(fileName || '')) throw new Error('this does not look like a file downloaded from IMS');
+    const hi = rows.findIndex(r => r.some(c => /^GSTIN of (supplier|ISD)$/i.test(c)));
+    if (hi < 0) throw new Error('the heading row (GSTIN of Supplier …) was not found');
+    const H = rows[hi].map(c => c.replace(/\s+/g, ' ').trim()), title = rows.slice(0, hi).map(r => r.join(' ')).join(' ');
+    const col = re => H.findIndex(h => re.test(h));
+    const C = { gstin: col(/^GSTIN of/i), name: col(/Trade\/Legal name/i), docno: col(/^(Invoice|Note|Document) Number$/i), doctype: col(/^(Invoice|Note|Document) Type$/i), date: col(/^(Invoice|Note|Document) Date$/i),
+      value: col(/^(Invoice|Note|Document) Value/i), status: col(/^Status$/i), pos: col(/^Place of Supply$/i), txval: col(/^Taxable Value/i), igst: col(/^Integrated Tax/i), cgst: col(/^Central Tax/i), sgst: col(/^State\/UT Tax/i), cess: col(/^Cess/i),
+      remarks: col(/^Remarks$/i), source: col(/^Source$/i), period: col(/^Source Return Period$/i), fstatus: col(/Filing Status/i), fdate: col(/Filing Date/i), freq: col(/Filing Frequency/i),
+      origno: col(/^Original (Invoice|Note|Document) Number$/i), origdate: col(/^Original (Invoice|Note|Document) Date$/i), origtype: col(/^Original (Invoice|Note|Document) Type$/i) };
+    const sec = ((/^IMS_([^_]+(?:_[^_]+)*?)_\d{2}[0-9A-Z]{13}_/i.exec(fileName || '') || [])[1] || 'B2B').toUpperCase();
+    const amend = C.origno >= 0 || /amend/i.test(title) || /A$/.test(sec.replace(/[^A-Z]/g, ''));
+    const isNote = /CN|DN|NOTE/.test(sec) || /credit|debit\s*note/i.test(title);
+    const num = v => { const n = Number(String(v || '').replace(/[,\s₹]/g, '')); return isFinite(n) ? n : 0; };
+    const g = (r, k) => C[k] >= 0 ? (r[C[k]] || '') : '';
+    const recs = [], periods = {};
+    rows.slice(hi + 1).forEach((r, i) => {
+      const gstin = g(r, 'gstin'), docno = g(r, 'docno'); if (!gstin && !docno) return;
+      const doctype = g(r, 'doctype'), sign = /credit/i.test(doctype) || (/CN/.test(sec) && !/debit/i.test(doctype)) ? -1 : 1;
+      const p = g(r, 'period'); if (p) periods[p] = (periods[p] || 0) + 1;
+      const rec = { sheet: 'IMS ' + sec, kind: isNote ? 'note' : 'inv', amend, sign, gstin, name: g(r, 'name'), docno, doctype, notetype: '', date: g(r, 'date'), value: sign * num(g(r, 'value')),
+        pos: g(r, 'pos'), rcm: 'No', txval: sign * num(g(r, 'txval')), igst: sign * num(g(r, 'igst')), cgst: sign * num(g(r, 'cgst')), sgst: sign * num(g(r, 'sgst')), cess: sign * num(g(r, 'cess')),
+        period: p, fdate: g(r, 'fdate'), avail: '', reason: '', pct: '', source: g(r, 'source'), irn: '', irndate: '', imsStatus: g(r, 'status') || 'No Action', imsRemarks: g(r, 'remarks'),
+        srcStatus: g(r, 'fstatus'), freq: g(r, 'freq'), orig: { no: g(r, 'origno'), date: g(r, 'origdate'), type: g(r, 'origtype') }, row: hi + 2 + i };
+      rec.id = `${rec.sheet}|${gstin}|${docno}|${rec.date}|${rec.row}`;
+      recs.push(rec);
+    });
+    const fn = /IMS_.*?_(\d{2}[0-9A-Z]{13})_(\d{2})(\d{2})(\d{4})/i.exec(fileName || '');
+    const top = Object.entries(periods).sort((a, b) => b[1] - a[1])[0];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    let period = '', fy = '';
+    if (top) { const m = /^(\d{1,2})\/(\d{4})$/.exec(top[0]); if (m) { const mo = +m[1], y = +m[2], f0 = mo >= 4 ? y : y - 1; period = MONTHS[mo - 1]; fy = `${f0}-${String(f0 + 1).slice(2)}`; } }
+    const info = { gstin: fn ? fn[1].toUpperCase() : '', period, fy, generated: fn ? `${fn[2]}/${fn[3]}/${fn[4]}` : '', ims: true, fromName: true, imsPeriods: periods };
+    return { info, records: recs, summary: [] };
+  }
+
   function infoFromName(name) {
     const m = /(\d{2})(\d{4})_(\d{2}[0-9A-Z]{13})_GSTR-?2B_(\d{2})(\d{2})(\d{4})(?:_(\d+))?/i.exec(name || '');
     if (!m || +m[1] < 1 || +m[1] > 12) return null;
@@ -203,6 +251,8 @@
     const odd = withInfo.filter(p => key(p.data.info) !== key(base));
     if (odd.length) throw new Error(`${odd.map(p => p.file).join(', ')}: GSTIN / period ${odd.map(p => `${p.data.info.gstin} ${p.data.info.period} ${p.data.info.fy}`).join('; ')} differs from ${base.gstin} ${base.period} ${base.fy} – load the parts of one GSTR-2B together`);
     const notes = [], seen = new Map(), records = [], ids = new Set();
+    const kinds = new Set(parts.map(p => p.data.info.ims ? 'ims' : '2b'));
+    if (kinds.size > 1) notes.push(['warn', 'IMS records and a GSTR-2B have been loaded together – an invoice can appear in both and be counted twice. Load the IMS files or the GSTR-2B, not both.']);
     const ck = r => [r.sheet, r.gstin, r.docno, r.date, r.doctype, r.txval, r.igst, r.cgst, r.sgst, r.cess].join('|');
     parts.forEach((p, k) => {
       let dup = 0;
@@ -237,7 +287,8 @@
       let cat = 'elig', reason = '', flags = [];
       const nm = rec.name.toUpperCase();
       const posOut = rec.pos && H && norm(rec.pos) !== H;
-      if (rec.kind === 'rej') { cat = 'rejected'; reason = 'Rejected on the IMS dashboard'; }
+      if (rec.kind === 'rej' || /^reject/i.test(rec.imsStatus || '')) { cat = 'rejected'; reason = 'Rejected on the IMS dashboard'; }
+      else if (/^pending/i.test(rec.imsStatus || '')) { cat = 'hold'; reason = 'Kept pending on IMS'; }
       else if (rec.kind === 'rev') { cat = 'rev37a'; reason = 'ITC reversal shown in GSTR-2B (rule 37A) – 4B(2)'; }
       else if (rec.kind === 'imp') cat = 'imp';
       else if (/^no$/i.test(rec.avail)) { cat = 'notavl'; reason = 'ITC not available as per GSTR-2B' + (rec.reason ? ` – ${rec.reason}` : ''); }
@@ -262,5 +313,5 @@
     });
   }
 
-  root.G2B = { read, merge, infoFromName, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
+  root.G2B = { read, readIms, merge, infoFromName, classify, CATS, CAT, STATES, DEFAULT_RULES, stateOf, norm, parseRules };
 })(typeof window !== 'undefined' ? window : globalThis);

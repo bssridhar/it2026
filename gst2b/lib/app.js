@@ -31,8 +31,8 @@ const kk = i => `${i.gstin}|${i.period}|${i.fy}`;
 async function loadFiles(files) {
   const msgs = [], fresh = [];
   for (const f of files) {
-    if (!/\.xlsx$/i.test(f.name)) { msgs.push(['err', `${f.name}: choose the GSTR-2B Excel (.xlsx) downloaded from the portal.`]); continue; }
-    try { const data = G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())), f.name);
+    if (!/\.(xlsx|csv)$/i.test(f.name)) { msgs.push(['err', `${f.name}: choose the GSTR-2B Excel (.xlsx) or the IMS download (.csv) from the portal.`]); continue; }
+    try { const data = /\.csv$/i.test(f.name) ? G2B.readIms(await f.text(), f.name) : G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())), f.name);
       if (!data.records.length && !data.summary.length) throw new Error('no invoices or notes were found in the file');
       fresh.push({ file: f.name, data }); }
     catch (e) { msgs.push(['err', `${f.name}: ${e.message || e}`]); }
@@ -56,7 +56,7 @@ async function loadFiles(files) {
       colF = {}; sortBy = null; selected.clear(); undoStack = [];
       save(); render();
       if (draftNote) msgs.push(['info', draftNote]);
-      msgs.push(['ok', `GSTR-2B of ${data.info.legal || data.info.gstin} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
+      msgs.push(['ok', `${data.info.ims ? 'IMS records' : 'GSTR-2B'} of ${data.info.legal || data.info.gstin} for ${data.info.period} ${data.info.fy}: ${data.records.length} records from ${parts.length} file(s) – ${data.files.map(x => `${x.file} (${x.n})`).join(', ')}.`]);
       data.notes.forEach(n => msgs.push(n));
       const gap = shortfall(); if (gap) msgs.push(['warn', gap]);
     } catch (e) { msgs.push(['err', e.message || String(e)]); }
@@ -81,7 +81,7 @@ $('#xfile').onchange = e => { const f = Array.from(e.target.files); e.target.val
 drop.addEventListener('drop', e => { const f = Array.from(e.dataTransfer.files || []); if (f.length) loadFiles(f); });
 
 /* ---------- render ---------- */
-const ctx = () => ({ info: st.data.info, rows, summary: st.data.summary, settings: st.settings, reco: window.G2BRecoUI && st.books ? G2BRecoUI.result() : null, booksFile: st.books ? st.books.file : '' });
+const ctx = () => ({ info: st.data.info, rows, summary: st.data.summary, settings: st.settings, ims: Object.values(imsMap), reco: window.G2BRecoUI && st.books ? G2BRecoUI.result() : null, booksFile: st.books ? st.books.file : '' });
 function classify() { rows = st.data ? G2B.classify(st.data, { home: st.settings.home, rules }, st.overrides, st.supplierRules) : []; }
 function render() {
   const has = !!st.data;
@@ -90,6 +90,7 @@ function render() {
   renderSupRules();
   if (!has) return;
   classify();
+  if (window.G2BRecoUI) G2BRecoUI.render();
   const I = st.data.info;
   $('#gstin').value = I.gstin || ''; $('#legal').value = I.legal || ''; $('#period').value = `${I.period || ''} ${I.fy || ''}`;
   $('#home').innerHTML = Object.values(G2B.STATES).map(s => `<option${s === st.settings.home ? ' selected' : ''}>${esc(s)}</option>`).join('');
@@ -99,8 +100,19 @@ function render() {
   $('#parts').innerHTML = P.length ? 'Files: ' + P.map((p, k) => `${esc(p.file)} (${p.data.records.length} records)${P.length > 1 ? ` <button type="button" class="link sm danger" data-part="${k}">remove</button>` : ''}`).join(' · ') : '';
   $$('[data-part]').forEach(b => b.onclick = () => { st.parts.splice(+b.dataset.part, 1); st.data = G2B.merge(st.parts); st.file = st.parts.map(p => p.file).join(', '); save(); refresh(); });
   const gap = shortfall(); $('#gapMsg').innerHTML = gap ? `<div class="m-warn">${esc(gap)}</div>` : '';
-  renderSummary(); renderChips(); renderRows(); renderChecks();
-  if (window.G2BRecoUI) G2BRecoUI.render();
+  renderIms(); renderSummary(); renderChips(); renderRows(); renderChecks();
+}
+let imsMap = {};
+function renderIms() {
+  const list = G2BReco.imsActions(rows, window.G2BRecoUI && st.books ? G2BRecoUI.result() : null);
+  imsMap = Object.fromEntries(list.map(x => [x.r.id, x]));
+  const box = $('#imsBox'); if (!box) return;
+  if (!list.length) { box.innerHTML = ''; return; }
+  const by = {}; list.forEach(x => { const b = by[x.act] = by[x.act] || { n: 0, tax: 0, differs: 0 }; b.n++; b.tax += x.r.igst + x.r.cgst + x.r.sgst + x.r.cess; if (x.differs) b.differs++; });
+  const cur = {}; list.forEach(x => cur[x.cur] = (cur[x.cur] || 0) + 1);
+  box.innerHTML = `<h2 style="font-size:.95rem;margin-top:16px">Suggested IMS actions <span class="pill">status in the file: ${Object.entries(cur).map(([k, n]) => `${esc(k)} ${n}`).join(' · ')}</span></h2>
+    <div class="tw" style="max-height:none"><table class="t"><thead><tr><th>Suggested action</th><th class="n">Records</th><th class="n">Tax</th><th class="n">Already acted otherwise</th></tr></thead><tbody>${['Accept', 'Pending', 'Reject'].filter(a => by[a]).map(a => `<tr><td>${a}</td><td class="n">${by[a].n}</td><td class="n">${fmt(by[a].tax)}</td><td class="n">${by[a].differs || ''}</td></tr>`).join('')}</tbody></table></div>
+    <p class="hint">A suggestion for each record, from its category${st.books ? ' and the reconciliation with the purchase register' : ' (load the purchase register below to check against the books)'} – shown under the category of each line and listed in the Excel ("IMS actions"). The action itself is taken on the GST portal (IMS). Records not acted upon are deemed accepted when GSTR-2B is generated.</p>`;
 }
 function renderSummary() {
   const T = G2BBook.totals(rows);
@@ -160,7 +172,7 @@ function renderRows() {
     return `<tr class="${cls}" title="${esc(r.flags.join('\n'))}"><td><input type="checkbox" class="rsel" data-i="${i}"${selected.has(r.id) ? ' checked' : ''}></td><td>${i + 1}</td><td class="small">${esc(r.sheet)}${r.amend ? `<br>orig. ${esc(r.orig.no)}` : ''}</td><td class="wrap">${esc(r.name)}<br><span class="small">${esc(r.gstin)}</span></td>
       <td>${esc(r.docno)}<br><span class="small">${esc(r.date)} ${r.sign < 0 ? '· credit note' : /debit/i.test(r.doctype) ? '· debit note' : ''}</span></td><td>${esc(r.pos)}</td><td>${esc(r.rcm)}</td>
       ${['txval', ...HEADS].map(h => `<td class="n">${fmt(r[h])}</td>`).join('')}
-      <td><select class="cat" data-i="${i}">${opts(r.cat)}</select>${r.src !== 'auto' ? `<div class="small">${r.src === 'user' ? 'marked' : 'supplier rule'} · auto: ${esc(CAT[r.auto.cat][1])}</div>` : ''}</td>
+      <td><select class="cat" data-i="${i}">${opts(r.cat)}</select>${r.src !== 'auto' ? `<div class="small">${r.src === 'user' ? 'marked' : 'supplier rule'} · auto: ${esc(CAT[r.auto.cat][1])}</div>` : ''}${imsMap[r.id] ? `<div class="small" title="${esc(imsMap[r.id].why)}">IMS: ${esc(imsMap[r.id].cur)} → <b class="ims-${imsMap[r.id].act.toLowerCase()}">${imsMap[r.id].act}</b>${imsMap[r.id].differs ? ' ⚠' : ''}</div>` : ''}</td>
       <td><input class="rsn" data-i="${i}" value="${esc(r.reason)}" placeholder="${NOREASON.includes(r.cat) ? 'optional remarks' : 'reason for ineligible'}"></td>
       <td style="white-space:nowrap">${r.gstin ? `<button type="button" class="link sm" data-all="${i}" title="Apply this category and reason to every line of this supplier">All of supplier</button><br><button type="button" class="link sm" data-rem="${i}" title="Use this category for this supplier in future months">${st.supplierRules[r.gstin] ? 'Remembered ✓' : 'Remember'}</button>` : ''}${r.src === 'user' ? `<br><button type="button" class="link sm" data-undo="${i}">Undo</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="16" class="hint">Nothing to show.</td></tr>'}</tbody>${all.length > show.length ? `<tfoot><tr><td colspan="16">Showing ${show.length} of ${all.length} lines – <button type="button" class="link" id="more">show ${Math.min(PAGE, all.length - show.length)} more</button> · <button type="button" class="link" id="moreAll">show all</button></td></tr></tfoot>` : ''}`;
   if ($('#more')) { $('#more').onclick = () => { pageN += PAGE; renderRows(); }; $('#moreAll').onclick = () => { pageN = all.length; renderRows(); }; }
