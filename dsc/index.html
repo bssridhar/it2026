@@ -81,6 +81,10 @@ td.d-exp{color:var(--err);font-weight:700} td.d-30{color:var(--err)} td.d-60{col
 .chk{display:flex;flex-wrap:wrap;gap:4px 14px}.chk label{display:flex;gap:6px;align-items:center;color:var(--ink);margin:0;font-size:.88rem}.chk input{width:auto}
 fieldset[disabled] button.edit-only{opacity:.4}
 .ro-hide{display:none !important}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #8a93a3;vertical-align:-2px;margin-right:5px}
+.keytag{display:inline-block;min-width:64px;text-align:center;padding:3px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.25);font-weight:600;font-size:.82rem}
+.setrow{display:flex;gap:6px;align-items:center;margin:4px 0}.setrow input[type=text]{flex:1}.setrow input[type=color]{width:40px;padding:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:700px){.two{grid-template-columns:1fr}}
 .saved{font-size:.85rem;color:var(--ok)} .saved.warn{color:var(--warn)}
 body.closed #valCard{opacity:.55;pointer-events:none}
 </style>
@@ -108,6 +112,7 @@ body.closed #valCard{opacity:.55;pointer-events:none}
       <span style="flex:1"></span>
       <button type="button" id="importX">Import from Excel</button><input type="file" id="importFile" accept=".xlsx" hidden>
       <button type="button" id="exportX">Export to Excel</button>
+      <button type="button" id="setBtn">Settings</button>
       <button type="button" id="saveJson">Save a copy (JSON)</button>
       <button type="button" id="openJson">Open a JSON file</button><input type="file" id="jsonFile" accept=".json" hidden>
     </div>
@@ -116,7 +121,7 @@ body.closed #valCard{opacity:.55;pointer-events:none}
   </div>
 
   <section class="card" id="valCard">
-    <h2>Validity <span class="bar"><input id="q" placeholder="Search company / name / mobile / PAN" style="width:260px"><button type="button" class="primary edit-only" id="addBtn">+ Add DSC</button></span></h2>
+    <h2>Validity <span class="bar"><select id="fLoc" title="Location" style="width:auto"></select><select id="fTag" title="Key tag colour" style="width:auto"></select><input id="q" placeholder="Search company / name / mobile / PAN" style="width:240px"><button type="button" class="primary edit-only" id="addBtn">+ Add DSC</button></span></h2>
     <div class="kpis" id="kpis" style="margin-bottom:12px"></div>
     <div class="chips" id="chips"></div>
     <div class="tw"><table class="t" id="tbl"></table></div>
@@ -130,6 +135,8 @@ body.closed #valCard{opacity:.55;pointer-events:none}
     <div class="full"><label>Name of the DSC holder</label><input name="name" required></div>
     <div><label>Valid till</label><input type="date" name="validTill" required></div>
     <div><label>Token with</label><select name="location"><option value="">–</option><option>Office</option><option>Client</option></select></div>
+    <div><label>Location (in the office)</label><select name="storage"></select></div>
+    <div><label>Key tag colour</label><div class="bar" style="flex-wrap:nowrap"><select name="tagColor"></select><span id="tagPrev"></span></div></div>
     <div class="full"><label>Purpose / registered on</label><div class="chk" id="purposeBox"></div></div>
     <div class="full"><label>Other purpose</label><input name="purposeOther" placeholder="e.g. tender portal, bank"></div>
     <div><label>Mobile (linked to the DSC)</label><input name="mobile" inputmode="tel"></div>
@@ -149,6 +156,7 @@ body.closed #valCard{opacity:.55;pointer-events:none}
   <div class="db">
     <div class="grid">
       <div><label>Movement</label><select name="dir"><option value="In">Received into the office (In)</option><option value="Out">Returned / handed over (Out)</option></select></div>
+      <div class="inOnly"><label>Keep at (location)</label><select name="storage"></select></div>
       <div><label>Date and time</label><input type="datetime-local" name="at" required></div>
       <div><label>Received from / handed to</label><input name="person" required></div>
       <div><label>Purpose / remarks</label><input name="note" placeholder="e.g. GST return filing"></div>
@@ -162,6 +170,16 @@ body.closed #valCard{opacity:.55;pointer-events:none}
 <dialog id="remDlg"><div class="dh">Reminder to the client</div>
   <div class="db"><textarea id="remText" rows="9"></textarea><p class="hint">A factual reminder for your client – copy it into email / WhatsApp. Edit as needed before sending.</p></div>
   <div class="df"><a id="remMail" class="link" href="#">Open in email</a><span style="flex:1"></span><button type="button" id="remCopy">Copy</button><button type="button" class="primary" id="remClose">Close</button></div></dialog>
+
+<dialog id="setDlg"><div class="dh">Settings – key tag colours and locations</div>
+  <div class="db">
+    <p class="hint" style="margin-top:0">These lists are saved in the register file, so everyone who opens it sees the same choices. Renaming changes the DSCs that use the name; deleting clears it from them.</p>
+    <div class="two">
+      <div><h3 style="font-size:.95rem;margin:0 0 6px">Key tag colours</h3><div id="setTags"></div><div class="bar" style="margin-top:6px"><input id="newTag" placeholder="New colour, e.g. Yellow" style="width:170px"><input type="color" id="newTagHex" value="#f2d24b" style="width:44px;padding:2px"><button type="button" class="sm" id="addTag">Add</button></div></div>
+      <div><h3 style="font-size:.95rem;margin:0 0 6px">Locations</h3><div id="setLocs"></div><div class="bar" style="margin-top:6px"><input id="newLoc" placeholder="New location, e.g. Box 3" style="width:200px"><button type="button" class="sm" id="addLoc">Add</button></div></div>
+    </div>
+  </div>
+  <div class="df"><button type="button" class="primary" id="setClose">Done</button></div></dialog>
 
 <dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
   <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>

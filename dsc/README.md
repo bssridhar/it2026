@@ -23,5 +23,11 @@ day keeps a copy of the earlier version in `backup/`.
 bank, e-tender, other), mobile, email, PAN, DIN, issuer, class / type, token serial, token with (office / client),
 movements in and out with an acknowledgment (PDF), remarks. **Token PINs and passwords are not stored.**
 
-Import from the existing Excel list (headings like Sl No / Company / Name / Valid Till / Purpose; other columns such
+**Key tag colour and location.** Each DSC has a key tag colour (shown as a coloured label and a coloured stripe at the
+start of its row) and the place where the token is kept. "Settings" maintains the colours (name and colour) and the
+locations – add, rename (the DSCs using it change too) or delete (cleared from the DSCs). The lists are saved in the
+register file, so everyone sees the same choices. Filters by location and key tag; recording a token "In" asks where it
+is kept. Defaults: Pink, Orange, White, Green, Blue; BSS Cabin, Box 1, Box 2.
+
+Import from the existing Excel list (headings like Sl No / Company / Name / Valid Till / Purpose / Location / Key Tag Colour; other columns such
 as Mobile, Email, PAN are picked up if present); export to Excel; renewal reminder text for the client.
