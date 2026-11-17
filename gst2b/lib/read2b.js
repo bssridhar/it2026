@@ -108,7 +108,7 @@
     const kind = sheetKind(name); if (!kind) return [];
     const rows = {}; Object.keys(cells).forEach(ref => { (rows[rowOf(ref)] = rows[rowOf(ref)] || {})[colOf(ref)] = cells[ref]; });
     const rnums = Object.keys(rows).map(Number).sort((a, b) => a - b);
-    const hr = rnums.find(r => Object.values(rows[r]).some(v => /^GSTIN of (supplier|ISD)$/i.test(str(v)) || /Icegate Reference Date/i.test(str(v))));
+    const hr = rnums.find(r => Object.values(rows[r]).some(v => /^GSTIN of (supplier|ISD|ECO|e-?commerce operator)$/i.test(str(v)) || /Icegate Reference Date/i.test(str(v))));
     if (!hr) return [];
     const H = rows[hr] || {}, S = rows[hr + 1] || {};
     const cols = Array.from(new Set(Object.keys(H).concat(Object.keys(S)))).sort((a, b) => cIdx(a) - cIdx(b));
@@ -118,8 +118,8 @@
     const after = (re, from = gi) => cols.find(c => cIdx(c) > from - (gcol ? 0 : 1) && re.test(label(c)));
     const F = {
       gstin: gcol, name: after(/^Trade\/Legal name/i),
-      docno: after(/^(Invoice number|Note number|ISD Document number|Number)$/i), doctype: after(/^(Invoice type|Note type|ISD Document type)$/i),
-      notetype: after(/^Note Supply type$/i), date: after(/^(Invoice Date|Note date|ISD Document date|Date)$/i), value: after(/^(Invoice Value|Note Value)/i),
+      docno: after(/^(Invoice number|Note number|ISD Document number|Document number|Number)$/i), doctype: after(/^(Invoice type|Note type|ISD Document type|Document type)$/i),
+      notetype: after(/^Note Supply type$/i), date: after(/^(Invoice Date|Note date|ISD Document date|Document date|Date)$/i), value: after(/^(Invoice Value|Note Value|Document value)/i),
       pos: after(/^Place of supply/i), rcm: after(/Reverse Charge/i), txval: after(/^Taxable Value/i),
       igst: after(/^Integrated Tax/i), cgst: after(/^Central Tax/i), sgst: after(/^State\/UT Tax/i), cess: after(/^Cess/i),
       period: after(/Period$/i), fdate: after(/Filing Date$/i), avail: after(/^(ITC Availability|Eligibility of ITC)$/i), reason: after(/^Reason$/i),
@@ -188,7 +188,7 @@
   function readIms(text, fileName) {
     const rows = csvRows(String(text).replace(/^﻿/, ''));
     if (!/IMS/i.test((rows[0] || []).join(' ')) && !/^IMS_/i.test(fileName || '')) throw new Error('this does not look like a file downloaded from IMS');
-    const hi = rows.findIndex(r => r.some(c => /^GSTIN of (supplier|ISD)$/i.test(c)));
+    const hi = rows.findIndex(r => r.some(c => /^GSTIN of (supplier|ISD|ECO|e-?commerce operator)$/i.test(c)));
     if (hi < 0) throw new Error('the heading row (GSTIN of Supplier …) was not found');
     const H = rows[hi].map(c => c.replace(/\s+/g, ' ').trim()), title = rows.slice(0, hi).map(r => r.join(' ')).join(' ');
     const col = re => H.findIndex(h => re.test(h));
@@ -236,8 +236,13 @@
       if (!info.gstin) { Object.assign(info, { gstin: fn.gstin, period: fn.period, fy: fn.fy, generated: info.generated || fn.generated }); info.fromName = true; } }
     if (!info.gstin && !Object.keys(sheets).some(sheetKind)) throw new Error('this does not look like a GSTR-2B downloaded from the GST portal (no "Read me" sheet and no B2B / CDNR sheets)');
     let records = [];
-    Object.keys(sheets).forEach(n => { records = records.concat(readSheet(n, sheets[n])); });
-    return { info, records, summary: readSummary(sheets) };
+    const unread = [];
+    Object.keys(sheets).forEach(n => { const got = readSheet(n, sheets[n]); records = records.concat(got);
+      if (got.length || /^(Read me|ITC Available|ITC not available|ITC Reversal|ITC Rejected)$/i.test(n)) return;
+      // a GSTIN-like value or an amount below the heading rows means the sheet has data that was not read
+      const cells = sheets[n] || {}, data = Object.keys(cells).filter(ref => rowOf(ref) >= 7 && /^\d{2}[A-Z]{5}\d{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/.test(str(cells[ref])));
+      if (data.length) unread.push(`${n} (${new Set(data.map(rowOf)).size} row(s))`); });
+    return { info, records, summary: readSummary(sheets), unread };
   }
 
   /* Several files of the same GSTR-2B (the portal splits a large GSTR-2B into parts): one data set.

@@ -34,6 +34,7 @@ async function loadFiles(files) {
     if (!/\.(xlsx|csv)$/i.test(f.name)) { msgs.push(['err', `${f.name}: choose the GSTR-2B Excel (.xlsx) or the IMS download (.csv) from the portal.`]); continue; }
     try { const data = /\.csv$/i.test(f.name) ? G2B.readIms(await f.text(), f.name) : G2B.read(LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())), f.name);
       if (!data.records.length && !data.summary.length) throw new Error('no invoices or notes were found in the file');
+      if (data.unread && data.unread.length) msgs.push(['err', `${f.name}: sheet(s) with records that could not be read – ${data.unread.join(', ')}. Their ITC is NOT included; please send the file to have the tool updated.`]);
       fresh.push({ file: f.name, data }); }
     catch (e) { msgs.push(['err', `${f.name}: ${e.message || e}`]); }
   }
