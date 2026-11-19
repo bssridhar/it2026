@@ -22,7 +22,7 @@ folder – `index.html`, `home-config.js`, `shared/` and the tool folders – to
 | `trust/` | Trust Formation: deed, NOC, resolution, PAN and Form 104 data sheets, formalities checklist |
 | `pfesi/` | EPF and ESI monthly returns: ECR file, ESIC upload file (.xls), registers, summary and reconciliation |
 | `26as-ais-tis/` | Form 26AS · AIS · TIS Consolidator: income consolidation workbook (Excel) for the computation of total income, TDS credit, review points |
-| `roc/` | ROC Compliance: appointment of a director (private company) – client checklist, procedure and due dates, notices, resolutions, DIR-2, DIR-8, MBP-1, appointment letter, DIR-12 data sheet, register entry |
+| `roc/` | ROC Compliance: appointment of directors, up to 5 at a time (private company) – client checklist, procedure and due dates, notices, resolutions, DIR-2, DIR-8, MBP-1, appointment letter, DIR-12 data sheet, register entry |
 | `depn/` | Depreciation under Schedule II, Companies Act, 2013: single-asset rate and pro rata working, life-time schedule, fixed asset register (Excel import) with audit checks, PPE note, disclosure |
 | `gst2b/` | GSTR-2B Analyser: reads the GSTR-2B Excel, sorts ITC into eligible / blocked 17(5) / insurance-motor / POS / RCM / others with reasons, amendments, GSTR-3B figures, Excel working |
 | `gst9/` | GSTR-9 / 9C Working: reads GSTR-1 and GSTR-3B PDFs (1 to 12 months) – GSTR Recon sheet with formulas, month-wise data, GSTR-9 draft, books-vs-returns summary, filing dates, checks |

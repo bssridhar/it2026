@@ -119,7 +119,7 @@ def build():
     tag(d, "{#p}"); para(d, "{text}", after=8); tag(d, "{/p}")
     tag(d, "{#pl}"); para(d, "{text}", align="l", after=4); tag(d, "{/pl}")
     tag(d, "{#pr}"); para(d, "{text}", align="r", after=4); tag(d, "{/pr}")
-    tag(d, "{#pb}"); para(d, "{text}", bold=True, after=8); tag(d, "{/pb}")
+    tag(d, "{#pb}"); para(d, "{text}", bold=True, after=8, keep=True); tag(d, "{/pb}")
     tag(d, "{#res}"); para(d, "{text}", after=8, left=0.5); tag(d, "{/res}")
     tag(d, "{#n}"); para(d, "{num}\t{text}", left=1.0, hanging=1.0, after=5, tab=1.0); tag(d, "{/n}")
     tag(d, "{#n2}"); para(d, "{num}\t{text}", left=2.0, hanging=1.0, after=4, tab=2.0); tag(d, "{/n2}")

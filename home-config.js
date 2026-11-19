@@ -152,7 +152,7 @@ window.HOME_CONFIG = {
       category: "Company Law and Audit",
       path: "roc/index.html",
       status: "available",
-      description: "Appointment of a director in a private company: list of information and documents for the client (copy / PDF / e-mail), procedure with due dates, Board and general meeting notices and resolutions, DIR-2, DIR-8, MBP-1, appointment letter, DIR-12 data sheet and register entry – from an Excel template.",
+      description: "Appointment of directors (one to five at a time) in a private company: list of information and documents for the client (copy / PDF / e-mail), procedure with due dates, Board and general meeting notices and resolutions, DIR-2, DIR-8, MBP-1, appointment letter, DIR-12 data sheet and register entry – from an Excel template.",
       added: "2026-11-19"
     },
     {

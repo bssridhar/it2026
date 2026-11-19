@@ -85,7 +85,7 @@ table.t td.wrapc{white-space:normal}
 <main>
   <a class="home" href="../index.html">&larr; All tools</a>
   <h1>ROC Compliance</h1>
-  <p class="sub">Procedure, list of information and documents for the client, resolutions, notices, consent and disclosure forms, data sheet for the e-form and register entries – Companies Act, 2013. Starting with the appointment of a director in a private limited company.</p>
+  <p class="sub">Procedure, list of information and documents for the client, resolutions, notices, consent and disclosure forms, data sheet for the e-form and register entries – Companies Act, 2013. Starting with the appointment of directors (one to five at a time) in a private limited company.</p>
 
   <div class="card">
     <div class="grid">
@@ -106,7 +106,8 @@ table.t td.wrapc{white-space:normal}
     <h2>1. Information and documents required from the client</h2>
     <div class="grid" style="margin-bottom:8px">
       <div><label>Manner of appointment</label><select data-f="mode" id="reqMode"></select></div>
-      <div><label>Does the proposed director have a DIN?</label><select data-f="dir.hasDin" id="reqDin"></select></div>
+      <div><label>Number of directors to be appointed</label><select id="numDirs"></select></div>
+      <div><label>Do all the proposed directors have a DIN?</label><select id="allDin"><option value="yes">Yes</option><option value="no">No – one or more need a DIN</option></select></div>
     </div>
     <pre class="req" id="reqText"></pre>
     <div class="bar"><button type="button" class="primary" id="reqCopy">Copy the text</button><button type="button" id="reqPdf">PDF (to attach to an e-mail)</button><button type="button" id="reqDoc">Word</button><a class="link" id="reqMail" href="#">Open in e-mail</a></div>
@@ -116,10 +117,6 @@ table.t td.wrapc{white-space:normal}
   <section class="card">
     <h2>2. Details <span class="pill" id="fillPill"></span></h2>
     <div id="form"></div>
-    <details class="sec" open><summary>Other companies / firms / bodies in which the director is interested (for MBP-1 and DIR-8)</summary>
-      <div class="tw" style="margin-top:8px;max-height:none"><table class="t" id="intT"></table></div>
-      <button type="button" class="link" id="addInt">+ Add a row</button>
-    </details>
   </section>
 
   <section class="card">
