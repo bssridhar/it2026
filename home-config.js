@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: ROC Compliance – appointment of a director: client checklist, procedure, resolutions, DIR-2 / DIR-8 / MBP-1, DIR-12 data sheet.",
     "New: DSC Register – validity of clients’ DSCs, token in / out, renewal reminders; one register file in a shared folder.",
     "New: GSTR-2B Analyser – sorts the ITC in GSTR-2B (blocked credit, insurance / motor vehicle, place of supply, RCM) and gives the GSTR-3B figures.",
     "New: GSTR-9 / 9C Working – reads GSTR-1 and GSTR-3B PDFs and prepares the GSTR reconciliation, GSTR-9 draft and 9C summary in Excel.",
@@ -144,6 +145,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Reads the GSTR-1 and GSTR-3B PDFs for the year (any number of months) and prepares the GSTR reconciliation working with formulas, month-wise data, a GSTR-9 draft (Tables 4 to 9), books-vs-returns summary for 9C, filing dates and checks.",
       added: "2026-11-13"
+    },
+    {
+      id: "roc",
+      title: "ROC Compliance",
+      category: "Company Law and Audit",
+      path: "roc/index.html",
+      status: "available",
+      description: "Appointment of a director in a private company: list of information and documents for the client (copy / PDF / e-mail), procedure with due dates, Board and general meeting notices and resolutions, DIR-2, DIR-8, MBP-1, appointment letter, DIR-12 data sheet and register entry – from an Excel template.",
+      added: "2026-11-19"
     },
     {
       id: "depn",

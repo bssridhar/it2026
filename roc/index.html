@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROC Compliance</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.84rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--head);font-weight:600;position:sticky;top:0;z-index:1}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tfoot td{font-weight:700;background:var(--head);position:sticky;bottom:0}
+table.t input,table.t select{padding:3px 5px;font-size:.84rem}
+table.t input.w-s{width:60px} table.t input.w-m{width:110px} table.t input.w-l{width:190px} table.t input.num{text-align:right;width:90px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpis div{background:var(--head);border-radius:8px;padding:10px 12px}
+.kpis span{display:block;font-size:.78rem;color:var(--muted)}
+.kpis b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.outs button{text-align:left;padding:10px 12px}
+.outs button small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.outs button.primary small{color:inherit;opacity:.85}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 16px}
+.tabs button{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:none;color:var(--muted);padding:8px 14px;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--card);border-color:var(--line);color:var(--ink);margin-bottom:-1px}
+.pane[hidden]{display:none}
+.steps{margin:0;padding-left:20px;font-size:.9rem}
+.steps li{margin:3px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.75rem;background:var(--head);color:var(--muted);margin-left:6px}
+td.c{background:var(--lock)}
+.radio{display:flex;gap:16px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:flex-start;color:var(--ink);font-size:.9rem;margin:0}
+.radio input{width:auto;margin-top:3px}
+.secgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px}
+.secgrid .full{grid-column:1/-1}
+details.sec{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 10px;background:var(--card)}
+details.sec>summary{cursor:pointer;font-weight:600}
+.doclist label{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:.9rem;margin:4px 0}
+.doclist input{width:auto;margin-top:3px}
+.doclist .grp{font-weight:700;margin:10px 0 2px;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+pre.req{white-space:pre-wrap;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;font:13px/1.5 system-ui,sans-serif;max-height:360px;overflow:auto}
+table.t td.wrapc{white-space:normal}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>ROC Compliance</h1>
+  <p class="sub">Procedure, list of information and documents for the client, resolutions, notices, consent and disclosure forms, data sheet for the e-form and register entries – Companies Act, 2013. Starting with the appointment of a director in a private limited company.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div class="full"><label>Compliance</label><select id="event"></select></div>
+    </div>
+    <div class="bar" style="margin-top:12px">
+      <button type="button" class="primary" id="upXlsx">Import details (Excel)</button><input type="file" id="xlsxFile" accept=".xlsx" hidden>
+      <button type="button" id="dlXlsx">Download the Excel template</button>
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button><input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" id="newCase" class="danger">New case</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <section class="card">
+    <h2>1. Information and documents required from the client</h2>
+    <div class="grid" style="margin-bottom:8px">
+      <div><label>Manner of appointment</label><select data-f="mode" id="reqMode"></select></div>
+      <div><label>Does the proposed director have a DIN?</label><select data-f="dir.hasDin" id="reqDin"></select></div>
+    </div>
+    <pre class="req" id="reqText"></pre>
+    <div class="bar"><button type="button" class="primary" id="reqCopy">Copy the text</button><button type="button" id="reqPdf">PDF (to attach to an e-mail)</button><button type="button" id="reqDoc">Word</button><a class="link" id="reqMail" href="#">Open in e-mail</a></div>
+    <p class="hint">The list follows the choices above and the details entered below; it can be sent before the details are available.</p>
+  </section>
+
+  <section class="card">
+    <h2>2. Details <span class="pill" id="fillPill"></span></h2>
+    <div id="form"></div>
+    <details class="sec" open><summary>Other companies / firms / bodies in which the director is interested (for MBP-1 and DIR-8)</summary>
+      <div class="tw" style="margin-top:8px;max-height:none"><table class="t" id="intT"></table></div>
+      <button type="button" class="link" id="addInt">+ Add a row</button>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>3. Checks</h2>
+    <div id="issues" class="msgs"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Procedure and timeline</h2>
+    <div class="tw" style="max-height:none"><table class="t" id="steps"></table></div>
+    <p class="hint">From the Companies Act, 2013 and the rules as understood by the office – check against the current text, the Articles of the company and the e-forms on the MCA portal.</p>
+  </section>
+
+  <section class="card">
+    <h2>5. Documents</h2>
+    <div class="bar" style="margin-bottom:8px"><label style="display:flex;gap:6px;align-items:center;margin:0;color:var(--ink)"><input type="checkbox" id="letterhead" style="width:auto"> Print resolutions, notices and letters on the company's letter-head</label></div>
+    <div class="doclist" id="docs"></div>
+    <div class="bar" style="margin-top:10px"><button type="button" class="primary" id="dlZip">Download the selected documents (ZIP of Word files)</button><button type="button" id="selAll">Select all</button><button type="button" id="selNone">Select none</button></div>
+    <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+  </section>
+</main>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../home-config.js"></script>
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/exceljs.min.js"></script>
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="lib/templates.js"></script>
+<script src="lib/compose.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
