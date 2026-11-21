@@ -9,30 +9,34 @@ window.addEventListener('error', function (e) { var s = e.target; if (!s || s.ta
     document.body.insertBefore(d, document.body.firstChild); };
   if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cost Inflation Index</title>
+<title>Capital Gains Calculation</title>
 <style>
-:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--hi:#fff3c4}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--hi:#3d3410}}
-:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--hi:#3d3410}
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--hi:#fff3c4;--tip-bg:#e8f0fb;--tip:#1f4f8f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--hi:#3d3410;--tip-bg:#172a42;--tip:#9cc3f2}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--hi:#3d3410;--tip-bg:#172a42;--tip:#9cc3f2}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-main{max-width:1100px;margin:0 auto;padding:20px 16px 90px}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 90px}
 .home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
 h1{font-size:1.45rem;margin:4px 0}
 .sub{color:var(--muted);margin:0 0 16px}
-.cols{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
-@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.cols{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
-.card h2{font-size:1.05rem;margin:0 0 12px}
-.card h3{font-size:.95rem;margin:14px 0 6px}
+.card h2{font-size:1.1rem;margin:0 0 12px}
+.card h3{font-size:.98rem;margin:16px 0 6px}
+.card h4{font-size:.9rem;margin:12px 0 4px;color:var(--muted)}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0 0 12px}
+legend{font-weight:600;font-size:.9rem;padding:0 6px}
 table.t{border-collapse:collapse;width:100%;font-size:.9rem}
 table.t th,table.t td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 table.t thead th{background:var(--head);font-weight:600}
 #ciiTable thead th{position:sticky;top:0}
 table.t td.n,table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 table.t tr.hi td{background:var(--hi)}
-.tw{max-height:none;overflow:auto}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px 14px}
+table.t tr.best td{background:var(--ok-bg)}
+.tw{overflow:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px}
 .full{grid-column:1/-1}
 label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
 .req{color:var(--err)}
@@ -45,48 +49,78 @@ button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
 button.danger{color:var(--err)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .msgs div{padding:9px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
-.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--head);color:var(--ink)} .m-tip{background:var(--tip-bg);color:var(--tip)}
 .notes{font-size:.86rem;color:var(--ink);padding-left:18px;margin:0}
 .notes li{margin:0 0 6px}
-.calc-out table.t td:first-child{width:60%}
+.calc-out table.t td:first-child{width:55%}
+.calc-out table.cmp td:first-child{width:auto;min-width:220px}
+.calc-out table.t td:first-child{min-width:240px}
 .calc-out .tot td{font-weight:700;border-top:2px solid var(--ink)}
-.formula{font-family:Consolas,Menlo,monospace;font-size:.85rem;color:var(--muted)}
+.formula{font-family:Consolas,Menlo,monospace;font-size:.82rem;color:var(--muted)}
 .src{font-size:.78rem;color:var(--muted)}
+.rhead{text-align:center;margin:0 0 14px}
+.rhead .t1{font-size:1.3rem;font-weight:700}
+.rhead .t2{color:var(--muted);font-size:.88rem}
+.banner{border:2px solid;border-radius:10px;padding:12px 16px;margin:12px 0;font-size:1.02rem}
+.banner b{font-size:1.08rem}
+.banner.no{border-color:var(--err);background:var(--err-bg);color:var(--err)}
+.banner.yes{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;background:var(--head);font-size:.8rem}
+details.opt{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0 0 10px}
+details.opt summary{cursor:pointer;font-weight:600}
+.act{font-weight:700;color:var(--ok)}
 .print-only{display:none}
 @media print{
-  body{background:#fff;color:#000;font-size:11pt}
-  .home,.no-print,#tableCard,#infoCard{display:none!important}
+  body{background:#fff;color:#000;font-size:10.5pt}
+  .home,.no-print,#tableCard,#infoCard,h1,.sub{display:none!important}
   .cols{display:block}
   .card{border:none;padding:0}
-  main{padding:0}
+  main{padding:0;max-width:none}
   .print-only{display:block}
+  details.opt{break-inside:avoid}
+  h3{break-after:avoid}
+  .banner{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
 <body>
 <main>
   <a class="home" href="../index.html">&larr; All tools</a>
-  <h1>Cost Inflation Index</h1>
-  <p class="sub">CII table (base year 2001-02 = 100) and an indexed cost calculator with the working shown step by step.</p>
+  <h1>Capital Gains Calculation</h1>
+  <p class="sub">Capital gain with and without indexation, the tax on it, and the reinvestment options (house, bonds, both) with the deadline dates – sections of the Income-tax Act, 1961 and the Income-tax Act, 2025. CII table (base 2001-02 = 100) alongside.</p>
 
   <div class="cols">
     <section class="card" id="tableCard">
       <h2>Cost Inflation Index</h2>
       <div class="tw"><table class="t" id="ciiTable"><thead><tr><th>FY</th><th class="n">CII</th><th class="n" title="CII of the latest year ÷ CII of this year">Factor to <span id="latestFy"></span></th></tr></thead><tbody></tbody></table></div>
-      <p class="hint">Factor = CII of the latest year ÷ CII of that year: a cost of Rs. 1 in that year is Rs. "factor" indexed to the latest year.</p>
+      <p class="hint">Factor = CII of the latest year ÷ CII of that year.</p>
       <p class="src">Source: Income Tax Department, Cost Inflation Index table (incometaxindia.gov.in). 2025-26: Notification No. 70/2025 dated 01-07-2025. 2026-27: Notification No. 85/2026 dated 15-07-2026.</p>
     </section>
 
     <div>
       <section class="card no-print">
-        <h2>Indexed cost calculator</h2>
-        <div class="grid">
+        <h2>Capital Gains Calculation</h2>
+        <fieldset><legend>Assessee</legend><div class="grid">
+          <div><label>Title</label><select data-f="sal"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>M/s.</option></select></div>
+          <div style="grid-column:span 2"><label>Name of the Assessee <span class="req">*</span></label><input data-f="name" placeholder="as in the PAN"></div>
+          <div><label>PAN</label><input data-f="pan" maxlength="10" style="text-transform:uppercase" placeholder="optional"></div>
+          <div><label>Status</label><select data-f="seller"><option value="res">Resident individual / HUF</option><option value="other">Others (non-resident, firm, company, etc.)</option></select></div>
+          <div class="ind"><label>Tax regime</label><select data-f="regime"><option value="new">New regime (s.115BAC / 2025 Act)</option><option value="old">Old regime</option></select></div>
+          <div class="ind"><label>Age (old regime)</label><select data-f="age"><option value="lt60">Below 60</option><option value="60-80">60 to 80</option><option value="80+">80 and above</option></select></div>
+          <div><label>Other income of the year (Rs.)</label><input type="number" min="0" step="1" data-f="other" placeholder="income other than this gain"><p class="hint">For the slab tax, the basic exemption shortfall and the surcharge.</p></div>
+          <div class="oth"><label>Surcharge rate on this tax (%)</label><input type="number" min="0" step="0.01" data-f="srate" placeholder="e.g. 0, 7, 12"></div>
+          <div class="oth"><label>Normal rate of tax (%)</label><input type="number" min="0" step="0.01" data-f="orate" placeholder="30"><p class="hint">For a short-term gain taxed at normal rates.</p></div>
+          <div><label>Due date of the return</label><select data-f="due"><option value="jul">31 July after the year</option><option value="aug">31 August after the year</option><option value="oct">31 October (audit cases)</option><option value="custom">Other date…</option></select><p class="hint">Check the due date applicable to the assessee and any extension.</p></div>
+          <div id="dueWrap" hidden><label>Due date (as applicable)</label><input type="date" data-f="dueDate"></div>
+        </div></fieldset>
+
+        <fieldset><legend>Asset sold</legend><div class="grid">
           <div><label>Asset</label><select data-f="asset">
             <option value="land">Land or building (or both)</option>
             <option value="listed">Listed shares / equity-oriented MF units</option>
             <option value="unlisted">Unlisted shares</option>
             <option value="other">Other capital asset (e.g. gold, jewellery)</option></select></div>
-          <div><label>Seller</label><select data-f="seller"><option value="res">Resident individual / HUF</option><option value="other">Others</option></select></div>
+          <div id="resHouseWrap"><label>Is the property sold a residential house?</label><select data-f="resHouse"><option value="yes">Yes – residential house (s.54 / s.82)</option><option value="no">No – plot / commercial (s.54F / s.86)</option></select></div>
           <div><label>Date of purchase <span class="req">*</span></label><input type="date" data-f="pdate"></div>
           <div><label>Amount of purchase (Rs.) <span class="req">*</span></label><input type="number" min="0" step="1" data-f="pamt"></div>
           <div><label>Date of sale <span class="req">*</span></label><input type="date" data-f="sdate"></div>
@@ -96,17 +130,29 @@ button.danger{color:var(--err)}
           <div id="fmvWrap" class="full" hidden><div class="grid">
             <div><label>Fair market value as on 01-04-2001 (Rs.)</label><input type="number" min="0" step="1" data-f="fmv"></div>
             <div id="fmvSdvWrap"><label>Stamp duty value as on 01-04-2001 (Rs.)</label><input type="number" min="0" step="1" data-f="fmvsdv" placeholder="optional"></div>
-          </div><p class="hint">Purchased before 01-04-2001: the cost may be taken as the FMV on 01-04-2001 at the seller's option; for land or building the FMV cannot exceed the stamp duty value on that date. The tool takes the higher of cost and (capped) FMV.</p></div>
+          </div><p class="hint">Purchased before 01-04-2001: the cost may be taken as the FMV on 01-04-2001; for land or building the FMV cannot exceed the stamp duty value on that date. The tool takes the higher of cost and (capped) FMV.</p></div>
         </div>
-        <h3>Cost of improvement</h3>
+        <h4>Cost of improvement</h4>
         <table class="t" id="imp"><thead><tr><th>Date</th><th class="n">Amount (Rs.)</th><th></th></tr></thead><tbody></tbody></table>
         <button type="button" class="link" id="addImp">+ Add improvement</button>
-        <div class="bar" style="margin-top:14px">
+        </fieldset>
+
+        <fieldset><legend>Set-off of capital losses (optional)</legend><div class="grid">
+          <div><label>Short-term capital loss available (Rs.)</label><input type="number" min="0" step="1" data-f="stcl" placeholder="current year / brought forward"></div>
+          <div><label>Long-term capital loss available (Rs.)</label><input type="number" min="0" step="1" data-f="ltcl" placeholder="against long-term gain only"></div>
+        </div></fieldset>
+
+        <fieldset id="planBox"><legend>Tax planning – amounts proposed to be invested</legend><div class="grid">
+          <div id="houseWrap"><label>Investment in residential house (Rs.)</label><input type="number" min="0" step="1" data-f="house" placeholder="purchase / construction cost"><p class="hint" id="houseHint"></p></div>
+          <div id="bondsWrap"><label>Investment in capital gains bonds (Rs.)</label><input type="number" min="0" max="5000000" step="1" data-f="bonds" placeholder="maximum 50,00,000"><p class="hint">s.54EC / s.85 – land or building only; maximum Rs. 50 lakh.</p></div>
+        </div><p class="hint" id="planHint"></p></fieldset>
+
+        <div class="bar" style="margin-top:6px">
           <button type="button" class="primary" id="go">Calculate</button>
-          <button type="button" id="print">Print working</button>
+          <button type="button" id="print">Print / PDF</button>
           <button type="button" id="copy">Copy working</button>
           <span style="flex:1"></span>
-          <input data-f="ref" placeholder="Case / client reference" style="width:200px">
+          <input data-f="ref" placeholder="Case / client reference" style="width:190px">
           <button type="button" id="saveCase">Save case file</button>
           <button type="button" id="openCase">Open case file</button>
           <input type="file" id="caseFile" accept=".json" hidden>
@@ -115,39 +161,34 @@ button.danger{color:var(--err)}
         <div id="msgs" class="msgs" style="margin-top:10px"></div>
       </section>
 
-      <section class="card calc-out" id="out" hidden></section>
-
       <section class="card" id="infoCard">
         <h2>Points to note</h2>
         <ul class="notes">
-          <li><b>Formula:</b> Indexed cost of acquisition = Cost of acquisition × CII of the year of transfer ÷ CII of the year in which the asset was first held by the seller or 2001-02, whichever is later. Indexed cost of improvement = Cost of improvement × CII of the year of transfer ÷ CII of the year of improvement. (Section 48, Explanation, Income-tax Act, 1961; section 72, Income-tax Act, 2025.)</li>
-          <li><b>Base year:</b> 2001-02 = 100 from AY 2018-19, when the Finance Act, 2017 moved the base year from 1981-82. For assets acquired before 01-04-2001 the cost may be taken as the fair market value on 01-04-2001 (section 55(2)(b), Income-tax Act, 1961); improvements made before 01-04-2001 are ignored.</li>
-          <li><b>Transfers on or after 23-07-2024:</b> the Finance (No. 2) Act, 2024 withdrew indexation for long-term capital gains and set the rate at 12.5%. For land or building acquired before 23-07-2024 and transferred by a resident individual or HUF, the tax is the lower of 12.5% without indexation and 20% with indexation (proviso to section 112(1), Income-tax Act, 1961).</li>
-          <li><b>Long-term:</b> for transfers on or after 23-07-2024, listed securities and units held for more than 12 months, and other assets held for more than 24 months. Before that date: 12 months for listed securities and equity-oriented units, 24 months for unlisted shares and immovable property, 36 months for other assets.</li>
-          <li><b>No indexation in any case</b> for long-term gains on listed equity shares and equity-oriented units taxed under section 112A (cost may be stepped up to the FMV on 31-01-2018 instead). Units of specified (debt) mutual funds acquired on or after 01-04-2023 are short-term regardless of the period of holding (section 50AA).</li>
-          <li><b>Income-tax Act, 2025:</b> applies from 01-04-2026 ("tax year" in place of "previous year" and "assessment year"). The CII for 2026-27 (384) was notified under it.</li>
-          <li>The calculator ignores surcharge, health and education cess, exemptions (sections 54, 54EC, 54F, etc.) and the adjustment against the basic exemption limit. Verify with the Act before relying on the result.</li>
+          <li><b>Indexed cost</b> = cost × CII of the year of transfer ÷ CII of the year of acquisition (or 2001-02, if later); improvement likewise from the year of improvement (Explanation to s.48 of the 1961 Act; s.72 of the 2025 Act). Improvements before 01-04-2001 are ignored.</li>
+          <li><b>Transfers on or after 23-07-2024:</b> long-term gains at 12.5% without indexation. For land or building acquired before 23-07-2024 and transferred by a resident individual or HUF, the tax is the lower of 12.5% without indexation and 20% with indexation (proviso to s.112(1)). Transfers before 23-07-2024: 20% with indexation.</li>
+          <li><b>Long-term:</b> for transfers on or after 23-07-2024, listed securities and units held for more than 12 months, other assets for more than 24 months. Before that date: 12 months for listed securities, 24 months for unlisted shares and immovable property, 36 months for others.</li>
+          <li><b>Listed equity (s.112A / s.198):</b> 12.5% above Rs. 1.25 lakh from 23-07-2024 (10% above Rs. 1 lakh earlier); short-term (s.111A / s.196) 20% (15% earlier). No indexation.</li>
+          <li><b>Surcharge</b> on these gains is limited to 15%; health and education cess 4%. For others (firms, companies, non-residents) enter the surcharge rate. Marginal relief is not worked out.</li>
+          <li><b>Income-tax Act, 2025</b> applies from 01-04-2026 ("tax year"). Section numbers of the 2025 Act are taken from the published concordance tables – verify them with the Act / CBDT concordance before quoting.</li>
+          <li>The working is based on the figures entered; verify with the Act, the rules and the facts before relying on it.</li>
         </ul>
       </section>
     </div>
   </div>
+  <section class="card calc-out" id="out" hidden></section>
 </main>
 
+<script src="lib/cg.js"></script>
 <script>
 (function(){
 "use strict";
-/* Cost Inflation Index, base 2001-02 = 100 (Income Tax Department table; 2026-27 per Notification No. 85/2026 dated 15-07-2026) */
-const CII = { 2001:100, 2002:105, 2003:109, 2004:113, 2005:117, 2006:122, 2007:129, 2008:137, 2009:148, 2010:167, 2011:184, 2012:200,
-  2013:220, 2014:240, 2015:254, 2016:264, 2017:272, 2018:280, 2019:289, 2020:301, 2021:317, 2022:331, 2023:348, 2024:363, 2025:376, 2026:384 };
-const YEARS = Object.keys(CII).map(Number), FIRST = YEARS[0], LAST = YEARS[YEARS.length - 1];
+const { CII, YEARS, LAST, SECTIONS, fyLabel } = CG;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fyLabel = y => `${y}-${String((y + 1) % 100).padStart(2, '0')}`;
-const fyOf = iso => { const [y, m] = iso.split('-').map(Number); return m >= 4 ? y : y - 1; };
 const dmy = iso => iso ? iso.split('-').reverse().join('-') : '';
 const rs = n => (n < 0 ? '-' : '') + 'Rs. ' + Math.round(Math.abs(n)).toLocaleString('en-IN');
 const num = n => Math.round(n).toLocaleString('en-IN');
-const CUTOFF = '2024-07-23';
+const N = v => Number(v) || 0;
 
 /* ---------- table ---------- */
 $('#latestFy').textContent = fyLabel(LAST);
@@ -155,24 +196,31 @@ $('#ciiTable tbody').innerHTML = YEARS.map(y => `<tr data-y="${y}"><td>${fyLabel
 
 /* ---------- state ---------- */
 const LS = 'cii-calc-v1';
-const blank = () => ({ asset: 'land', seller: 'res', pdate: '', pamt: '', sdate: '', samt: '', exp: '', sdv: '', fmv: '', fmvsdv: '', ref: '', imps: [] });
+const blank = () => ({ sal: 'Mr.', name: '', pan: '', seller: 'res', regime: 'new', age: 'lt60', other: '', srate: '', orate: '', due: 'jul', dueDate: '',
+  asset: 'land', resHouse: 'yes', pdate: '', pamt: '', sdate: '', samt: '', exp: '', sdv: '', fmv: '', fmvsdv: '', stcl: '', ltcl: '', house: '', bonds: '', ref: '', imps: [] });
 let c; try { c = Object.assign(blank(), JSON.parse(localStorage.getItem(LS) || 'null') || {}); } catch (e) { c = blank(); }
 const save = () => { try { localStorage.setItem(LS, JSON.stringify(c)); } catch (e) {} };
 
 function bind(){
-  document.querySelectorAll('[data-f]').forEach(el => { el.value = c[el.dataset.f] ?? ''; el.oninput = el.onchange = () => { c[el.dataset.f] = el.value; save(); vis(); }; });
+  document.querySelectorAll('[data-f]').forEach(el => { el.value = c[el.dataset.f] ?? ''; el.oninput = el.onchange = () => { c[el.dataset.f] = el.dataset.f === 'pan' ? el.value.toUpperCase() : el.value; save(); vis(); }; });
   renderImps(); vis();
 }
 function vis(){
+  const land = c.asset === 'land', res = c.seller === 'res';
   $('#fmvWrap').hidden = !(c.pdate && c.pdate < '2001-04-01');
-  $('#fmvSdvWrap').hidden = c.asset !== 'land';
-  $('#sdvWrap').hidden = c.asset !== 'land';
+  $('#fmvSdvWrap').hidden = !land; $('#sdvWrap').hidden = !land; $('#resHouseWrap').hidden = !land;
+  document.querySelectorAll('.ind').forEach(e => e.hidden = !res);
+  document.querySelectorAll('.oth').forEach(e => e.hidden = res);
+  $('#dueWrap').hidden = c.due !== 'custom';
+  $('#houseWrap').hidden = !res; $('#bondsWrap').hidden = !land;
+  $('#houseHint').textContent = land && c.resHouse === 'yes' ? 's.54 / s.82 – exemption up to the amount invested (cap Rs. 10 crore).' : 's.54F / s.86 – exemption in proportion to the net consideration invested (cap Rs. 10 crore).';
+  $('#planHint').textContent = !res && !land ? 'No reinvestment exemption for this asset and status – only Option 1 (pay the tax) applies.' : 'Leave blank to see only the tax payable; the options and the amount needed for full exemption are worked out in the report.';
 }
 function renderImps(){
   const tb = $('#imp tbody'); tb.innerHTML = '';
   c.imps.forEach((im, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><input type="date" value="${esc(im.date)}" data-k="date"></td><td><input type="number" min="0" step="1" value="${esc(im.amt)}" data-k="amt" style="text-align:right"></td><td><button type="button" class="link danger">✕</button></td>`;
+    tr.innerHTML = `<td><input type="date" value="${esc(im.date)}" data-k="date"></td><td><input type="number" min="0" step="1" value="${esc(im.amt)}" data-k="amt" style="text-align:right"></td><td><button type="button" class="link danger" title="Remove">✕</button></td>`;
     tr.addEventListener('input', e => { const k = e.target.dataset.k; if (k) { im[k] = e.target.value; save(); } });
     tr.querySelector('button').onclick = () => { c.imps.splice(i, 1); renderImps(); save(); };
     tb.appendChild(tr);
@@ -181,127 +229,125 @@ function renderImps(){
 }
 $('#addImp').onclick = () => { c.imps.push({ date: '', amt: '' }); renderImps(); save(); };
 
-/* ---------- calculation ---------- */
-function addMonths(iso, m){ const [y, mo, d] = iso.split('-').map(Number); const t = new Date(Date.UTC(y, mo - 1 + m, d)); if (t.getUTCDate() !== d) t.setUTCDate(0); return t.toISOString().slice(0, 10); }
-function heldFor(a, b){
-  const [y1, m1, d1] = a.split('-').map(Number), [y2, m2, d2] = b.split('-').map(Number);
-  let months = (y2 - y1) * 12 + (m2 - m1); if (d2 < d1) months--;
-  const days = Math.round((Date.parse(b) - Date.parse(addMonths(a, months))) / 864e5);
-  return { months, days, totalDays: Math.round((Date.parse(b) - Date.parse(a)) / 864e5) };
-}
-function ltLimit(asset, sdate){
-  const after = sdate >= CUTOFF;
-  if (asset === 'listed') return 12;
-  if (asset === 'land' || asset === 'unlisted') return 24;
-  return after ? 24 : 36;
-}
-function calculate(scroll = true){
-  const errs = [], N = v => Number(v) || 0;
-  if (!c.pdate) errs.push('Enter the date of purchase.');
-  if (!c.sdate) errs.push('Enter the date of sale.');
-  if (!(N(c.pamt) > 0) && !(N(c.fmv) > 0)) errs.push('Enter the amount of purchase.');
-  if (!(N(c.samt) > 0)) errs.push('Enter the amount of sale.');
-  if (c.pdate && c.sdate && c.sdate <= c.pdate) errs.push('The date of sale must be after the date of purchase.');
-  const sfy = c.sdate ? fyOf(c.sdate) : 0;
-  if (c.sdate && sfy > LAST) errs.push(`The CII for ${fyLabel(sfy)} is not in the table (latest: ${fyLabel(LAST)}). Add it when it is notified.`);
-  if (c.sdate && sfy < FIRST) errs.push('Sales before 01-04-2001 are not covered by this table (base year 2001-02).');
-  c.imps.forEach((im, i) => { if (N(im.amt) && !im.date) errs.push(`Improvement ${i + 1}: enter the date.`); if (im.date && c.sdate && (im.date > c.sdate || (c.pdate && im.date < c.pdate))) errs.push(`Improvement ${i + 1}: the date must be between purchase and sale.`); });
-  if (errs.length) { $('#msgs').innerHTML = errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); $('#out').hidden = true; return; }
-  $('#msgs').innerHTML = '';
-
-  const pfy = fyOf(c.pdate), baseFy = Math.max(pfy, FIRST), ciiS = CII[sfy], ciiP = CII[baseFy];
-  const pre2001 = c.pdate < '2001-04-01';
-  let cost = N(c.pamt), costNote = 'Actual cost of purchase';
-  if (pre2001 && N(c.fmv) > 0) {
-    let fmv = N(c.fmv); let capNote = '';
-    if (c.asset === 'land' && N(c.fmvsdv) > 0 && fmv > N(c.fmvsdv)) { fmv = N(c.fmvsdv); capNote = ` (FMV ${rs(N(c.fmv))} limited to stamp duty value ${rs(fmv)})`; }
-    if (fmv > cost) { cost = fmv; costNote = `FMV as on 01-04-2001${capNote}, being higher than the actual cost of ${rs(N(c.pamt))}`; }
-    else costNote = `Actual cost, being higher than the FMV as on 01-04-2001 of ${rs(fmv)}${capNote}`;
-  }
-  const idxCost = cost * ciiS / ciiP;
-  const imps = c.imps.filter(im => N(im.amt) > 0).map(im => {
-    if (im.date < '2001-04-01') return { ...im, fy: fyOf(im.date), ignored: true, cost: N(im.amt), idx: 0 };
-    const fy = fyOf(im.date); return { ...im, fy, cost: N(im.amt), idx: N(im.amt) * ciiS / CII[fy] };
-  });
-  let full = N(c.samt), fullNote = 'Sale consideration';
-  if (c.asset === 'land' && N(c.sdv) > N(c.samt)) {
-    if (N(c.sdv) > N(c.samt) * 1.1) { full = N(c.sdv); fullNote = `Stamp duty value, as it exceeds 110% of the consideration of ${rs(N(c.samt))} (section 50C)`; }
-    else fullNote = `Sale consideration (stamp duty value ${rs(N(c.sdv))} is within 110% of it, section 50C)`;
-  }
-  const exp = N(c.exp);
-  const impCost = imps.filter(i => !i.ignored).reduce((a, i) => a + i.cost, 0), impIdx = imps.reduce((a, i) => a + i.idx, 0);
-  const gainIdx = full - exp - idxCost - impIdx, gainPlain = full - exp - cost - impCost;
-  const h = heldFor(c.pdate, c.sdate), lim = ltLimit(c.asset, c.sdate);
-  const longTerm = c.sdate > addMonths(c.pdate, lim);
-  const after = c.sdate >= CUTOFF;
-
-  let html = `<div class="print-only"><b>Indexed cost – working</b>${c.ref ? ' · ' + esc(c.ref) : ''}</div>
-  <h2>Working${c.ref ? ' – ' + esc(c.ref) : ''}</h2>
-  <table class="t"><tbody>
-    <tr><td>Date of purchase</td><td class="n">${dmy(c.pdate)} (FY ${fyLabel(pfy)})</td></tr>
-    <tr><td>Date of sale</td><td class="n">${dmy(c.sdate)} (FY ${fyLabel(sfy)}${sfy >= 2026 ? ', tax year under the Income-tax Act, 2025' : ''})</td></tr>
-    <tr><td>Period of holding</td><td class="n">${h.months} months ${h.days} days (${h.totalDays.toLocaleString('en-IN')} days)</td></tr>
-    <tr><td>Nature of the gain (held for more than ${lim} months?)</td><td class="n"><b>${longTerm ? 'Long-term' : 'Short-term'}</b></td></tr>
-  </tbody></table>
-  <h3>Indexed cost of acquisition</h3>
-  <table class="t"><tbody>
-    <tr><td>Cost of acquisition (${esc(costNote)})</td><td class="n">${rs(cost)}</td></tr>
-    <tr><td>CII of the year of sale (${fyLabel(sfy)})</td><td class="n">${ciiS}</td></tr>
-    <tr><td>CII of the year of purchase${pfy < FIRST ? ` (purchased in ${fyLabel(pfy)}; 2001-02 taken)` : ''} (${fyLabel(baseFy)})</td><td class="n">${ciiP}</td></tr>
-    <tr class="tot"><td>Indexed cost of acquisition<div class="formula">${num(cost)} × ${ciiS} ÷ ${ciiP}</div></td><td class="n">${rs(idxCost)}</td></tr>
+/* ---------- report ---------- */
+const NOTE = { warn: 'm-warn', info: 'm-info', tip: 'm-tip', ok: 'm-ok' };
+function optionTable(o, r){
+  const two = !!o.I, cols = two ? [o.A, o.I] : [o.A];
+  const row = (label, f, cls = '') => `<tr class="${cls}"><td>${label}</td>${cols.map(x => `<td class="n">${f(x)}</td>`).join('')}</tr>`;
+  const any = k => cols.some(x => x[k] > 0);
+  let h = `<table class="t"><thead><tr><th></th>${two ? '<th class="n">Without indexation</th><th class="n">With indexation</th>' : '<th class="n">Amount</th>'}</tr></thead><tbody>`;
+  h += row(`${r.longTerm ? 'Long-term' : 'Short-term'} capital gain`, x => rs(x.G));
+  if (any('s54')) h += row('Less: exemption – s.54 / s.82 (house)', x => rs(-x.s54));
+  if (any('s54F')) h += row(`Less: exemption – s.54F / s.86 (house)<div class="formula">gain × ${num(Math.min(o.H, r.netCons))} ÷ ${num(r.netCons)}</div>`, x => rs(-x.s54F));
+  if (any('s54EC')) h += row('Less: exemption – s.54EC / s.85 (bonds)', x => rs(-x.s54EC));
+  if (any('setoff')) h += row('Less: capital losses set off', x => rs(-x.setoff));
+  h += row('Taxable capital gain', x => rs(x.taxable), 'tot');
+  if (any('adj')) h += row('Less: unexhausted basic exemption limit', x => rs(-x.adj));
+  if (any('thr')) h += row('Less: exempt up to the threshold (s.112A / s.198)', x => rs(-x.thr));
+  if (r.kind === 'stcgSlab') h += row('Tax at normal rates on the gain', x => rs(x.base));
+  else h += row('Tax on the gain', x => `${num(x.net)} × ${x.rate}% = ${rs(x.base)}`);
+  h += `</tbody></table>`;
+  h += `<table class="t" style="margin-top:6px"><tbody>
+    ${two ? `<tr><td>Tax considered</td><td class="n"><b>${esc(o.basis)}</b></td></tr>` : ''}
+    <tr><td>Tax on the gain</td><td class="n">${rs(o.pick.base)}</td></tr>
+    <tr><td>Surcharge @ ${o.sr}%</td><td class="n">${rs(o.sur)}</td></tr>
+    <tr><td>Health and education cess @ 4%</td><td class="n">${rs(o.cess)}</td></tr>
+    <tr class="tot"><td>Tax payable on the capital gain</td><td class="n">${rs(o.total)}</td></tr>
+    ${o.id > 1 ? `<tr><td>Tax saved compared with Option 1</td><td class="n">${rs(o.saved)}</td></tr>` : ''}
   </tbody></table>`;
-  if (imps.length) {
-    html += `<h3>Indexed cost of improvement</h3><table class="t"><tbody>` + imps.map(i => i.ignored
+  return h;
+}
+function render(r){
+  const nm = `${esc(c.sal)} ${esc(c.name.trim())}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const ix = r.ix, two = ix.applicable;
+  let h = `<div class="rhead"><div class="t1">Capital Gain Calculation for ${nm}</div>
+    <div class="t2">${c.pan ? 'PAN: ' + esc(c.pan) + ' · ' : ''}${r.act === '2025' ? 'Tax year' : 'Financial year'} ${fyLabel(r.sfy)} · ${r.act === '2025' ? 'Income-tax Act, 2025' : 'Income-tax Act, 1961'}${c.ref ? ' · ' + esc(c.ref) : ''} · Date: ${dmy(today)}</div></div>`;
+  h += `<div class="banner ${two ? 'yes' : 'no'}">${two ? `<b>Indexation applicable</b> – ${esc(ix.reason)}.` : `<b>Indexation not applicable due to ${esc(ix.reason)}.</b> The capital gain is computed without indexation.`}</div>`;
+  h += `<h3>Facts</h3><table class="t"><tbody>
+    <tr><td>Asset</td><td class="n">${esc($('[data-f=asset]').selectedOptions[0].text)}${c.asset === 'land' ? (c.resHouse === 'yes' ? ' – residential house' : ' – not a residential house') : ''}</td></tr>
+    <tr><td>Status</td><td class="n">${c.seller === 'res' ? 'Resident individual / HUF' : 'Others'}</td></tr>
+    <tr><td>Date of purchase</td><td class="n">${dmy(c.pdate)} (FY ${fyLabel(r.pfy)})</td></tr>
+    <tr><td>Date of sale</td><td class="n">${dmy(c.sdate)} (${r.act === '2025' ? 'tax year' : 'FY'} ${fyLabel(r.sfy)})</td></tr>
+    <tr><td>Period of holding</td><td class="n">${r.hold.months} months ${r.hold.days} days (${r.hold.totalDays.toLocaleString('en-IN')} days)</td></tr>
+    <tr><td>Nature of the gain (held for more than ${r.lim} months?)</td><td class="n"><b>${r.longTerm ? 'Long-term' : 'Short-term'}</b></td></tr>
+    <tr><td>Rate of tax</td><td class="n">${esc(r.rateText)}</td></tr>
+  </tbody></table>`;
+  if (two) {
+    h += `<h3>Indexed cost of acquisition</h3><table class="t"><tbody>
+      <tr><td>Cost of acquisition (${esc(r.costNote)})</td><td class="n">${rs(r.cost)}</td></tr>
+      <tr><td>CII of the year of sale (${fyLabel(r.sfy)})</td><td class="n">${r.ciiS}</td></tr>
+      <tr><td>CII of the year of purchase${r.pfy < r.baseFy ? ` (purchased in ${fyLabel(r.pfy)}; 2001-02 taken)` : ''} (${fyLabel(r.baseFy)})</td><td class="n">${r.ciiP}</td></tr>
+      <tr class="tot"><td>Indexed cost of acquisition<div class="formula">${num(r.cost)} × ${r.ciiS} ÷ ${r.ciiP}</div></td><td class="n">${rs(r.idxCost)}</td></tr></tbody></table>`;
+    if (r.imps.length) h += `<h3>Indexed cost of improvement</h3><table class="t"><tbody>` + r.imps.map(i => i.ignored
       ? `<tr><td>${dmy(i.date)} – ${rs(i.cost)}: before 01-04-2001, ignored</td><td class="n">Rs. 0</td></tr>`
-      : `<tr><td>${dmy(i.date)} (FY ${fyLabel(i.fy)}, CII ${CII[i.fy]})<div class="formula">${num(i.cost)} × ${ciiS} ÷ ${CII[i.fy]}</div></td><td class="n">${rs(i.idx)}</td></tr>`).join('') +
-      `<tr class="tot"><td>Total indexed cost of improvement</td><td class="n">${rs(impIdx)}</td></tr></tbody></table>`;
+      : `<tr><td>${dmy(i.date)} (FY ${fyLabel(i.fy)}, CII ${i.cii})<div class="formula">${num(i.cost)} × ${r.ciiS} ÷ ${i.cii}</div></td><td class="n">${rs(i.idx)}</td></tr>`).join('') +
+      `<tr class="tot"><td>Total indexed cost of improvement</td><td class="n">${rs(r.impIdx)}</td></tr></tbody></table>`;
   }
-  html += `<h3>Capital gain</h3><table class="t"><thead><tr><th></th><th class="n">With indexation</th><th class="n">Without indexation</th></tr></thead><tbody>
-    <tr><td>Full value of consideration – ${esc(fullNote)}</td><td class="n">${rs(full)}</td><td class="n">${rs(full)}</td></tr>
-    ${exp ? `<tr><td>Less: expenses on transfer</td><td class="n">${rs(exp)}</td><td class="n">${rs(exp)}</td></tr>` : ''}
-    <tr><td>Less: cost of acquisition</td><td class="n">${rs(idxCost)}</td><td class="n">${rs(cost)}</td></tr>
-    ${imps.length ? `<tr><td>Less: cost of improvement</td><td class="n">${rs(impIdx)}</td><td class="n">${rs(impCost)}</td></tr>` : ''}
-    <tr class="tot"><td>${longTerm ? 'Long-term' : 'Short-term'} capital gain / (loss)</td><td class="n">${rs(gainIdx)}</td><td class="n">${rs(gainPlain)}</td></tr>
+  const cg = (label, a, b) => `<tr><td>${label}</td>${two ? `<td class="n">${b}</td>` : ''}<td class="n">${a}</td></tr>`;
+  h += `<h3>Computation of capital gain</h3><table class="t"><thead><tr><th></th>${two ? '<th class="n">With indexation</th>' : ''}<th class="n">${two ? 'Without indexation' : 'Amount'}</th></tr></thead><tbody>
+    ${cg(`Full value of consideration – ${esc(r.fullNote)}`, rs(r.full), rs(r.full))}
+    ${r.exp ? cg('Less: expenses on transfer', rs(-r.exp), rs(-r.exp)) : ''}
+    ${cg(`Less: cost of acquisition${two ? '' : ` (${esc(r.costNote)})`}`, rs(-r.cost), two ? rs(-r.idxCost) : '')}
+    ${r.imps.length ? cg('Less: cost of improvement' + (r.imps.some(i => i.ignored) ? ' (before 01-04-2001 ignored)' : ''), rs(-r.impCost), two ? rs(-r.impIdx) : '') : ''}
+    <tr class="tot"><td>${r.longTerm ? 'Long-term' : 'Short-term'} capital gain / (loss)</td>${two ? `<td class="n">${rs(r.gainIdx)}</td>` : ''}<td class="n">${rs(r.gainPlain)}</td></tr>
   </tbody></table>`;
+  if (r.gainPlain <= 0 && (!two || r.gainIdx <= 0)) h += `<div class="msgs" style="margin-top:8px"><div class="m-warn">There is a capital loss – no tax. A ${r.longTerm ? 'long-term loss can be set off only against long-term gains' : 'short-term loss can be set off against short-term or long-term gains'} and carried forward for eight years if the return is filed by the due date.</div></div>`;
 
-  const notes = [];
-  if (!longTerm) notes.push(['m-warn', `Short-term: indexation does not apply. The gain is ${rs(gainPlain)} (without indexation). The indexed figures are shown for reference only.`]);
-  else if (c.asset === 'listed') notes.push(['m-warn', 'Listed equity shares / equity-oriented units: long-term gains are taxed under section 112A without indexation (cost may be stepped up to the FMV on 31-01-2018). The indexed figures are for reference only.']);
-  else if (!after) notes.push(['m-ok', `Transfer before 23-07-2024: long-term gain with indexation ${rs(gainIdx)}, taxable at 20% (plus surcharge and cess) – ${rs(Math.max(0, gainIdx) * 0.2)}.`]);
-  else if (c.asset === 'land' && c.seller === 'res' && c.pdate < CUTOFF) {
-    const tA = Math.max(0, gainPlain) * 0.125, tB = Math.max(0, gainIdx) * 0.2;
-    html += `<h3>Tax – the lower of the two (proviso to section 112(1))</h3><table class="t"><tbody>
-      <tr><td>12.5% on the gain without indexation<div class="formula">${num(Math.max(0, gainPlain))} × 12.5%</div></td><td class="n">${rs(tA)}</td></tr>
-      <tr><td>20% on the gain with indexation<div class="formula">${num(Math.max(0, gainIdx))} × 20%</div></td><td class="n">${rs(tB)}</td></tr>
-      <tr class="tot"><td>Tax payable (before surcharge and cess): ${tB < tA ? '20% with indexation' : tA < tB ? '12.5% without indexation' : 'both equal'}</td><td class="n">${rs(Math.min(tA, tB))}</td></tr></tbody></table>`;
-    notes.push(['m-ok', 'Land or building acquired before 23-07-2024 and sold by a resident individual / HUF: tax is the lower of the two amounts above.']);
-  } else notes.push(['m-warn', `Transfer on or after 23-07-2024: indexation is not available for this asset${c.asset === 'land' ? (c.seller !== 'res' ? ' (seller is not a resident individual / HUF)' : ' (acquired on or after 23-07-2024)') : ''}. Long-term gain ${rs(gainPlain)} at 12.5% – ${rs(Math.max(0, gainPlain) * 0.125)} before surcharge and cess. The indexed figures are for reference only.`]);
-  if (c.asset === 'other') notes.push(['m-warn', 'Bonds and debentures (other than capital indexed bonds and sovereign gold bonds) do not get indexation, and units of specified mutual funds acquired on or after 01-04-2023 are short-term (section 50AA).']);
-  html += `<div class="msgs" style="margin-top:12px">${notes.map(([k, t]) => `<div class="${k}">${esc(t)}</div>`).join('')}</div>
-    <p class="src">Surcharge, cess, exemptions (sections 54, 54EC, 54F etc.) and basic exemption limit adjustments are not considered. CII: ${fyLabel(baseFy)} = ${ciiP}, ${fyLabel(sfy)} = ${ciiS}.</p>`;
-  const out = $('#out'); out.innerHTML = html; out.hidden = false;
-  document.querySelectorAll('#ciiTable tr.hi').forEach(r => r.classList.remove('hi'));
-  [baseFy, sfy, ...imps.filter(i => !i.ignored).map(i => i.fy)].forEach(y => { const r = document.querySelector(`#ciiTable tr[data-y="${y}"]`); if (r) r.classList.add('hi'); });
+  // options
+  const O = r.options, best = O.reduce((a, o) => o.total < a.total || (o.total === a.total && o.invested < a.invested) ? o : a, O[0]);
+  h += `<h3>Tax planning options</h3><div class="tw"><table class="t cmp"><thead><tr><th>Option</th><th class="n">House</th><th class="n">Bonds</th><th class="n">Taxable gain</th><th class="n">Tax payable</th><th class="n">Tax saved</th><th class="n">Funds locked in</th><th class="n">Cash in hand after tax and investment</th></tr></thead><tbody>` +
+    O.map(o => `<tr class="${o === best && O.length > 1 && o.saved > 0 ? 'best' : ''}"><td>${esc(o.title)}</td><td class="n">${o.H ? num(o.H) : '–'}</td><td class="n">${o.B ? num(o.B) : '–'}</td><td class="n">${num(o.pick.taxable)}</td><td class="n"><b>${num(o.total)}</b></td><td class="n">${o.id > 1 ? num(o.saved) : '–'}</td><td class="n">${o.invested ? num(o.invested) : '–'}</td><td class="n">${num(o.cash)}</td></tr>`).join('') +
+    `</tbody></table></div><p class="hint">Amounts in Rs. Cash in hand = net consideration (sale value less expenses) – tax – amounts invested. Funds in bonds are locked in for five years; the new house is not to be sold for three years.</p>`;
+  if (r.need) h += `<table class="t" style="margin:8px 0"><tbody><tr><td colspan="2"><b>Investment needed for full exemption</b> (gain ${rs(r.need.gain)})</td></tr>
+    ${r.need.houseOnly != null ? `<tr><td>House alone (${r.houseSec === 's54' ? 's.54 / s.82 – the gain' : 's.54F / s.86 – the net consideration'})</td><td class="n">${rs(r.need.houseOnly)}${r.need.houseOnly > 1e8 ? ' (above the Rs. 10 crore cap)' : ''}</td></tr>` : ''}
+    ${r.need.bondsOnly != null ? `<tr><td>Bonds alone (maximum Rs. 50 lakh)</td><td class="n">${rs(r.need.bondsOnly)}${r.need.gain > 5e6 ? ` – gain of ${rs(r.need.gain - 5e6)} remains` : ''}</td></tr>` : ''}
+    ${r.need.houseWithBonds != null ? `<tr><td>House, with bonds of ${rs(r.need.bondsOnly)}</td><td class="n">${rs(r.need.houseWithBonds)}</td></tr>` : ''}</tbody></table>`;
+  h += O.map(o => `<details class="opt"${o.id === 1 || o === best ? ' open' : ''}><summary>${esc(o.title)} – tax ${rs(o.total)}</summary>${optionTable(o, r)}</details>`).join('');
+
+  // deadlines
+  if (r.deadlines.length) h += `<h3>Time limits from the date of sale (${dmy(c.sdate)})</h3><div class="tw"><table class="t cmp"><thead><tr><th>What</th><th class="n">By / date</th><th>Basis</th></tr></thead><tbody>` +
+    r.deadlines.map(d => `<tr><td>${esc(d.what)}</td><td class="n"><b>${esc(d.when)}</b></td><td>${esc(d.why)}</td></tr>`).join('') + `</tbody></table></div>`;
+  if (r.notes.length) h += `<h3>Notes</h3><div class="msgs">${r.notes.map(([k, t]) => `<div class="${NOTE[k] || 'm-info'}">${esc(t)}</div>`).join('')}</div>`;
+
+  // provisions
+  h += `<h3>Provisions – Income-tax Act, 1961 and Income-tax Act, 2025</h3><div class="tw"><table class="t cmp"><thead><tr><th>Subject</th><th>${r.act === '1961' ? '<span class="act">ITA 1961 (applies)</span>' : 'ITA 1961'}</th><th>${r.act === '2025' ? '<span class="act">ITA 2025 (applies)</span>' : 'ITA 2025'}</th></tr></thead><tbody>` +
+    SECTIONS.map(s => `<tr><td>${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td></tr>`).join('') + `</tbody></table></div>
+    <p class="src">The Income-tax Act, 2025 applies to the tax year 2026-27 onwards (transfers from 01-04-2026); earlier transfers are under the Income-tax Act, 1961. Section numbers of the 2025 Act are from the published concordance tables – verify with the Act / CBDT concordance before quoting.
+    Working based on the figures entered${c.seller === 'res' ? '; surcharge on the basis of total income of Rs. ' + num(r.other) + ' plus the taxable gain, marginal relief not considered' : ''}. CII${two ? `: ${fyLabel(r.baseFy)} = ${r.ciiP}, ${fyLabel(r.sfy)} = ${r.ciiS}` : ' not used'}.</p>`;
+  return h;
+}
+
+function calculate(scroll = true){
+  const r = CG.compute(c);
+  if (r.errs.length) { $('#msgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); $('#out').hidden = true; return false; }
+  $('#msgs').innerHTML = '';
+  const out = $('#out'); out.innerHTML = render(r); out.hidden = false;
+  document.querySelectorAll('#ciiTable tr.hi').forEach(x => x.classList.remove('hi'));
+  if (r.ix.applicable) [r.baseFy, r.sfy, ...r.imps.filter(i => !i.ignored).map(i => i.fy)].forEach(y => { const x = document.querySelector(`#ciiTable tr[data-y="${y}"]`); if (x) x.classList.add('hi'); });
   if (scroll) out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  return true;
 }
 $('#go').onclick = () => calculate();
-$('#print').onclick = () => { if ($('#out').hidden) calculate(); if (!$('#out').hidden) window.print(); };
+window.addEventListener('beforeprint', () => document.querySelectorAll('details.opt').forEach(d => { d.dataset.was = d.open ? '1' : ''; d.open = true; }));
+window.addEventListener('afterprint', () => document.querySelectorAll('details.opt').forEach(d => { d.open = d.dataset.was === '1'; }));
+$('#print').onclick = () => { if (calculate(false)) { const t = document.title; document.title = `Capital_Gain_${(c.name || '').trim().replace(/[^A-Za-z0-9]+/g, '_')}`; window.print(); document.title = t; } };
 $('#copy').onclick = () => {
-  if ($('#out').hidden) calculate(); if ($('#out').hidden) return;
-  const t = [...$('#out').querySelectorAll('h2,h3,tr,.msgs div')].map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
+  if (!calculate(false)) return;
+  const t = [...$('#out').querySelectorAll('.t1,.t2,.banner,h3,summary,tr,.msgs div')].map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
   const done = () => { $('#msgs').innerHTML = '<div class="m-ok">Working copied – paste it into Word or Excel.</div>'; };
   if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, () => {});
 };
-$('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' })); a.download = `${(c.ref || 'CII_working').replace(/[^A-Za-z0-9]+/g, '_')}_cii_case.json`; a.click(); };
+$('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' })); a.download = `${(c.ref || c.name || 'Capital_gain').trim().replace(/[^A-Za-z0-9]+/g, '_')}_cg_case.json`; a.click(); };
 $('#openCase').onclick = () => $('#caseFile').click();
 $('#caseFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const d = JSON.parse(await f.text()); if (!('pdate' in d)) throw 0; c = Object.assign(blank(), d); save(); bind(); calculate(); }
-  catch (err) { $('#msgs').innerHTML = '<div class="m-err">That file is not a CII case file.</div>'; }
+  catch (err) { $('#msgs').innerHTML = '<div class="m-err">That file is not a capital gains case file.</div>'; }
 };
-$('#clear').onclick = () => { c = blank(); save(); bind(); $('#out').hidden = true; $('#msgs').innerHTML = ''; document.querySelectorAll('#ciiTable tr.hi').forEach(r => r.classList.remove('hi')); };
+$('#clear').onclick = () => { if (!confirm('Clear all the entries?')) return; c = blank(); save(); bind(); $('#out').hidden = true; $('#msgs').innerHTML = ''; document.querySelectorAll('#ciiTable tr.hi').forEach(x => x.classList.remove('hi')); };
 bind();
-if (c.pdate && c.sdate && c.samt) calculate(false);
+if (c.pdate && c.sdate && c.samt && c.name) calculate(false);
 })();
 </script>
 <script src="../shared/calc.js"></script>

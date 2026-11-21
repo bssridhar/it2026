@@ -94,11 +94,11 @@ window.HOME_CONFIG = {
     },
     {
       id: "cii",
-      title: "Cost Inflation Index",
+      title: "Capital Gains Calculation",
       category: "Income Tax",
       path: "cii/index.html",
       status: "available",
-      description: "CII table from 2001-02 to 2026-27 and an indexed cost calculator: purchase and sale dates and amounts, improvements, pre-2001 FMV, with the working step by step.",
+      description: "Capital gain with and without indexation (CII table 2001-02 to 2026-27), the tax on it, and the options – pay the tax, residential house (s.54 / s.54F), capital gains bonds (s.54EC) or both – with the time limits from the date of sale and the sections of the Income-tax Acts, 1961 and 2025.",
       added: "2026-11-06"
     },
     {
