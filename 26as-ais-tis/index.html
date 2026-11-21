@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>26AS AIS TIS Consolidator</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.drop{display:block;border:2px dashed var(--line);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--head)}
+.drop strong{display:block;font-size:1rem;margin-bottom:4px}
+.drop span{color:var(--muted);font-size:.88rem}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
+.slot{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:84px}
+.slot h3{margin:0 0 4px;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.slot .fn{font-size:.85rem;word-break:break-all}
+.slot .meta{font-size:.82rem;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font-size:.74rem;font-weight:600;padding:2px 8px;border-radius:99px;margin-top:6px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.wait{background:var(--head);color:var(--muted)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.err{background:var(--err-bg);color:var(--err)}
+.pw{display:flex;gap:6px;margin-top:8px}
+.pw input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;font-size:.86rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:4px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--err)}
+button.sm{padding:5px 9px;font-size:.84rem}
+button:disabled{opacity:.45;cursor:not-allowed}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sticky{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line)}
+.msgs div{padding:9px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-err{background:var(--err-bg);color:var(--err)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:0 0 12px}
+.big div{background:var(--head);border-radius:8px;padding:9px 12px}
+.big span{display:block;font-size:.78rem;color:var(--muted)}
+.big b{font-size:1.05rem}
+table.t{border-collapse:collapse;width:100%;font-size:.9rem}
+table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.tot td{font-weight:700;border-top:2px solid var(--ink)}
+.cnt{color:var(--muted);font-size:.8rem}
+.tblwrap{overflow-x:auto}
+.flags{margin:0;padding:0;list-style:none}
+.flags li{padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.flags li:last-child{border-bottom:0}
+.flags b{display:block}
+.footer{color:var(--muted);font-size:.82rem;margin-top:18px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Form 26AS · AIS · TIS Consolidator</h1>
+  <p class="sub">Reads Form 26AS, AIS and TIS PDFs and prepares the income consolidation workbook (Excel) for the computation of total income. The PDFs are read in this browser only.</p>
+
+  <section class="card">
+    <h2>Statements</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+      <strong>Drop the PDFs here, or click to choose</strong>
+      <span>Choose Form 26AS, AIS and TIS of the same assessee together. Each file is identified automatically.</span>
+    </label>
+    <div class="slots" id="slots"></div>
+    <p class="hint">Passwords: Form 26AS – date of birth as DDMMYYYY; AIS and TIS – PAN in lowercase followed by DDMMYYYY.</p>
+  </section>
+
+  <div id="messages" class="msgs" aria-live="polite"></div>
+
+  <section class="card" id="result" hidden></section>
+
+  <div class="sticky bar">
+    <button type="button" class="primary" id="gen" disabled>Download Excel</button>
+    <button type="button" id="saveCase">Save case file</button>
+    <button type="button" id="loadCase">Open case file</button>
+    <input type="file" id="loadFile" accept=".json" hidden>
+    <button type="button" class="danger" id="clearAll">Clear</button>
+    <span id="status" class="hint"></span>
+  </div>
+  <p class="footer">The workbook has four sheets: Income Summary, TDS Credit (26AS), Additional Information and 26AS &amp; AIS Check.
+    "Consider for SOI" takes the 26AS figure if the item is only in 26AS, the AIS/TIS figure if it is only in AIS/TIS, the 26AS figure if both agree and the higher figure if they differ.
+    Sections are mapped under the Income-tax Act, 1961; codes under the Income-tax Act, 2025 are flagged for review.
+    The case file and draft hold the figures read from the statements (not the PDFs). The workbook is a working paper – review it against the statements before use.</p>
+</main>
+
+<script src="../shared/pdf.worker.min.js"></script>
+<script src="../shared/pdf.min.js"></script>
+<script src="../shared/exceljs.min.js"></script>
+<script src="lib/core.js"></script>
+<script>
+(function(){
+'use strict';
+const C = window.Consolidator;
+const DRAFT_KEY = '26as-ais-tis-draft-v1';
+const LABEL = { '26AS': 'Form 26AS', AIS: 'AIS', TIS: 'TIS' };
+const PWHINT = { '26AS': 'Form 26AS: date of birth as DDMMYYYY', AIS: 'AIS: PAN in lowercase + DOB as DDMMYYYY', TIS: 'TIS: PAN in lowercase + DOB as DDMMYYYY', '?': 'Form 26AS: DOB as DDMMYYYY · AIS/TIS: PAN in lowercase + DOB DDMMYYYY' };
+let files = [];   // {id,name,bytes,status,type,parsed,msg}
+let lastRes = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const inr = v => v == null ? '–' : 'Rs.' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: (v % 1) ? 2 : 0, maximumFractionDigits: 2 });
+const guessType = name => { const n = name.toUpperCase(); return /26AS/.test(n) ? '26AS' : /AIS/.test(n) ? 'AIS' : /TIS/.test(n) ? 'TIS' : '?'; };
+function showMessages(list) { $('messages').innerHTML = list.map(([c, t]) => '<div class="' + c + '">' + esc(t) + '</div>').join(''); }
+function download(name, blob) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ---------- reading PDFs ---------- */
+async function readEntry(e, password) {
+  e.status = 'reading'; e.msg = ''; render();
+  try {
+    const pdf = await pdfjsLib.getDocument({ data: e.bytes.slice(), password: password || undefined, isEvalSupported: false }).promise;
+    const lines = await C.extractLines(pdf);
+    const t = C.detectType(lines);
+    if (!t) { e.status = 'error'; e.msg = 'Not recognised as Form 26AS, AIS or TIS'; }
+    else {
+      e.type = t;
+      e.parsed = t === '26AS' ? C.parse26AS(lines) : t === 'AIS' ? C.parseAIS(lines) : C.parseTIS(lines);
+      e.status = 'ok'; delete e.bytes;
+      files = files.filter(o => o === e || !(o.status === 'ok' && o.type === t));   // latest of each type
+    }
+  } catch (err) {
+    if (err && err.name === 'PasswordException') { e.status = 'password'; e.msg = err.code === 2 ? 'Incorrect password – try again' : 'Password protected'; }
+    else { e.status = 'error'; e.msg = (err && err.message) || String(err); }
+  }
+  render(); refresh();
+}
+async function addFiles(list) {
+  const pdfs = [...list].filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+  if (!pdfs.length) return;
+  const entries = pdfs.map(f => ({ id: Math.random().toString(36).slice(2), name: f.name, file: f, status: 'reading', type: guessType(f.name) }));
+  files.push(...entries); render(); refresh();
+  for (const e of entries) e.bytes = new Uint8Array(await e.file.arrayBuffer());
+  for (const e of entries) { delete e.file; await readEntry(e); }
+}
+
+/* ---------- display ---------- */
+function render() {
+  const slots = $('slots');
+  const byType = { '26AS': null, AIS: null, TIS: null }, other = [];
+  for (const e of files) { if (e.status === 'ok') byType[e.type] = e; else other.push(e); }
+  let h = '';
+  for (const t of ['26AS', 'AIS', 'TIS']) {
+    const e = byType[t];
+    h += '<div class="slot"><h3>' + LABEL[t] + (t === 'TIS' ? ' (optional)' : '') + '</h3>';
+    if (e) h += '<div class="fn">' + esc(e.name) + '</div><div class="meta">' + esc(e.parsed.pan || '') + (e.parsed.fy ? ' · FY ' + esc(e.parsed.fy) : '') + '</div><span class="pill ok">Read</span>';
+    else h += '<div class="meta">Not added</div><span class="pill wait">Waiting</span>';
+    h += '</div>';
+  }
+  for (const e of other) {
+    h += '<div class="slot"><h3>' + esc(e.type && e.type !== '?' ? LABEL[e.type] : 'File') + '</h3><div class="fn">' + esc(e.name) + '</div>';
+    if (e.status === 'reading') h += '<span class="pill wait"><span class="spin"></span>Reading…</span>';
+    else if (e.status === 'password') h += '<span class="pill warn">' + esc(e.msg) + '</span><div class="pw"><input type="password" data-id="' + e.id + '" placeholder="PDF password" autocomplete="off"><button type="button" class="sm" data-unlock="' + e.id + '">Open</button></div><div class="hint">' + esc(PWHINT[e.type || '?']) + '</div>';
+    else h += '<span class="pill err">' + esc(e.msg) + '</span> <button type="button" class="sm" data-remove="' + e.id + '">Remove</button>';
+    h += '</div>';
+  }
+  slots.innerHTML = h;
+  const unlock = id => { const inp = slots.querySelector('input[data-id="' + id + '"]'); const e = files.find(o => o.id === id); if (e && inp && inp.value) readEntry(e, inp.value); };
+  slots.querySelectorAll('[data-unlock]').forEach(b => b.onclick = () => unlock(b.dataset.unlock));
+  slots.querySelectorAll('input[data-id]').forEach(inp => inp.onkeydown = ev => { if (ev.key === 'Enter') unlock(inp.dataset.id); });
+  slots.querySelectorAll('[data-remove]').forEach(b => b.onclick = () => { files = files.filter(o => o.id !== b.dataset.remove); render(); refresh(); });
+}
+function currentDocs() { const d = {}; files.filter(e => e.status === 'ok').forEach(e => d[e.type] = e.parsed); return d; }
+function refresh(keepMsgs) {
+  const docs = currentDocs();
+  const busy = files.some(e => e.status === 'reading');
+  $('status').innerHTML = busy ? '<span class="spin"></span>Reading files…' : '';
+  if (!keepMsgs) showMessages([]);
+  if (busy || (!docs['26AS'] && !docs.AIS)) { $('gen').disabled = true; if (!busy) { lastRes = null; $('result').hidden = true; } return; }
+  let res;
+  try { res = C.consolidate(docs); } catch (err) { showMessages([['m-err', 'Could not process the statements: ' + err.message]]); $('gen').disabled = true; return; }
+  lastRes = res;
+  const m = res.errors.map(x => ['m-err', x]).concat(res.warnings.map(x => ['m-warn', x]));
+  if (m.length) showMessages(m);
+  $('gen').disabled = res.errors.length > 0;
+  showResult(res);
+  saveDraft();
+}
+function showResult(res) {
+  let rows = '', ga = 0, gb = 0, gc = 0;
+  for (const k of ['SAL', 'INT_SB', 'INT_TD', 'INT_OTH', 'DIV', 'CON', 'PRO', 'FTS', 'RENT', 'COMM', 'BUS', 'PART', 'WIN', 'OTH']) {
+    const ls = res.lines.filter(l => l.nature === k); if (!ls.length) continue;
+    const a = ls.reduce((s, l) => s + (l.a26 || 0), 0), b = ls.reduce((s, l) => s + (l.ais || 0), 0), c = ls.reduce((s, l) => s + l.soi, 0);
+    ga += a; gb += b; gc += c;
+    rows += '<tr><td>' + esc(C.NATURES[k]) + ' <span class="cnt">(' + ls.length + ')</span></td><td class="n">' + inr(a) + '</td><td class="n">' + inr(b) + '</td><td class="n">' + inr(c) + '</td></tr>';
+  }
+  if (!rows) rows = '<tr><td colspan="4" class="cnt">No income items found.</td></tr>';
+  rows += '<tr class="tot"><td>Grand total</td><td class="n">' + inr(ga) + '</td><td class="n">' + inr(gb) + '</td><td class="n">' + inr(gc) + '</td></tr>';
+  const tds = Math.round(res.tdsRows.filter(d => d.part !== 'VI').reduce((s, d) => s + d.tds, 0) * 100) / 100;
+  $('result').innerHTML =
+    '<h2>Summary</h2><div class="big"><div><span>Assessee</span><b>' + esc(res.name || '–') + '</b></div><div><span>PAN</span><b>' + esc(res.pan || '–') + '</b></div><div><span>' + esc(res.ayLabel) + '</span><b>' + esc(res.ay || '–') + '</b></div><div><span>Financial Year</span><b>' + esc(res.fy || '–') + '</b></div><div><span>TDS as per 26AS</span><b>' + inr(tds) + '</b></div></div>' +
+    '<div class="tblwrap"><table class="t"><thead><tr><th>Nature of income</th><th class="n">As per 26AS</th><th class="n">As per AIS/TIS</th><th class="n">Consider for SOI</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<h2 style="margin-top:16px">Additional information to be considered (' + res.flags.length + ')</h2><ul class="flags">' + res.flags.map(f => '<li><b>' + esc(f.point) + '</b>' + esc(f.details) + '</li>').join('') + '</ul>';
+  $('result').hidden = false;
+}
+
+/* ---------- Excel ---------- */
+$('gen').addEventListener('click', async () => {
+  if (!lastRes) return;
+  $('gen').disabled = true; $('status').innerHTML = '<span class="spin"></span>Preparing workbook…';
+  try {
+    const wb = await C.buildWorkbook(ExcelJS, lastRes);
+    const buf = await wb.xlsx.writeBuffer();
+    download('Income_Consolidation_' + (lastRes.ayLabel === 'Tax Year' ? 'TY' : 'AY') + (lastRes.ay || '') + '_' + (lastRes.pan || 'assessee') + '.xlsx',
+      new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    $('status').textContent = 'Workbook downloaded.';
+  } catch (err) { $('status').textContent = ''; showMessages([['m-err', 'Could not create the workbook: ' + err.message]]); }
+  $('gen').disabled = !lastRes || lastRes.errors.length > 0;
+});
+
+/* ---------- case file / draft ---------- */
+function collect() {
+  const ok = files.filter(e => e.status === 'ok');
+  return { tool: '26as-ais-tis', version: 1, saved: new Date().toISOString(), docs: Object.fromEntries(ok.map(e => [e.type, { name: e.name, parsed: e.parsed }])) };
+}
+function restore(d) {
+  files = [];
+  if (d && d.docs) for (const [t, v] of Object.entries(d.docs)) if (LABEL[t] && v && v.parsed) files.push({ id: t, name: v.name || LABEL[t], status: 'ok', type: t, parsed: v.parsed });
+  render(); refresh(true);
+}
+function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collect())); } catch (e) {} }
+$('saveCase').addEventListener('click', () => {
+  const d = collect();
+  if (!Object.keys(d.docs).length) { showMessages([['m-warn', 'Add the statements first.']]); return; }
+  const pan = (lastRes && lastRes.pan) || 'assessee', ay = (lastRes && lastRes.ay) || '';
+  download(pan + '_' + ay + '_26AS-AIS_case.json', new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }));
+});
+const lf = $('loadFile');
+$('loadCase').addEventListener('click', () => lf.click());
+lf.addEventListener('change', async () => {
+  const f = lf.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.tool !== '26as-ais-tis') throw new Error('not a case file of this tool');
+    restore(d); saveDraft(); showMessages([['m-ok', 'Case file opened.']].concat(lastRes ? lastRes.errors.map(x => ['m-err', x]) : []));
+  } catch (e) { showMessages([['m-err', 'That file could not be read as a case file of this tool.']]); }
+  lf.value = '';
+});
+$('clearAll').addEventListener('click', () => {
+  if (files.length && !confirm('Clear the statements read so far?')) return;
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  files = []; lastRes = null; render(); refresh();
+});
+
+/* ---------- drag and drop ---------- */
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+$('file').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+
+/* ---------- start: restore draft ---------- */
+let draft = null;
+try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+if (draft && draft.docs && Object.keys(draft.docs).length) { restore(draft); showMessages([['m-ok', 'Restored the statements from the last session (draft). Use Clear to start a new assessee.']]); }
+else render();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

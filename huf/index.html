@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUF Formation</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+.req{color:var(--err)}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+textarea{min-height:60px;resize:vertical}
+.invalid{border-color:var(--err)!important;background:var(--err-bg)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+.preview{background:var(--lock);border-radius:6px;padding:8px 10px;font-size:.88rem;margin-top:6px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink);margin:0}
+.msgs div{padding:9px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:.88rem}
+table.t th,table.t td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t thead th{background:var(--head);font-weight:600;white-space:nowrap}
+table.t input,table.t select,table.t textarea{padding:5px 6px;font-size:.88rem}
+.karta-row td{background:var(--lock)}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:560px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>HUF Formation – Affidavit and PAN Data Sheet</h1>
+  <p class="sub">Enter the Karta and the members (or import the Excel template), generate the affidavit for execution on stamp paper, then the data sheet for the HUF's PAN application from the same details. Everything stays in this browser.</p>
+
+  <div class="card">
+    <div class="bar">
+      <button type="button" id="dlXlsx">Download Excel template</button>
+      <button type="button" id="upXlsx">Import Excel</button>
+      <input type="file" id="xlsxFile" accept=".xlsx" hidden>
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save case file</button>
+      <button type="button" id="openCase">Open case file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" class="danger" id="newCase">New HUF</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <section class="card">
+    <h2>1. HUF and Karta</h2>
+    <div class="grid">
+      <div><label>Name of the HUF <span class="req">*</span></label><input data-f="huf_name" placeholder="e.g. RAMESH K HUF"></div>
+      <div><label>Name of the Karta <span class="req">*</span></label><input data-f="karta_name"></div>
+      <div><label>Karta is</label><select data-f="karta_rel"><option>son of</option><option>daughter of</option><option>wife of</option></select></div>
+      <div><label id="fatherLbl">Father's name of the Karta <span class="req">*</span></label><input data-f="karta_father"></div>
+      <div><label>Karta's date of birth <span class="req">*</span></label><input type="date" data-f="karta_dob"><div class="hint" id="ageHint"></div></div>
+      <div><label>Karta's Aadhaar no.</label><input data-f="karta_aadhaar" placeholder="12 digits"></div>
+      <div><label>Karta's PAN</label><input data-f="karta_pan" maxlength="10" style="text-transform:uppercase"></div>
+      <div><label>Mobile (for PAN application)</label><input data-f="karta_mobile" inputmode="tel"></div>
+      <div><label>E-mail (for PAN application)</label><input data-f="karta_email" type="email"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Address of the Karta (also the HUF's address)</h2>
+    <div class="grid">
+      <div><label>Flat / Door / Block No. <span class="req">*</span></label><input data-f="addr_flat"></div>
+      <div><label>Premises / Building / Village</label><input data-f="addr_building"></div>
+      <div><label>Road / Street / Lane</label><input data-f="addr_road"></div>
+      <div><label>Area / Locality / Taluk <span class="req">*</span></label><input data-f="addr_area"></div>
+      <div><label>Town / City / District <span class="req">*</span></label><input data-f="addr_city"></div>
+      <div><label>State <span class="req">*</span></label><input data-f="addr_state" list="states"></div>
+      <div><label>PIN code <span class="req">*</span></label><input data-f="addr_pin" maxlength="6" inputmode="numeric"></div>
+      <div class="full"><label>Address as it should read in the affidavit (optional – one line per row; leave blank to use the lines above)</label><textarea data-f="address_print" rows="3"></textarea>
+        <div class="preview" id="addrPreview"></div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. Members of the HUF</h2>
+    <p class="hint" style="margin-top:-6px">The Karta is No. 1 automatically. Add the other members in the order they should appear in the affidavit.</p>
+    <div class="tw"><table class="t" id="members"><thead><tr><th>Name</th><th>Relationship to Karta</th><th>Name of father</th><th>Date of birth</th><th>Aadhaar no.</th><th>Address</th><th title="Print relationship and date of birth under the name">Show rel./DOB</th><th></th></tr></thead><tbody></tbody></table></div>
+    <button type="button" class="link" id="addMember">+ Add member</button>
+  </section>
+
+  <section class="card">
+    <h2>4. Affidavit</h2>
+    <div class="grid">
+      <div><label>HUF in existence since <span class="req">*</span></label><input type="date" data-f="since_date"></div>
+      <div><label>Basis of that date (optional, printed in brackets)</label><input data-f="since_basis" list="bases" placeholder="e.g. date of marriage"></div>
+      <div><label>Place of execution <span class="req">*</span></label><input data-f="place"></div>
+      <div><label>Date of the affidavit</label><input type="date" data-f="aff_date"><label class="check" style="margin-top:6px"><input type="checkbox" data-f="date_blank"> Leave the date blank (fill in at execution)</label></div>
+      <div class="full"><label>Additional declarations (optional – one per line; each becomes a numbered clause)</label><textarea data-f="extra" rows="3"></textarea></div>
+      <div class="full"><label>Purpose clause (last clause)</label><textarea data-f="purpose" rows="2"></textarea></div>
+    </div>
+    <h2 style="margin-top:16px">Layout</h2>
+    <div class="grid">
+      <div><label>Page size</label><select data-f="page"><option value="letter">Letter (as in the firm's format)</option><option value="a4">A4</option><option value="legal">Legal</option></select></div>
+      <div><label>Space at the top of page 1 for the stamp paper (cm)</label><input type="number" min="0" max="20" step="0.5" data-f="stamp_cm"></div>
+      <div><label>Heading of the name column</label><select data-f="col_head"><option>Name of Coparceners</option><option>Name of Coparceners / Members</option><option>Name of Members</option></select></div>
+      <div><label class="check" style="margin-top:24px"><input type="checkbox" data-f="newpage"> Start the list of members on a new page</label></div>
+      <div><label class="check" style="margin-top:24px"><input type="checkbox" data-f="mask"> Show Aadhaar masked (XXXX XXXX 1234)</label></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>5. PAN application of the HUF</h2>
+    <div class="grid">
+      <div><label>Name to be printed on the PAN card</label><input data-f="pan_name_card" placeholder="default: name of the HUF"></div>
+      <div><label>Source of income</label><select data-f="pan_income"><option>No income</option><option>Income from house property</option><option>Capital gains</option><option>Income from other sources</option><option>Business / profession</option></select></div>
+      <div><label>AO code, if known</label><input data-f="pan_ao" placeholder="Area code / AO type / Range code / AO No."></div>
+      <div><label>Case / file reference</label><input data-f="ref"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6. Checks and output</h2>
+    <div id="checks" class="msgs"></div>
+    <div class="bar" style="margin-top:8px">
+      <button type="button" class="primary" id="genAff">Affidavit (Word)</button>
+      <button type="button" class="primary" id="genPan">PAN data sheet (Word)</button>
+    </div>
+    <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+  </section>
+</main>
+
+<datalist id="rels"><option>Wife</option><option>Son</option><option>Daughter</option><option>Mother</option><option>Son's wife</option><option>Grandson</option><option>Granddaughter</option><option>Brother</option></datalist>
+<datalist id="bases"><option>date of marriage of the Karta</option><option>date of birth of the first child</option></datalist>
+<datalist id="states"><option>Andhra Pradesh</option><option>Karnataka</option><option>Kerala</option><option>Maharashtra</option><option>Tamil Nadu</option><option>Telangana</option><option>Puducherry</option><option>Delhi</option><option>Gujarat</option><option>West Bengal</option><option>Uttar Pradesh</option><option>Rajasthan</option></datalist>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/docxtemplater.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="lib/templates.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const pad = n => String(n).padStart(2,'0');
+const isoToday = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const dmy = iso => iso ? iso.split('-').reverse().join('/') : '';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const LS = 'huf-draft-v1';
+const PURPOSE = 'That this affidavit is executed as a declaration for the purpose of submission to the Income Tax Department and for opening the bank account of HUF.';
+const blank = () => ({ huf_name: '', karta_name: '', karta_rel: 'son of', karta_father: '', karta_dob: '', karta_aadhaar: '', karta_pan: '', karta_mobile: '', karta_email: '',
+  addr_flat: '', addr_building: '', addr_road: '', addr_area: '', addr_city: '', addr_state: 'Tamil Nadu', addr_pin: '', address_print: '',
+  members: [], since_date: '', since_basis: '', place: 'Chennai', aff_date: isoToday(), date_blank: true, extra: '', purpose: PURPOSE,
+  page: 'letter', stamp_cm: 10, col_head: 'Name of Coparceners', newpage: true, mask: false, pan_name_card: '', pan_income: 'No income', pan_ao: '', ref: '' });
+let c; try { c = Object.assign(blank(), JSON.parse(localStorage.getItem(LS) || 'null') || {}); } catch (e) { c = blank(); }
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(c)); } catch (e) {} };
+
+/* ---------- helpers ---------- */
+const VD = [[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]];
+const VP = [[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],[8,9,1,6,0,4,3,5,2,7],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]];
+const verhoeff = n => { let ch = 0; n.split('').reverse().forEach((d, i) => { ch = VD[ch][VP[i % 8][+d]]; }); return ch === 0; };
+const digits = a => String(a || '').replace(/\D/g, '');
+const aadhaarOk = a => { const d = digits(a); return d.length === 12 && verhoeff(d); };
+const aadhaarFmt = a => { const d = digits(a); if (d.length !== 12) return String(a || '').trim(); return c.mask ? `XXXX XXXX ${d.slice(8)}` : `${d.slice(0,4)} ${d.slice(4,8)} ${d.slice(8)}`; };
+function ageOn(dob, on){ if (!dob) return ''; const [y, m, d] = dob.split('-').map(Number), [y2, m2, d2] = on.split('-').map(Number); let a = y2 - y; if (m2 < m || (m2 === m && d2 < d)) a--; return a; }
+const ageDate = () => (!c.date_blank && c.aff_date) ? c.aff_date : isoToday();
+function addrLines(){
+  if (c.address_print.trim()) return c.address_print.split(/\r?\n/).map(s => s.trim().replace(/,$/, '')).filter(Boolean);
+  const l = [c.addr_flat, c.addr_building, c.addr_road, c.addr_area, c.addr_city].map(s => String(s || '').trim()).filter(Boolean);
+  const st = [c.addr_state, c.addr_pin].map(s => String(s || '').trim()).filter(Boolean).join(' - ');
+  if (st) l.push(st);
+  return l;
+}
+const addrInline = () => addrLines().join(', ');
+const REL_DESC = { 'Wife': 'Wife of Karta', 'Son': 'Son of Karta', 'Daughter': 'Daughter of Karta', 'Mother': 'Mother of Karta', "Son's wife": "Son's wife of Karta", 'Grandson': 'Grandson of Karta', 'Granddaughter': 'Granddaughter of Karta', 'Brother': 'Brother of Karta' };
+const relDesc = r => REL_DESC[r] || (r ? `${r} of Karta` : '');
+
+/* ---------- fields ---------- */
+function bind(){
+  document.querySelectorAll('[data-f]').forEach(el => {
+    const k = el.dataset.f;
+    if (el.type === 'checkbox') el.checked = !!c[k]; else el.value = c[k] ?? '';
+    el.oninput = el.onchange = () => { c[k] = el.type === 'checkbox' ? el.checked : el.value; save(); refresh(); };
+  });
+}
+function refresh(){
+  $('#fatherLbl').innerHTML = (c.karta_rel === 'wife of' ? "Husband's name of the Karta" : "Father's name of the Karta") + ' <span class="req">*</span>';
+  $('#addrPreview').textContent = addrInline() ? 'In the affidavit: ' + addrInline() : 'Enter the address.';
+  const a = ageOn(c.karta_dob, ageDate()); $('#ageHint').textContent = a !== '' ? `Aged ${a} years ${c.date_blank ? 'as on today' : 'on the date of the affidavit'}` : '';
+  document.querySelector('[data-f=aff_date]').disabled = !!c.date_blank;
+  renderMembers(false); renderChecks();
+}
+
+/* ---------- members ---------- */
+function renderMembers(full = true){
+  const tb = $('#members tbody');
+  if (!full && tb.children.length === c.members.length + 1) { tb.firstElementChild.innerHTML = kartaRow(); return; }
+  tb.innerHTML = `<tr class="karta-row">${kartaRow()}</tr>`;
+  c.members.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><input data-m="name" value="${esc(m.name)}"></td><td><input data-m="relation" value="${esc(m.relation)}" list="rels"></td>
+      <td><input data-m="father" value="${esc(m.father)}"></td><td><input type="date" data-m="dob" value="${esc(m.dob)}"></td>
+      <td><input data-m="aadhaar" value="${esc(m.aadhaar)}" placeholder="12 digits"></td>
+      <td><textarea data-m="address" rows="2" placeholder="Same as the Karta">${esc(m.address)}</textarea></td>
+      <td><input type="checkbox" data-m="show_rel" ${m.show_rel ? 'checked' : ''}></td>
+      <td><button type="button" class="sm link" data-up ${i ? '' : 'disabled'}>↑</button><button type="button" class="sm link danger" data-del>✕</button></td>`;
+    tr.addEventListener('input', e => { const k = e.target.dataset.m; if (!k) return; m[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      if (k === 'relation' && !m._touched) m.show_rel = /son|daughter|grand/i.test(m.relation) && !/wife/i.test(m.relation), tr.querySelector('[data-m=show_rel]').checked = m.show_rel;
+      if (k === 'show_rel') m._touched = true; save(); renderChecks(); });
+    tr.querySelector('[data-del]').onclick = () => { c.members.splice(i, 1); save(); renderMembers(); renderChecks(); };
+    tr.querySelector('[data-up]').onclick = () => { c.members.splice(i - 1, 0, c.members.splice(i, 1)[0]); save(); renderMembers(); };
+    tb.appendChild(tr);
+  });
+}
+function kartaRow(){ return `<td><b>${esc(c.karta_name || '(Karta)')}</b></td><td>Karta</td><td>${esc(c.karta_father)}</td><td>${dmy(c.karta_dob)}</td><td>${esc(aadhaarFmt(c.karta_aadhaar))}</td><td colspan="3" class="hint">From sections 1 and 2</td>`; }
+$('#addMember').onclick = () => { c.members.push({ id: uid(), name: '', relation: '', father: '', dob: '', aadhaar: '', address: '', show_rel: false }); save(); renderMembers(); const ins = $('#members tbody').lastElementChild.querySelector('input'); ins && ins.focus(); };
+
+/* ---------- checks ---------- */
+function checks(){
+  const errs = [], warns = [];
+  const req = [['huf_name', 'the name of the HUF'], ['karta_name', 'the name of the Karta'], ['karta_father', c.karta_rel === 'wife of' ? "the Karta's husband's name" : "the Karta's father's name"], ['karta_dob', "the Karta's date of birth"], ['since_date', 'the date from which the HUF is in existence'], ['place', 'the place of execution']];
+  req.forEach(([k, t]) => { if (!String(c[k] || '').trim()) errs.push(`Enter ${t}.`); });
+  if (!addrLines().length) errs.push("Enter the Karta's address.");
+  if (c.addr_pin && !/^\d{6}$/.test(c.addr_pin.trim())) warns.push('The PIN code should have 6 digits.');
+  if (c.huf_name && !/\bHUF\b/i.test(c.huf_name)) warns.push('The name of the HUF usually ends with "HUF" (e.g. RAMESH K HUF).');
+  if (c.karta_aadhaar && !aadhaarOk(c.karta_aadhaar)) warns.push("The Karta's Aadhaar number does not look valid (12 digits with a check digit).");
+  if (c.karta_pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(c.karta_pan.trim().toUpperCase())) warns.push("The Karta's PAN format looks wrong.");
+  const named = c.members.filter(m => m.name.trim());
+  if (!named.length) warns.push('Only the Karta is listed – add the other members of the family.');
+  c.members.forEach((m, i) => {
+    if (!m.name.trim() && (m.relation || m.father || m.aadhaar)) errs.push(`Member ${i + 2}: enter the name.`);
+    if (m.name.trim() && !m.father.trim()) warns.push(`${m.name}: enter the father's name.`);
+    if (m.aadhaar && !aadhaarOk(m.aadhaar)) warns.push(`${m.name || 'Member ' + (i + 2)}: the Aadhaar number does not look valid.`);
+    if (m.show_rel && !m.dob && /son|daughter|grand/i.test(m.relation)) warns.push(`${m.name}: enter the date of birth (printed under the name).`);
+  });
+  if (c.since_date && c.karta_dob && c.since_date < c.karta_dob) errs.push('The HUF cannot be in existence before the Karta\'s date of birth.');
+  if (c.since_date && c.since_date > (c.date_blank ? isoToday() : c.aff_date)) errs.push('The date of existence of the HUF is after the date of the affidavit.');
+  if (c.karta_dob && ageOn(c.karta_dob, ageDate()) < 18) errs.push('The Karta is a minor on the date of the affidavit.');
+  return { errs, warns };
+}
+function renderChecks(){
+  const r = checks();
+  $('#checks').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join('') + r.warns.map(t => `<div class="m-warn">${esc(t)}</div>`).join('') || '<div class="m-ok">All details entered.</div>';
+}
+
+/* ---------- documents ---------- */
+function b64ToBytes(b64){ const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+const fileTag = () => (c.huf_name || 'HUF').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+const PAGES = { letter: [12240, 15840], a4: [11906, 16838], legal: [12240, 20160] };
+function render(tplName, data, post){
+  const zip = new PizZip(b64ToBytes(window.LLP_TEMPLATES[tplName]));
+  const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => '' });
+  doc.render(data);
+  const z = doc.getZip();
+  if (post) { let x = z.file('word/document.xml').asText(); x = post(x); z.file('word/document.xml', x); }
+  return new Blob([z.generate({ type: 'uint8array', compression: 'DEFLATE' })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+function memberRows(){
+  const withCommas = t => t.split(/\r?\n/).map(x => x.trim()).filter(Boolean).map((x, i, arr) => i < arr.length - 1 && !/[,.]$/.test(x) ? x + ',' : x).join('\n');
+  const kartaAddr = withCommas(addrLines().join('\n'));
+  const rows = [{ name: c.karta_name.trim(), relation: 'Karta', father: c.karta_father.trim(), dob: c.karta_dob, aadhaar: c.karta_aadhaar, address: kartaAddr, show_rel: false, karta: true }]
+    .concat(c.members.filter(m => m.name.trim()).map(m => ({ ...m, name: m.name.trim(), father: m.father.trim(), address: m.address.trim() ? withCommas(m.address) : kartaAddr })));
+  return rows;
+}
+async function ask(title, html){
+  return new Promise(res => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg');
+    const done = v => { dl.close(); res(v); }; $('#askYes').onclick = () => done(true); $('#askNo').onclick = () => done(false); dl.oncancel = () => res(false); dl.showModal(); });
+}
+async function gate(){
+  const r = checks();
+  if (r.errs.length) { $('#outMsgs').innerHTML = r.errs.map(t => `<div class="m-err">${esc(t)}</div>`).join(''); return false; }
+  if (r.warns.length && !(await ask('Generate with these points open?', r.warns.map(t => `<p>${esc(t)}</p>`).join('')))) return false;
+  return true;
+}
+$('#genAff').onclick = async () => {
+  if (!(await gate())) return;
+  const age = ageOn(c.karta_dob, ageDate());
+  const members = memberRows().map((m, i) => {
+    const lines = [m.name];
+    if (m.show_rel) { const rd = relDesc(m.relation); if (rd) lines.push(rd); if (m.dob) lines.push(`(DOB ${dmy(m.dob)})`); }
+    if (digits(m.aadhaar).length) lines.push(`[Aadhaar No ${aadhaarFmt(m.aadhaar)}]`);
+    return { n: i + 1, name_cell: lines.join('\n'), father: m.father, address: m.address };
+  });
+  const clauses = [`That the above said HUF is in existence since ${dmy(c.since_date)}${c.since_basis.trim() ? ` (${c.since_basis.trim()})` : ''}.`]
+    .concat(c.extra.split(/\r?\n/).map(s => s.trim()).filter(Boolean).map(s => /^that\b/i.test(s) ? s : 'That ' + s))
+    .concat(c.purpose.trim() ? [c.purpose.trim()] : [])
+    .map((text, i) => ({ n: i + 3, text: /[.:;]$/.test(text) ? text : text + '.' }));
+  const data = { karta_name: c.karta_name.trim(), karta_rel: c.karta_rel, karta_father: c.karta_father.trim(), karta_age: age, karta_address_inline: addrInline(),
+    huf_name: c.huf_name.trim(), newpage: !!c.newpage, col_head: c.col_head, members, clauses, place: c.place.trim(), aff_date: c.date_blank ? '' : dmy(c.aff_date) };
+  const [w, h] = PAGES[c.page] || PAGES.letter;
+  const blob = render('affidavit', data, x => x.replace('w:before="1111"', `w:before="${Math.round((Number(c.stamp_cm) || 0) * 567)}"`).replace(/<w:pgSz w:w="\d+" w:h="\d+"/, `<w:pgSz w:w="${w}" w:h="${h}"`));
+  download(`${fileTag()}_Affidavit.docx`, blob);
+  $('#outMsgs').innerHTML = '<div class="m-ok">Affidavit downloaded. Check it against the original KYC documents before it is printed on stamp paper and executed.</div>';
+};
+$('#genPan').onclick = async () => {
+  if (!(await gate())) return;
+  const L = addrLines(), rows = memberRows();
+  const v = s => String(s || '').trim() || '—';
+  const secs = [
+    { title: 'Applicant', rows: [
+      ['Category of applicant', 'Hindu Undivided Family'], ['Full name of the HUF', c.huf_name.trim().toUpperCase()],
+      ['Name to be printed on the PAN card', (c.pan_name_card.trim() || c.huf_name.trim()).toUpperCase()],
+      ['Date of formation of the HUF', dmy(c.since_date) + (c.since_basis.trim() ? ` (${c.since_basis.trim()})` : '')],
+      ['Status', 'Hindu Undivided Family'], ['Source of income', c.pan_income], ['AO code', c.pan_ao.trim() || 'To be selected on the portal for the city of the address'] ] },
+    { title: 'Karta (signs the application on behalf of the HUF)', rows: [
+      ['Name of the Karta', c.karta_name.trim()], [c.karta_rel === 'wife of' ? "Husband's name" : "Father's name", c.karta_father.trim()],
+      ['Date of birth', dmy(c.karta_dob)], ['PAN of the Karta', v(c.karta_pan.toUpperCase())], ['Aadhaar of the Karta', digits(c.karta_aadhaar) ? aadhaarFmt(c.karta_aadhaar) : '—'],
+      ['Mobile', v(c.karta_mobile)], ['E-mail', v(c.karta_email)] ] },
+    { title: 'Address for communication (residence of the Karta)', rows: [
+      ['Flat / Door / Block No.', v(c.addr_flat)], ['Premises / Building / Village', v(c.addr_building)], ['Road / Street / Lane', v(c.addr_road)],
+      ['Area / Locality / Taluk', v(c.addr_area)], ['Town / City / District', v(c.addr_city)], ['State', v(c.addr_state)], ['PIN code', v(c.addr_pin)], ['Country', 'India'] ] },
+    { title: 'Proof submitted', rows: [
+      ['Proof of identity, address and date of formation of the HUF', `Affidavit of the Karta${c.date_blank ? '' : ' dated ' + dmy(c.aff_date)} stating the name, father's name and address of all the members`],
+      ['Proof of identity and address of the Karta', c.karta_aadhaar ? 'Aadhaar of the Karta' : (c.karta_pan ? 'PAN card of the Karta' : 'To be furnished')] ] },
+  ].map(s => ({ title: s.title, rows: s.rows.map(([label, value]) => ({ label, value })) }));
+  const data = { huf_name: c.huf_name.trim().toUpperCase(), today: dmy(isoToday()), ref_text: c.ref.trim() ? ' · ' + c.ref.trim() : '', secs,
+    members: rows.map((m, i) => ({ n: i + 1, name: m.name, relation: m.relation || '—', father: m.father || '—', aadhaar_dob: [digits(m.aadhaar) ? aadhaarFmt(m.aadhaar) : '', m.dob ? 'DOB ' + dmy(m.dob) : ''].filter(Boolean).join('\n') || '—' })),
+    docs: ['Affidavit of the Karta, executed on stamp paper (scanned copy for an online application)', "Copy of the Karta's proof of identity and address (e.g. Aadhaar)", 'Application signed by the Karta in the capacity of Karta of the HUF'],
+    notes: ['The name of the HUF, the Karta\'s name and the address must match the affidavit exactly.',
+      'The date of formation should be the date stated in the affidavit as the date from which the HUF is in existence.',
+      'Check the AO code for the address using the AO code search on the PAN application site.',
+      'Verify every field against the original documents before the application is submitted.'] };
+  download(`${fileTag()}_PAN_data_sheet.docx`, render('pan_datasheet', data));
+  $('#outMsgs').innerHTML = '<div class="m-ok">PAN data sheet downloaded.</div>';
+};
+
+/* ---------- case files ---------- */
+$('#saveCase').onclick = () => download(`${fileTag()}_huf_case.json`, new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' }));
+$('#openCase').onclick = () => $('#caseFile').click();
+$('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (!('karta_name' in d)) throw 0; c = Object.assign(blank(), d); save(); all(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
+  catch (err) { $('#topMsgs').innerHTML = '<div class="m-err">That file is not an HUF case file.</div>'; } };
+$('#newCase').onclick = async () => { if (!(await ask('Start a new HUF?', 'The details on screen will be cleared. Save the case file first if you need it.'))) return; c = blank(); save(); all(); };
+
+/* ---------- Excel ---------- */
+$('#dlXlsx').onclick = () => download('HUF_data_template.xlsx', new Blob([b64ToBytes(window.LLP_TEMPLATES.HUF_data_template)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+$('#upXlsx').onclick = () => $('#xlsxFile').click();
+$('#xlsxFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const sh = LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer())), S = LLPXlsx.str, warns = [];
+    const D = sh['Details'], M = sh['Members'], C = sh['Clauses'];
+    if (!D || !M) throw new Error('this is not the HUF data template (sheets Details and Members are needed)');
+    const det = {}; Object.keys(D).forEach(ref => { const m = ref.match(/^A(\d+)$/); if (m) det[S(D[ref])] = D['C' + m[1]]; });
+    const rows = cells => { const kc = {}; Object.keys(cells).forEach(ref => { const m = ref.match(/^([A-Z]+)1$/); if (m) kc[S(cells[ref])] = m[1]; });
+      const max = Math.max(0, ...Object.keys(cells).map(r => +r.replace(/^[A-Z]+/, ''))); const out = [];
+      for (let r = 3; r <= max; r++) { const o = { _row: r }; let any = false; Object.entries(kc).forEach(([k, col]) => { const v = cells[col + r]; if (v !== undefined && v !== '') { o[k] = v; any = true; } }); if (any) out.push(o); }
+      return out; };
+    const dt = v => { if (v === undefined || v === '') return ''; const d = LLPXlsx.date(v); if (d === null) { warns.push(`"${S(v)}" is not a valid date.`); return ''; } return d; };
+    const n = blank();
+    ['huf_name','karta_name','karta_father','karta_aadhaar','karta_mobile','karta_email','addr_flat','addr_building','addr_road','addr_area','addr_city','addr_state','addr_pin','address_print','since_basis','place','pan_name_card','pan_ao']
+      .forEach(k => { if (det[k] !== undefined) n[k] = S(det[k]); });
+    if (det.karta_rel) n.karta_rel = ['son of', 'daughter of', 'wife of'].find(x => x === S(det.karta_rel).toLowerCase()) || 'son of';
+    if (det.karta_pan) n.karta_pan = S(det.karta_pan).toUpperCase();
+    if (det.pan_income) n.pan_income = S(det.pan_income);
+    n.karta_dob = dt(det.karta_dob); n.since_date = dt(det.since_date);
+    const ad = dt(det.aff_date); if (ad) { n.aff_date = ad; n.date_blank = false; }
+    n.members = rows(M).filter(m => S(m.name)).map(m => ({ id: uid(), name: S(m.name), relation: S(m.relation), father: S(m.father), dob: dt(m.dob), aadhaar: S(m.aadhaar), address: S(m.address),
+      show_rel: m.show_rel !== undefined ? /^y/i.test(S(m.show_rel)) : /son|daughter|grand/i.test(S(m.relation)) && !/wife/i.test(S(m.relation)) }));
+    if (C) n.extra = rows(C).map(r => S(r.text)).filter(Boolean).join('\n');
+    if ((c.karta_name || c.members.length) && !(await ask('Replace the details on screen?', `The details on screen will be replaced by those in ${esc(f.name)}.`))) return;
+    c = n; save(); all();
+    $('#topMsgs').innerHTML = `<div class="m-ok">Imported ${esc(f.name)}: Karta ${esc(n.karta_name || '(not given)')} and ${n.members.length} other member(s).</div>` + warns.map(t => `<div class="m-warn">${esc(t)}</div>`).join('');
+  } catch (err) { $('#topMsgs').innerHTML = `<div class="m-err">Excel file not imported: ${esc(err.message || err)}</div>`; }
+};
+
+function all(){ bind(); renderMembers(); refresh(); }
+window.HUFTool = { get: () => c };
+all();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

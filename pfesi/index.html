@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPF and ESI Returns</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.84rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--head);font-weight:600;position:sticky;top:0;z-index:1}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tfoot td{font-weight:700;background:var(--head);position:sticky;bottom:0}
+table.t input,table.t select{padding:3px 5px;font-size:.84rem}
+table.t input.w-s{width:60px} table.t input.w-m{width:110px} table.t input.w-l{width:190px} table.t input.num{text-align:right;width:90px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpis div{background:var(--head);border-radius:8px;padding:10px 12px}
+.kpis span{display:block;font-size:.78rem;color:var(--muted)}
+.kpis b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.outs button{text-align:left;padding:10px 12px}
+.outs button small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.outs button.primary small{color:inherit;opacity:.85}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>EPF and ESI Monthly Returns</h1>
+  <p class="sub">Import the salary sheet, check the computation, and download the ECR file for the EPFO portal, the monthly contribution file for the ESIC portal, and registers and a summary for your records.</p>
+
+  <div class="card">
+    <div class="bar">
+      <button type="button" id="upXlsx" class="primary">Import salary sheet</button>
+      <input type="file" id="xlsxFile" accept=".xlsx" hidden>
+      <button type="button" id="dlXlsx">Download salary template</button>
+      <span style="flex:1"></span>
+      <button type="button" id="saveCase">Save month file</button>
+      <button type="button" id="openCase">Open month file</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" id="nextMonth">Start next month</button>
+      <button type="button" id="settingsBtn">Rates and ceilings</button>
+    </div>
+    <div id="topMsgs" class="msgs" style="margin-top:10px"></div>
+  </div>
+
+  <section class="card">
+    <h2>1. Establishment and wage month</h2>
+    <div class="grid">
+      <div class="full"><label>Establishment name</label><input data-f="est_name"></div>
+      <div><label>EPF establishment code</label><input data-f="pf_code" placeholder="e.g. TNMAS0012345000"></div>
+      <div><label>ESI employer code</label><input data-f="esi_code" placeholder="17 digits"></div>
+      <div><label>Wage month</label><input type="month" data-f="month"></div>
+      <div><label>Due date (EPF and ESI)</label><input id="due" disabled></div>
+      <div class="full hint" id="ceilInfo"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Employees <span class="bar"><input id="q" placeholder="Search" style="width:180px"><button type="button" class="link" id="addEmp">+ Add employee</button></span></h2>
+    <div class="tw"><table class="t" id="emp"><thead><tr>
+      <th>#</th><th>Emp ID</th><th>Name</th><th>UAN</th><th>ESI IP No.</th><th class="n">Gross</th><th class="n">PF wages (Basic+DA)</th><th class="n">NCP days</th><th class="n">ESI days</th>
+      <th title="PF applicable">PF</th><th title="EPS member">EPS</th><th title="PF on wages above the ceiling">Higher</th><th>ESI</th><th>Reason</th><th>Last working day</th><th>Date of birth</th><th class="n">Refund adv.</th>
+      <th class="n">EPF wages</th><th class="n">EE 12%</th><th class="n">EPS</th><th class="n">ER diff</th><th class="n">ESI EE</th><th class="n">ESI ER</th><th></th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <p class="hint">Grey columns on the right are computed. ESI: Auto = covered if there is an IP number and the gross is within the ceiling; Yes = covered for the current contribution period (April–September / October–March) even if wages have gone above the ceiling.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Contributions for the month</h2>
+    <div class="two">
+      <div><h2 style="font-size:.95rem">EPF (ECR)</h2><table class="t" id="pfSum"></table></div>
+      <div><h2 style="font-size:.95rem">ESI</h2><table class="t" id="esiSum"></table></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>4. Checks</h2>
+    <div id="issues" class="msgs"></div>
+  </section>
+
+  <section class="card">
+    <h2>5. Files for the portals and forms for your records</h2>
+    <div class="outs">
+      <button type="button" class="primary" data-out="ecr">ECR file (.txt)<small>Upload on the EPFO employer portal – ECR 2.0, #~# separated</small></button>
+      <button type="button" class="primary" data-out="esic">ESIC monthly contribution file (.xls)<small>Upload on the ESIC portal – Excel 97-2003, all text</small></button>
+      <button type="button" data-out="ecrx">ECR in Excel (.xls)<small>Same data with column headings, for review</small></button>
+      <button type="button" data-out="pfreg">EPF contribution register (PDF)<small>Employee-wise, with account-wise totals</small></button>
+      <button type="button" data-out="esireg">ESI contribution register (PDF)<small>Employee-wise</small></button>
+      <button type="button" data-out="summary">Monthly summary and reconciliation (PDF)<small>Challan details, portal comparison, notes</small></button>
+    </div>
+    <div id="outMsgs" class="msgs" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card">
+    <h2>6. Filing record and reconciliation with the portal</h2>
+    <div class="grid">
+      <div><label>EPF – TRRN</label><input data-f="trrn"></div>
+      <div><label>EPF – challan paid on</label><input type="date" data-f="pf_paid"></div>
+      <div><label>EPF – amount as per portal challan</label><input data-f="pf_portal" inputmode="numeric"></div>
+      <div><label>EPF – A/c 1 / 2 / 10 / 21 / 22 as per portal</label><input data-f="pf_portal_ac" placeholder="e.g. 52227 / 1666 / 27763 / 1666 / 0"></div>
+      <div><label>ESI – challan No.</label><input data-f="esi_challan"></div>
+      <div><label>ESI – paid on</label><input type="date" data-f="esi_paid"></div>
+      <div><label>ESI – amount as per portal</label><input data-f="esi_portal" inputmode="numeric"></div>
+      <div><label>ESI – employees' / employer's share as per portal</label><input data-f="esi_portal_split" placeholder="e.g. 4887 / 21143"></div>
+      <div class="full"><label>Notes (arrears included, employees not registered, differences explained…)</label><textarea data-f="notes" rows="3"></textarea></div>
+      <div class="full" id="recon"></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="setDlg"><form method="dialog" id="setForm">
+  <div class="dh">Rates and ceilings (kept with the month file and as your default)</div>
+  <div class="db">
+    <h3 style="margin:0 0 8px;font-size:.95rem">EPF</h3>
+    <div class="grid">
+      <div><label>Employee's share %</label><input name="pf_ee"></div>
+      <div><label>EPS %</label><input name="eps"></div>
+      <div><label>Admin charges % of EPF wages</label><input name="admin"></div>
+      <div><label>Minimum admin charges (Rs.)</label><input name="admin_min"></div>
+      <div><label>EDLI % of EDLI wages</label><input name="edli"></div>
+      <div><label>EDLI admin charges %</label><input name="edli_admin"></div>
+      <div><label>EPS stops at age</label><input name="eps_age"></div>
+      <div class="full"><label>EPF wage ceiling – one line per change: date from (DD-MM-YYYY), ceiling</label><textarea name="pf_ceilings" rows="3"></textarea>
+        <div class="hint">When the ceiling changes within a month, wages are split by calendar days (e.g. September 2026: 16 days at Rs.15,000 and 14 days at Rs.25,000).</div></div>
+    </div>
+    <h3 style="margin:14px 0 8px;font-size:.95rem">ESI</h3>
+    <div class="grid">
+      <div><label>Wage ceiling for coverage (Rs.)</label><input name="esi_ceiling"></div>
+      <div><label>Employee's share %</label><input name="esi_ee"></div>
+      <div><label>Employer's share %</label><input name="esi_er"></div>
+      <div><label>Employee's share nil if average daily wage up to (Rs.)</label><input name="esi_low_daily"></div>
+      <div><label>Rounding</label><select name="esi_round"><option value="up">Next higher rupee</option><option value="near">Nearest rupee</option></select></div>
+      <div class="full"><label>ESI wages for a covered employee whose gross is above the ceiling</label><select name="esi_wage_basis"><option value="actual">Actual gross wages (ESI Act – no ceiling on contribution wages)</option><option value="ceiling">Restrict to the ceiling amount</option></select>
+        <div class="hint">An employee covered at the start of a contribution period stays covered till its end, and contributions are on the actual wages. Restricting to the ceiling departs from this – use it only where you have a basis for it.</div></div>
+    </div>
+    <p class="hint">Check these against the latest EPFO / ESIC notifications before filing.</p>
+  </div>
+  <div class="df"><button type="button" id="setReset">Restore defaults</button><span style="flex:1"></span><button type="button" id="setCancel">Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></dialog>
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/xlswrite.js"></script>
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="../shared/jspdf.plugin.autotable.min.js"></script>
+<script src="lib/templates.js"></script>
+<script src="lib/engine.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const inr = n => Math.round(n || 0).toLocaleString('en-IN');
+const pad = n => String(n).padStart(2, '0');
+const dmy = iso => iso ? iso.split('-').reverse().join('-') : '';
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const monthName = ym => { const [y, m] = ym.split('-').map(Number); return `${MONTHS[m - 1]} ${y}`; };
+const LS = { cur: 'pfesi-current-v1', set: 'pfesi-settings-v1' };
+const store = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } } };
+const lastMonth = () => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const blankEmp = () => ({ emp_id: '', name: '', uan: '', ip: '', dept: '', desig: '', gross: '', pf_wage: '', ncp: 0, esi_days: '', pf_applicable: true, eps_member: true, higher_pf: false, esi: 'auto', reason: '', lwd: '', dob: '', refund: 0 });
+const blank = () => ({ est_name: '', pf_code: '', esi_code: '', month: lastMonth(), employees: [], settings: Object.assign({}, PfEsi.DEFAULTS, store.get(LS.set, {})),
+  trrn: '', pf_paid: '', pf_portal: '', pf_portal_ac: '', esi_challan: '', esi_paid: '', esi_portal: '', esi_portal_split: '', notes: '' });
+let st = Object.assign(blank(), store.get(LS.cur, {}));
+st.settings = Object.assign({}, PfEsi.DEFAULTS, st.settings || {});
+let res = null;
+const save = () => { if (!store.set(LS.cur, st)) $('#topMsgs').innerHTML = '<div class="m-warn">The browser could not keep a copy – use "Save month file".</div>'; };
+
+/* ---------- fields ---------- */
+function bind(){
+  document.querySelectorAll('[data-f]').forEach(el => { const k = el.dataset.f; el.value = st[k] ?? ''; el.oninput = el.onchange = () => { st[k] = el.value; save(); if (k === 'month') renderEmp(); recalc(); }; });
+}
+function dueDate(){ if (!st.month) return ''; const [y, m] = st.month.split('-').map(Number); const d = new Date(Date.UTC(y, m, 15)); return `15-${pad(d.getUTCMonth() + 1)}-${d.getUTCFullYear()}`; }
+
+/* ---------- employees table ---------- */
+const COLS = [['emp_id', 'w-s'], ['name', 'w-l'], ['uan', 'w-m'], ['ip', 'w-m'], ['gross', 'num'], ['pf_wage', 'num'], ['ncp', 'w-s'], ['esi_days', 'w-s']];
+function renderEmp(){
+  const q = ($('#q').value || '').trim().toLowerCase();
+  const tb = $('#emp tbody'); tb.innerHTML = '';
+  st.employees.forEach((e, i) => {
+    if (q && ![e.emp_id, e.name, e.uan, e.ip].join(' ').toLowerCase().includes(q)) return;
+    const tr = document.createElement('tr'); tr.dataset.i = i;
+    tr.innerHTML = `<td>${i + 1}</td>` + COLS.map(([k, cls]) => `<td><input class="${cls}" data-k="${k}" value="${esc(e[k])}" ${['gross', 'pf_wage', 'ncp', 'esi_days', 'uan', 'ip'].includes(k) ? 'inputmode="numeric"' : ''}></td>`).join('') +
+      `<td><input type="checkbox" data-k="pf_applicable" ${e.pf_applicable !== false ? 'checked' : ''}></td><td><input type="checkbox" data-k="eps_member" ${e.eps_member !== false ? 'checked' : ''}></td><td><input type="checkbox" data-k="higher_pf" ${e.higher_pf ? 'checked' : ''}></td>
+      <td><select data-k="esi">${['auto', 'yes', 'no'].map(v => `<option value="${v}" ${e.esi === v ? 'selected' : ''}>${v === 'auto' ? 'Auto' : v === 'yes' ? 'Yes' : 'No'}</option>`).join('')}</select></td>
+      <td><select data-k="reason"><option value=""></option>${PfEsi.REASONS.map(([c, t]) => `<option value="${c}" ${String(e.reason) === c ? 'selected' : ''}>${c} – ${esc(t)}</option>`).join('')}</select></td>
+      <td><input type="date" data-k="lwd" value="${esc(e.lwd)}"></td><td><input type="date" data-k="dob" value="${esc(e.dob)}"></td><td><input class="num" data-k="refund" value="${esc(e.refund)}" style="width:70px"></td>
+      <td class="n c" data-c="epfW"></td><td class="n c" data-c="ee"></td><td class="n c" data-c="epsC"></td><td class="n c" data-c="erDiff"></td><td class="n c" data-c="esiEE"></td><td class="n c" data-c="esiER"></td>
+      <td><button type="button" class="sm link danger" data-del title="Remove">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  recalc();
+}
+$('#emp tbody').addEventListener('input', e => { const tr = e.target.closest('tr'); const k = e.target.dataset.k; if (!tr || !k) return; const emp = st.employees[+tr.dataset.i];
+  emp[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; save(); recalc(); });
+$('#emp tbody').addEventListener('click', async e => { const b = e.target.closest('[data-del]'); if (!b) return; const i = +b.closest('tr').dataset.i;
+  if (!(await ask('Remove this employee?', esc(st.employees[i].name || '(no name)')))) return; st.employees.splice(i, 1); save(); renderEmp(); });
+$('#q').oninput = renderEmp;
+$('#addEmp').onclick = () => { st.employees.push(blankEmp()); save(); renderEmp(); const trs = $('#emp tbody').querySelectorAll('tr'); trs[trs.length - 1].querySelector('[data-k=name]').focus(); };
+
+/* ---------- computation ---------- */
+function recalc(){
+  if (!st.month) return;
+  res = PfEsi.compute(st);
+  $('#due').value = dueDate();
+  $('#ceilInfo').textContent = `${monthName(st.month)}: ${res.D} days. EPF wage ceiling ${res.seg.map(s => `Rs.${inr(s.ceiling)} for ${s.days} day(s)`).join(' and ')}. ESI ceiling Rs.${inr(res.S.esi_ceiling)}.`;
+  const byI = {}; res.rows.forEach(r => byI[r.i] = r);
+  $('#emp tbody').querySelectorAll('tr').forEach(tr => { const r = byI[+tr.dataset.i]; tr.querySelectorAll('[data-c]').forEach(td => { const k = td.dataset.c;
+    td.textContent = !r ? '' : (['epfW', 'ee', 'epsC', 'erDiff'].includes(k) && !r.pf) || (['esiEE', 'esiER'].includes(k) && !r.esi) ? '–' : inr(r[k]); td.style.background = 'var(--lock)'; }); });
+  const t = res.t;
+  $('#emp tfoot').innerHTML = `<tr><td colspan="5">Total (${res.rows.length})</td><td class="n">${inr(res.rows.reduce((a, r) => a + r.gross, 0))}</td><td colspan="11"></td><td class="n">${inr(t.epfW)}</td><td class="n">${inr(t.ee)}</td><td class="n">${inr(t.eps)}</td><td class="n">${inr(t.er)}</td><td class="n">${inr(t.esiEE)}</td><td class="n">${inr(t.esiER)}</td><td></td></tr>`;
+  $('#pfSum').innerHTML = `<tbody>
+    <tr><td>Members in the ECR</td><td class="n">${t.members}</td></tr><tr><td>EPF wages / EPS wages / EDLI wages</td><td class="n">${inr(t.epfW)} / ${inr(t.epsW)} / ${inr(t.edliW)}</td></tr>
+    <tr><td>A/c 1 – EPF (employees ${inr(t.ee)} + employer ${inr(t.er)})</td><td class="n">${inr(t.ac1)}</td></tr><tr><td>A/c 2 – Admin charges (${res.S.admin}%, min Rs.${inr(res.S.admin_min)})</td><td class="n">${inr(t.ac2)}</td></tr>
+    <tr><td>A/c 10 – EPS (${res.S.eps}%)</td><td class="n">${inr(t.ac10)}</td></tr><tr><td>A/c 21 – EDLI (${res.S.edli}%)</td><td class="n">${inr(t.ac21)}</td></tr><tr><td>A/c 22 – EDLI admin charges</td><td class="n">${inr(t.ac22)}</td></tr>
+    <tr><td><b>Total EPF challan</b></td><td class="n"><b>${inr(t.pfTotal)}</b></td></tr></tbody>`;
+  $('#esiSum').innerHTML = `<tbody><tr><td>Employees in the return</td><td class="n">${t.esiMembers}</td></tr><tr><td>Total wages</td><td class="n">${inr(t.esiW)}</td></tr>
+    <tr><td>Employees' share (${res.S.esi_ee}%)</td><td class="n">${inr(t.esiEE)}</td></tr><tr><td>Employer's share (${res.S.esi_er}%)</td><td class="n">${inr(t.esiER)}</td></tr>
+    <tr><td><b>Total ESI</b></td><td class="n"><b>${inr(t.esiTotal)}</b></td></tr><tr><td colspan="2" class="hint">The ESIC portal computes the contribution from the wages uploaded; this is the expected amount.</td></tr></tbody>`;
+  const cls = { err: 'm-err', warn: 'm-warn', info: 'm-info' };
+  $('#issues').innerHTML = res.issues.map(([k, m]) => `<div class="${cls[k]}">${esc(m)}</div>`).join('') || '<div class="m-ok">No problems found.</div>';
+  renderRecon();
+}
+function renderRecon(){
+  if (!res) return;
+  const n = v => Number(String(v || '').replace(/[^\d.]/g, '')) || 0, t = res.t, lines = [];
+  if (st.pf_portal) lines.push(['EPF challan', t.pfTotal, n(st.pf_portal)]);
+  const ac = String(st.pf_portal_ac || '').split(/[\/,]/).map(x => x.trim()).filter(Boolean);
+  if (ac.length) ['A/c 1', 'A/c 2', 'A/c 10', 'A/c 21', 'A/c 22'].forEach((a, i) => { if (ac[i] !== undefined) lines.push([a, [t.ac1, t.ac2, t.ac10, t.ac21, t.ac22][i], n(ac[i])]); });
+  if (st.esi_portal) lines.push(['ESI total', t.esiTotal, n(st.esi_portal)]);
+  const es = String(st.esi_portal_split || '').split(/[\/,]/).map(x => x.trim()).filter(Boolean);
+  if (es.length) [['ESI employees\' share', t.esiEE], ['ESI employer\'s share', t.esiER]].forEach(([a, v], i) => { if (es[i] !== undefined) lines.push([a, v, n(es[i])]); });
+  $('#recon').innerHTML = lines.length ? `<table class="t"><thead><tr><th></th><th class="n">As per this working</th><th class="n">As per portal</th><th class="n">Difference</th></tr></thead><tbody>${lines.map(([a, w, p]) =>
+    `<tr><td>${esc(a)}</td><td class="n">${inr(w)}</td><td class="n">${inr(p)}</td><td class="n" style="color:${Math.abs(w - p) > 1 ? 'var(--err)' : 'var(--ok)'}">${inr(w - p)}</td></tr>`).join('')}</tbody></table>` : '<p class="hint">Enter the amounts as per the portal to compare.</p>';
+}
+
+/* ---------- outputs ---------- */
+function download(name, data, type){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+const tag = () => `${(st.est_name || 'Establishment').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 30)}_${MONTHS[+st.month.split('-')[1] - 1].slice(0, 3)}_${st.month.split('-')[0]}`;
+function pdfDoc(title){
+  const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(st.est_name || 'Establishment', 14, 13);
+  doc.setFontSize(11); doc.text(title, 14, 19);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+  doc.text(`Wage month: ${monthName(st.month)}   ·   EPF code: ${st.pf_code || '—'}   ·   ESI code: ${st.esi_code || '—'}   ·   Due date: ${dueDate()}`, 14, 24.5);
+  return doc;
+}
+function footer(doc){ const n = doc.getNumberOfPages(); for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(110); doc.text(`Page ${i} of ${n}   ·   Prepared on ${new Date().toLocaleDateString('en-IN')}`, 14, 203); doc.setTextColor(0); } }
+const AT = { theme: 'grid', styles: { fontSize: 7.5, cellPadding: 1.2 }, headStyles: { fillColor: [31, 95, 174] }, footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: 'bold' }, didParseCell: d => { if (d.section !== 'head' && /^-?[\d,]+$/.test(String(d.cell.raw)) && d.column.index > 1) d.cell.styles.halign = 'right'; } };
+const OUT = {
+  ecr: () => { const t = PfEsi.ecrText(res); download(`ECR_${tag()}.txt`, t, 'text/plain'); return `ECR file downloaded – ${res.t.members} members, total EPF challan Rs.${inr(res.t.pfTotal)}.`; },
+  esic: () => { download(`ESIC_MC_${tag()}.xls`, XlsWrite.build([{ name: 'Sheet1', rows: PfEsi.esicRows(res) }], { allText: true }), 'application/vnd.ms-excel'); return `ESIC file downloaded – ${res.t.esiMembers} employees, wages Rs.${inr(res.t.esiW)}.`; },
+  ecrx: () => { const rows = [PfEsi.ECR_HEAD].concat(res.rows.filter(r => r.pf).map(r => [r.uan, r.name.toUpperCase(), r.gross, r.epfW, r.epsW, r.edliW, r.ee, r.epsC, r.erDiff, r.ncp, r.refund]));
+    const t = res.t; rows.push(['', 'TOTAL', t.gross, t.epfW, t.epsW, t.edliW, t.ee, t.eps, t.er, '', t.refund]);
+    download(`ECR_review_${tag()}.xls`, XlsWrite.build([{ name: 'ECR', rows }]), 'application/vnd.ms-excel'); return 'ECR in Excel downloaded.'; },
+  pfreg: () => { const doc = pdfDoc('EPF contribution register'); const t = res.t;
+    doc.autoTable(Object.assign({}, AT, { startY: 28, head: [['#', 'UAN', 'Name', 'Gross', 'EPF wages', 'EPS wages', 'EDLI wages', 'EE 12%', 'EPS 8.33%', 'ER diff', 'NCP', 'Refund']],
+      body: res.rows.filter(r => r.pf).map((r, i) => [i + 1, r.uan, r.name, inr(r.gross), inr(r.epfW), inr(r.epsW), inr(r.edliW), inr(r.ee), inr(r.epsC), inr(r.erDiff), r.ncp, inr(r.refund)]),
+      foot: [['', '', 'Total', inr(t.gross), inr(t.epfW), inr(t.epsW), inr(t.edliW), inr(t.ee), inr(t.eps), inr(t.er), '', inr(t.refund)]], columnStyles: Object.fromEntries([3, 4, 5, 6, 7, 8, 9, 10, 11].map(c => [c, { halign: 'right' }])) }));
+    doc.autoTable(Object.assign({}, AT, { startY: doc.lastAutoTable.finalY + 6, tableWidth: 120, head: [['Account', 'Amount (Rs.)']],
+      body: [['A/c 1 – EPF', inr(t.ac1)], ['A/c 2 – Admin charges', inr(t.ac2)], ['A/c 10 – EPS', inr(t.ac10)], ['A/c 21 – EDLI', inr(t.ac21)], ['A/c 22 – EDLI admin', inr(t.ac22)]], foot: [['Total', inr(t.pfTotal)]], columnStyles: { 1: { halign: 'right' } } }));
+    footer(doc); doc.save(`EPF_register_${tag()}.pdf`); return 'EPF register downloaded.'; },
+  esireg: () => { const doc = pdfDoc('ESI contribution register'); const t = res.t;
+    doc.autoTable(Object.assign({}, AT, { startY: 28, head: [['#', 'IP No.', 'Name', 'Days', 'Wages', 'Employee 0.75%', 'Employer 3.25%', 'Total', 'Reason', 'Last working day']],
+      body: res.rows.filter(r => r.esi).map((r, i) => [i + 1, r.ip, r.name, r.esiDays, inr(r.esiW), inr(r.esiEE), inr(r.esiER), inr(r.esiEE + r.esiER), r.reason, dmy(r.lwd)]),
+      foot: [['', '', 'Total', '', inr(t.esiW), inr(t.esiEE), inr(t.esiER), inr(t.esiTotal), '', '']], columnStyles: Object.fromEntries([3, 4, 5, 6, 7].map(c => [c, { halign: 'right' }])) }));
+    const not = res.rows.filter(r => !r.esi);
+    if (not.length) doc.autoTable(Object.assign({}, AT, { startY: doc.lastAutoTable.finalY + 6, head: [['Not covered under ESI this month', 'Gross']], body: not.map(r => [r.name, inr(r.gross)]), tableWidth: 120, columnStyles: { 1: { halign: 'right' } } }));
+    footer(doc); doc.save(`ESI_register_${tag()}.pdf`); return 'ESI register downloaded.'; },
+  summary: () => { const doc = pdfDoc('EPF and ESI – monthly summary'); const t = res.t;
+    doc.autoTable(Object.assign({}, AT, { startY: 28, tableWidth: 130, head: [['EPF', 'Amount (Rs.)']], body: [['Members', t.members], ['EPF wages', inr(t.epfW)], ['A/c 1 – EPF (EE + ER)', inr(t.ac1)], ['A/c 2 – Admin charges', inr(t.ac2)], ['A/c 10 – EPS', inr(t.ac10)], ['A/c 21 – EDLI', inr(t.ac21)], ['A/c 22 – EDLI admin', inr(t.ac22)]],
+      foot: [['Total EPF challan', inr(t.pfTotal)]], columnStyles: { 1: { halign: 'right' } } }));
+    const y1 = doc.lastAutoTable.finalY;
+    doc.autoTable(Object.assign({}, AT, { startY: 28, margin: { left: 152 }, tableWidth: 130, head: [['ESI', 'Amount (Rs.)']], body: [['Employees', t.esiMembers], ['Wages', inr(t.esiW)], ['Employees\' share', inr(t.esiEE)], ['Employer\'s share', inr(t.esiER)]], foot: [['Total ESI', inr(t.esiTotal)]], columnStyles: { 1: { halign: 'right' } } }));
+    let y = Math.max(y1, doc.lastAutoTable.finalY) + 6;
+    doc.autoTable(Object.assign({}, AT, { startY: y, head: [['Filing record', 'EPF', 'ESI']], body: [['Challan / TRRN', st.trrn || '—', st.esi_challan || '—'], ['Paid on', dmy(st.pf_paid) || '—', dmy(st.esi_paid) || '—'], ['Amount as per portal', st.pf_portal ? inr(Number(String(st.pf_portal).replace(/[^\d.]/g, ''))) : '—', st.esi_portal ? inr(Number(String(st.esi_portal).replace(/[^\d.]/g, ''))) : '—'], ['Due date', dueDate(), dueDate()]] }));
+    const rows = [...$('#recon').querySelectorAll('tbody tr')].map(tr => [...tr.children].map(td => td.textContent));
+    if (rows.length) doc.autoTable(Object.assign({}, AT, { startY: doc.lastAutoTable.finalY + 6, head: [['Reconciliation', 'As per working', 'As per portal', 'Difference']], body: rows, columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } } }));
+    if (st.notes) { y = doc.lastAutoTable.finalY + 8; doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.text('Notes', 14, y); doc.setFont('helvetica', 'normal'); doc.text(doc.splitTextToSize(st.notes, 265), 14, y + 5); }
+    const iss = res.issues.filter(i => i[0] !== 'info');
+    if (iss.length) doc.autoTable(Object.assign({}, AT, { startY: (st.notes ? y + 12 + doc.splitTextToSize(st.notes, 265).length * 4 : doc.lastAutoTable.finalY + 6), head: [['Points to attend']], body: iss.map(i => [i[1]]) }));
+    footer(doc); doc.save(`PF_ESI_summary_${tag()}.pdf`); return 'Monthly summary downloaded.'; },
+};
+document.querySelectorAll('[data-out]').forEach(b => b.onclick = async () => {
+  if (!res || !res.rows.length) { $('#outMsgs').innerHTML = '<div class="m-err">Import or enter the employees first.</div>'; return; }
+  const errs = res.issues.filter(i => i[0] === 'err');
+  const portal = ['ecr', 'esic'].includes(b.dataset.out);
+  const rel = errs.filter(i => b.dataset.out === 'ecr' ? /UAN|PF/.test(i[1]) : b.dataset.out === 'esic' ? /ESI|IP|reason|working day/i.test(i[1]) : true);
+  if (portal && rel.length && !(await ask('Generate the file with these errors?', rel.map(i => `<p>${esc(i[1])}</p>`).join('') + '<p>The portal may reject the file. Rows with errors are still included.</p>'))) return;
+  try { $('#outMsgs').innerHTML = `<div class="m-ok">${esc(OUT[b.dataset.out]())}</div>`; } catch (err) { $('#outMsgs').innerHTML = `<div class="m-err">Could not prepare the file: ${esc(err.message)}</div>`; }
+});
+
+/* ---------- import ---------- */
+$('#dlXlsx').onclick = () => { const bin = atob(window.LLP_TEMPLATES.PF_ESI_salary_template); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); download('PF_ESI_salary_template.xlsx', u, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); };
+$('#upXlsx').onclick = () => $('#xlsxFile').click();
+$('#xlsxFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const sheets = LLPXlsx.readWorkbook(new Uint8Array(await f.arrayBuffer()));
+    const p = PfEsi.parseWorkingSheet(sheets);
+    if (!p || !p.employees.length) throw new Error('no sheet with "UAN" and "Employee Name" headings and employee rows was found');
+    if (st.employees.length && !(await ask('Replace the employees on screen?', `${st.employees.length} employee(s) on screen will be replaced by ${p.employees.length} from "${esc(p.sheet)}" in ${esc(f.name)}.`))) return;
+    st.employees = p.employees.map(x => Object.assign(blankEmp(), x));
+    const m = (p.sheet + ' ' + f.name).match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s_\-']*(\d{2,4})/i);
+    if (m) { const mi = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(m[1].toLowerCase()) + 1; let y = +m[2]; if (y < 100) y += 2000; st.month = `${y}-${pad(mi)}`; }
+    const t1 = Object.values(sheets[p.sheet]).find(v => typeof v === 'string' && /private limited|limited|llp|& co/i.test(v)); if (t1 && !st.est_name) st.est_name = t1.trim();
+    save(); bind(); renderEmp();
+    $('#topMsgs').innerHTML = `<div class="m-ok">Imported ${p.employees.length} employees from "${esc(p.sheet)}" (${esc(f.name)}). Wage month set to ${monthName(st.month)} – change it if needed.</div>` + p.warnings.map(w => `<div class="m-warn">${esc(w)}</div>`).join('');
+  } catch (err) { $('#topMsgs').innerHTML = `<div class="m-err">Not imported: ${esc(err.message || err)}</div>`; }
+};
+
+/* ---------- month files ---------- */
+$('#saveCase').onclick = () => download(`PF_ESI_${tag()}.json`, JSON.stringify(Object.assign({ kind: 'pf-esi-month' }, st), null, 1), 'application/json');
+$('#openCase').onclick = () => $('#caseFile').click();
+$('#caseFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (d.kind !== 'pf-esi-month') throw 0; st = Object.assign(blank(), d); st.settings = Object.assign({}, PfEsi.DEFAULTS, d.settings || {}); save(); bind(); renderEmp(); $('#topMsgs').innerHTML = `<div class="m-ok">Opened ${esc(f.name)}.</div>`; }
+  catch (err) { $('#topMsgs').innerHTML = '<div class="m-err">That file is not an EPF & ESI month file.</div>'; } };
+$('#nextMonth').onclick = async () => {
+  if (!(await ask('Start the next month?', 'Save this month\'s file first. The employees, codes and settings are carried forward; NCP days, ESI days, reason codes, refunds and the filing details are cleared, and employees with a last working day are dropped.'))) return;
+  const [y, m] = st.month.split('-').map(Number); const d = new Date(Date.UTC(y, m, 1));
+  st.month = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`;
+  st.employees = st.employees.filter(e => !e.lwd).map(e => Object.assign(e, { ncp: 0, esi_days: '', reason: '', refund: 0 }));
+  ['trrn', 'pf_paid', 'pf_portal', 'pf_portal_ac', 'esi_challan', 'esi_paid', 'esi_portal', 'esi_portal_split', 'notes'].forEach(k => st[k] = '');
+  if (m === 3 || m === 9) $('#topMsgs').innerHTML = `<div class="m-warn">A new ESI contribution period starts in ${MONTHS[d.getUTCMonth()]}: employees set to ESI "Yes" whose gross is above the ceiling go out of coverage – they have been set back to "Auto".</div>`;
+  if (m === 3 || m === 9) st.employees.forEach(e => { if (e.esi === 'yes' && Number(e.gross) > st.settings.esi_ceiling) e.esi = 'auto'; });
+  save(); bind(); renderEmp(); };
+
+/* ---------- settings ---------- */
+const ceilText = l => l.map(x => `${dmy(x.from)}, ${x.ceiling}`).join('\n');
+function fillSet(S){ const f = $('#setForm'); ['pf_ee', 'eps', 'admin', 'admin_min', 'edli', 'edli_admin', 'eps_age', 'esi_ceiling', 'esi_ee', 'esi_er', 'esi_low_daily', 'esi_round', 'esi_wage_basis'].forEach(k => f.elements[k].value = S[k] || (k === 'esi_wage_basis' ? 'actual' : S[k])); f.elements.pf_ceilings.value = ceilText(S.pf_ceilings); }
+$('#settingsBtn').onclick = () => { fillSet(st.settings); $('#setDlg').showModal(); };
+$('#setCancel').onclick = () => $('#setDlg').close();
+$('#setReset').onclick = () => fillSet(PfEsi.DEFAULTS);
+$('#setForm').addEventListener('submit', () => { const f = $('#setForm'), S = st.settings;
+  ['pf_ee', 'eps', 'admin', 'admin_min', 'edli', 'edli_admin', 'eps_age', 'esi_ceiling', 'esi_ee', 'esi_er', 'esi_low_daily'].forEach(k => { const v = Number(f.elements[k].value); if (isFinite(v)) S[k] = v; });
+  S.esi_round = f.elements.esi_round.value; S.esi_wage_basis = f.elements.esi_wage_basis.value;
+  const list = f.elements.pf_ceilings.value.split(/\n/).map(l => l.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})\s*[,;\s]\s*([\d,]+)/)).filter(Boolean).map(m => ({ from: `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`, ceiling: Number(m[4].replace(/,/g, '')) }));
+  if (list.length) S.pf_ceilings = list;
+  store.set(LS.set, S); save(); recalc(); $('#topMsgs').innerHTML = '<div class="m-ok">Rates and ceilings saved.</div>'; });
+function ask(title, html){ return new Promise(res2 => { $('#askTitle').textContent = title; $('#askBody').innerHTML = html; const dl = $('#askDlg'); const done = v => { dl.close(); res2(v); }; $('#askYes').onclick = () => done(true); $('#askNo').onclick = () => done(false); dl.oncancel = () => res2(false); dl.showModal(); }); }
+
+window.PfEsiTool = { state: () => st, result: () => res };
+bind(); renderEmp();
+})();
+</script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
