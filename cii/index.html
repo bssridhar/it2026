@@ -182,7 +182,7 @@ details.opt summary{cursor:pointer;font-weight:600}
         <div class="bar" style="margin-top:6px">
           <button type="button" class="primary" id="go">Calculate</button>
           <button type="button" id="print">Print / PDF</button>
-          <button type="button" id="copy">Copy working</button>
+          <button type="button" id="copy" title="Copies the working with its formatting – paste into Word or Excel">Copy working (formatted)</button>
           <span style="flex:1"></span>
           <input data-f="ref" placeholder="Case / client reference" style="width:190px">
           <button type="button" id="saveCase">Save case file</button>
@@ -365,11 +365,69 @@ $('#go').onclick = () => calculate();
 window.addEventListener('beforeprint', () => document.querySelectorAll('details.opt').forEach(d => { d.dataset.was = d.open ? '1' : ''; d.open = true; }));
 window.addEventListener('afterprint', () => document.querySelectorAll('details.opt').forEach(d => { d.open = d.dataset.was === '1'; }));
 $('#print').onclick = () => { if (calculate(false)) { const t = document.title; document.title = `Capital_Gain_${(c.name || '').trim().replace(/[^A-Za-z0-9]+/g, '_')}`; window.print(); document.title = t; } };
-$('#copy').onclick = () => {
+/* rich copy: the working as HTML with inline styles (Word keeps the formatting; Excel gets cells, numbers as values) */
+function richHtml(){
+  const src = $('#out').cloneNode(true);
+  src.querySelectorAll('.screen-only').forEach(e => e.remove());
+  const NAVY = '#1f3a5f', LINE = '#b9c4d4', F = 'font-family:Calibri,Arial,sans-serif;';
+  const mk = (tag, css, html) => { const e = document.createElement(tag); if (css) e.setAttribute('style', css); if (html != null) e.innerHTML = html; return e; };
+  const box = (el, css) => { const t = mk('table', 'border-collapse:collapse;margin:6pt 0;width:100%'); t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '6');
+    const td = mk('td', F + 'font-size:10pt;' + css, el.innerHTML); t.appendChild(mk('tr')).appendChild(td); el.replaceWith(t); return t; };
+  // heading
+  const rh = src.querySelector('.rhead');
+  if (rh) { const w = mk('div'); w.appendChild(mk('p', F + 'text-align:center;font-size:16pt;font-weight:bold;color:' + NAVY + ';margin:0 0 2pt', rh.querySelector('.t1').innerHTML));
+    w.appendChild(mk('p', F + 'text-align:center;font-size:9.5pt;color:#4a5568;margin:0 0 4pt;padding-bottom:4pt;border-bottom:2.25pt solid ' + NAVY, rh.querySelector('.t2').innerHTML)); rh.replaceWith(...w.childNodes); }
+  // option details -> heading bar + table
+  src.querySelectorAll('details').forEach(d => { const sm = d.querySelector('summary'); const frag = document.createDocumentFragment();
+    frag.appendChild(mk('p', F + 'font-size:10.5pt;font-weight:bold;color:' + NAVY + ';background:#e3e9f2;border:1pt solid ' + LINE + ';margin:10pt 0 0;padding:3pt 6pt', sm ? sm.innerHTML : ''));
+    [...d.childNodes].forEach(n => { if (n !== sm) frag.appendChild(n); }); d.replaceWith(frag); });
+  // boxes
+  src.querySelectorAll('.banner.no').forEach(e => box(e, 'border:1.5pt solid #8f1d1d;background:#fbeaea;color:#8f1d1d'));
+  src.querySelectorAll('.banner.yes').forEach(e => box(e, 'border:1.5pt solid #1d5e34;background:#e6f2ea;color:#1d5e34'));
+  src.querySelectorAll('.disclaimer').forEach(e => box(e, 'border:1.5pt solid ' + NAVY + ';background:#eaf1fa;font-weight:bold;font-size:10.5pt'));
+  const NB = { 'm-warn': ['#b07a00', '#fdf4e1'], 'm-err': ['#8f1d1d', '#fbeaea'], 'm-ok': ['#1d5e34', '#e6f2ea'] };
+  src.querySelectorAll('.msgs > div').forEach(e => { const k = Object.keys(NB).find(x => e.classList.contains(x)), [bc, bg] = NB[k] || [NAVY, '#f1f4f9'];
+    const t = box(e, 'border-left:3pt solid ' + bc + ';background:' + bg + ';font-size:9.5pt'); t.style.margin = '0 0 3pt'; });
+  src.querySelectorAll('.msgs').forEach(e => e.replaceWith(...e.childNodes));
+  // headings, notes
+  src.querySelectorAll('h3').forEach(e => e.replaceWith(mk('p', F + 'font-size:12pt;font-weight:bold;color:' + NAVY + ';border-bottom:1pt solid ' + NAVY + ';margin:12pt 0 4pt;padding-bottom:1pt', e.innerHTML)));
+  src.querySelectorAll('.hint,.src').forEach(e => e.replaceWith(mk('p', F + 'font-size:8.5pt;color:#4a5568;margin:2pt 0 6pt', e.innerHTML)));
+  src.querySelectorAll('.formula').forEach(e => e.replaceWith(mk('br'), mk('span', 'font-family:Consolas,monospace;font-size:8.5pt;color:#4a5568', e.innerHTML)));
+  // data tables
+  src.querySelectorAll('table.t').forEach(t => {
+    t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '4'); t.setAttribute('cellspacing', '0'); t.setAttribute('style', 'border-collapse:collapse;width:100%;margin:2pt 0 6pt');
+    t.querySelectorAll('th').forEach(th => th.setAttribute('style', F + 'background:' + NAVY + ';color:#ffffff;font-weight:bold;font-size:10pt;border:1pt solid ' + LINE + ';padding:3pt 5pt;vertical-align:bottom;text-align:' + (th.classList.contains('n') ? 'right' : 'left')));
+    t.querySelectorAll('tbody').forEach(tb => [...tb.rows].forEach((tr, i) => {
+      const tot = tr.classList.contains('tot'), best = tr.classList.contains('best'), sub = tr.classList.contains('subh');
+      const bg = tot || sub ? '#e3e9f2' : best ? '#e6f2ea' : i % 2 ? '#f3f6fa' : '#ffffff';
+      [...tr.cells].forEach(td => { const n = td.classList.contains('n');
+        let css = F + 'font-size:10pt;color:' + (tot || sub ? NAVY : '#1b2433') + ';background:' + bg + ';border:1pt solid ' + LINE + ';padding:3pt 5pt;vertical-align:top;text-align:' + (n ? 'right' : 'left') + (tot || best ? ';font-weight:bold' : '') + (tot ? ';border-top:1.5pt solid ' + NAVY : '');
+        const m = n && td.textContent.trim().match(/^(-?)(?:Rs\. )?(-?)([\d,]+)$/);
+        if (m) { td.setAttribute('x:num', (m[1] || m[2] ? '-' : '') + m[3].replace(/,/g, '')); css += ';white-space:nowrap;mso-number-format:"\\#\\,\\#\\#0"'; }
+        if (n) td.setAttribute('nowrap', 'nowrap'); td.setAttribute('style', css); });
+    }));
+  });
+  src.querySelectorAll('table.opts').forEach(t => { t.querySelectorAll('th,td').forEach(c => c.setAttribute('style', c.getAttribute('style') + ';font-size:9pt')); t.querySelectorAll('tr > :first-child').forEach(c => { if (!c.colSpan || c.colSpan === 1) c.setAttribute('width', '22%'); }); });
+  src.querySelectorAll('[class]').forEach(e => e.removeAttribute('class'));
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body style="${F}">${src.innerHTML}</body></html>`;
+}
+function plainText(){
+  return [...$('#out').querySelectorAll('.t1,.t2,.banner,h3,summary,tr,.disclaimer,.msgs div')].filter(e => !e.closest('.screen-only')).map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
+}
+$('#copy').onclick = async () => {
   if (!calculate(false)) return;
-  const t = [...$('#out').querySelectorAll('.t1,.t2,.banner,h3,summary,tr,.disclaimer,.msgs div')].filter(e => !e.closest('.screen-only')).map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
-  const done = () => { $('#msgs').innerHTML = '<div class="m-ok">Working copied – paste it into Word or Excel.</div>'; };
-  if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, () => {});
+  const html = richHtml(), text = plainText();
+  const done = () => { $('#msgs').innerHTML = '<div class="m-ok">Working copied with formatting – paste it into Word (Ctrl+V; keep source formatting) or Excel. In Excel the amounts are pasted as numbers.</div>'; };
+  try {
+    if (navigator.clipboard && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]); done(); return; }
+  } catch (e) { /* fall back below */ }
+  const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:-9999px;top:0;background:#fff'; box.innerHTML = html.replace(/^[\s\S]*<body[^>]*>|<\/body>[\s\S]*$/g, '');
+  document.body.appendChild(box);
+  const onCopy = ev => { ev.clipboardData.setData('text/html', html); ev.clipboardData.setData('text/plain', text); ev.preventDefault(); };
+  document.addEventListener('copy', onCopy);
+  const sel = getSelection(), rg = document.createRange(); rg.selectNodeContents(box); sel.removeAllRanges(); sel.addRange(rg);
+  const ok = document.execCommand('copy'); sel.removeAllRanges(); document.removeEventListener('copy', onCopy); box.remove();
+  if (ok) done(); else $('#msgs').innerHTML = '<div class="m-err">The browser did not allow copying. Use Print / PDF instead.</div>';
 };
 $('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(c, null, 1)], { type: 'application/json' })); a.download = `${(c.ref || c.name || 'Capital_gain').trim().replace(/[^A-Za-z0-9]+/g, '_')}_cg_case.json`; a.click(); };
 $('#openCase').onclick = () => $('#caseFile').click();
