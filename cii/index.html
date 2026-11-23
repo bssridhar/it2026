@@ -70,8 +70,40 @@ details.opt{border:1px solid var(--line);border-radius:8px;padding:8px 12px;marg
 details.opt summary{cursor:pointer;font-weight:600}
 .act{font-weight:700;color:var(--ok)}
 .print-only{display:none}
+.disclaimer{border:2px solid var(--accent);border-left-width:6px;border-radius:8px;padding:10px 14px;margin:0 0 10px;font-weight:700;color:var(--ink);background:var(--tip-bg)}
+@page{size:A4;margin:12mm 11mm 14mm}
 @media print{
-  body{background:#fff;color:#000;font-size:10.5pt}
+  :root{--ink:#1b2433;--muted:#4a5568;--line:#c9d2df;--head:#e3e9f2;--hi:#fff3c4;--ok-bg:#e6f2ea;--ok:#1d5e34;--err-bg:#fbeaea;--err:#8f1d1d;--warn-bg:#fdf4e1;--warn:#7a5200;--tip-bg:#eaf1fa;--tip:#1f3a5f;--accent:#1f3a5f}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;color:var(--ink);font-size:9.5pt;line-height:1.35}
+  .screen-only{display:none!important}
+  .rhead{border-bottom:3px solid #1f3a5f;padding-bottom:6px;margin-bottom:10px}
+  .rhead .t1{color:#1f3a5f;font-size:15pt}
+  .card h3,.calc-out h3{color:#1f3a5f;font-size:11pt;border-bottom:1.5px solid #1f3a5f;padding-bottom:2px;margin:12px 0 6px}
+  .tw{overflow:visible}
+  table.t{font-size:8.8pt;border:1px solid #9fb0c7;width:calc(100% - 2px)}
+  table.t th,table.t td{padding:3px 6px;border:1px solid #c9d2df}
+  table.t thead th{background:#1f3a5f!important;color:#fff;font-weight:600;vertical-align:bottom}
+  table.t tbody tr:nth-child(even) td{background:#f3f6fa}
+  .calc-out table.t td:first-child{min-width:0}
+  .calc-out .tot td{background:#e3e9f2!important;border-top:1.5px solid #1f3a5f;color:#1f3a5f}
+  table.t tr.best td{background:#e6f2ea!important;font-weight:600}
+  table.t tr.subh td{background:#e3e9f2!important;color:#1f3a5f}
+  table.opts{table-layout:fixed;font-size:8.2pt}
+  table.opts{font-size:7.9pt}
+  table.opts th,table.opts td,table.opts th.n{white-space:normal!important;padding:3px 4px}
+  table.opts td.n{white-space:nowrap!important}
+  table.opts th:first-child,table.opts td:first-child{width:23%}
+  table.t td.n{white-space:nowrap}
+  .formula{font-size:7.8pt}
+  details.opt{border:1px solid #9fb0c7;border-radius:4px;padding:0;margin:0 0 8px;break-inside:avoid}
+  details.opt summary{list-style:none;background:#e3e9f2;color:#1f3a5f;padding:4px 8px;border-bottom:1px solid #9fb0c7}
+  details.opt summary::-webkit-details-marker{display:none}
+  details.opt table.t{border:none;margin:0!important}
+  .msgs div{padding:5px 9px;margin:0 0 5px;font-size:8.8pt;border-left:4px solid currentColor;border-radius:3px}
+  .disclaimer{font-size:9.5pt;border-color:#1f3a5f;background:#eaf1fa}
+  .hint,.src{font-size:7.8pt}
+  .banner{font-size:9.5pt;padding:7px 10px}
   .home,.no-print,#tableCard,#infoCard,h1,.sub{display:none!important}
   .cols{display:block}
   .card{border:none;padding:0}
@@ -79,7 +111,7 @@ details.opt summary{cursor:pointer;font-weight:600}
   .print-only{display:block}
   details.opt{break-inside:avoid}
   h3{break-after:avoid}
-  .banner{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tr{break-inside:avoid}
 }
 </style>
 </head>
@@ -296,11 +328,11 @@ function render(r){
 
   // options
   const O = r.options, best = O.reduce((a, o) => o.total < a.total || (o.total === a.total && o.invested < a.invested) ? o : a, O[0]);
-  h += `<h3>Tax planning options</h3><div class="tw"><table class="t cmp"><thead><tr><th>Option</th><th class="n">House</th><th class="n">Bonds</th><th class="n">Taxable gain</th><th class="n">Tax payable</th><th class="n">Tax saved</th><th class="n">Funds locked in</th><th class="n">Cash in hand after tax and investment</th></tr></thead><tbody>` +
+  h += `<h3>Tax planning options</h3><div class="tw"><table class="t cmp opts"><thead><tr><th>Option</th><th class="n">House</th><th class="n">Bonds</th><th class="n">Taxable gain</th><th class="n">Tax payable</th><th class="n">Tax saved</th><th class="n">Funds locked in</th><th class="n">Net cash in hand*</th></tr></thead><tbody>` +
     O.map(o => `<tr class="${o === best && O.length > 1 && o.saved > 0 ? 'best' : ''}"><td>${esc(o.title)}</td><td class="n">${o.H ? num(o.H) : '–'}</td><td class="n">${o.B ? num(o.B) : '–'}</td><td class="n">${num(o.pick.taxable)}</td><td class="n"><b>${num(o.total)}</b></td><td class="n">${o.id > 1 ? num(o.saved) : '–'}</td><td class="n">${o.invested ? num(o.invested) : '–'}</td><td class="n">${num(o.cash)}</td></tr>`).join('') +
     (r.unavail || []).map(([t, why]) => `<tr><td colspan="8" style="color:var(--muted)"><i>${esc(t)}: not available – ${esc(why)}</i></td></tr>`).join('') +
-    `</tbody></table></div><p class="hint">Amounts in Rs. Cash in hand = net consideration (sale value less expenses) – tax – amounts invested. Funds in bonds are locked in for five years; the new house is not to be sold for three years.</p>`;
-  if (r.need) h += `<table class="t" style="margin:8px 0"><tbody><tr><td colspan="2"><b>Investment needed for full exemption</b> (gain ${rs(r.need.gain)})</td></tr>
+    `</tbody></table></div><p class="hint">Amounts in Rs. *Net cash in hand = net consideration (sale value less expenses) – tax – amounts invested. Funds in bonds are locked in for five years; the new house is not to be sold for three years.</p>`;
+  if (r.need) h += `<table class="t need" style="margin:8px 0"><tbody><tr class="subh"><td colspan="2"><b>Investment needed for full exemption</b> (gain ${rs(r.need.gain)})</td></tr>
     ${r.need.houseOnly != null ? `<tr><td>House alone (${r.houseSec === 's54' ? 's.54 / s.82 – the gain' : 's.54F / s.86 – the net consideration'})</td><td class="n">${rs(r.need.houseOnly)}${r.need.houseOnly > 1e8 ? ' (above the Rs. 10 crore cap)' : ''}</td></tr>` : ''}
     ${r.need.bondsOnly != null ? `<tr><td>Bonds alone (maximum Rs. 50 lakh)</td><td class="n">${rs(r.need.bondsOnly)}${r.need.gain > 5e6 ? ` – gain of ${rs(r.need.gain - 5e6)} remains` : ''}</td></tr>` : ''}
     ${r.need.houseWithBonds != null ? `<tr><td>House, with bonds of ${rs(r.need.bondsOnly)}</td><td class="n">${rs(r.need.houseWithBonds)}</td></tr>` : ''}</tbody></table>`;
@@ -309,13 +341,13 @@ function render(r){
   // deadlines
   if (r.deadlines.length) h += `<h3>Time limits from the date of sale (${dmy(c.sdate)})</h3><div class="tw"><table class="t cmp"><thead><tr><th>What</th><th class="n">By / date</th><th>Basis</th></tr></thead><tbody>` +
     r.deadlines.map(d => `<tr><td>${esc(d.what)}</td><td class="n"><b>${esc(d.when)}</b></td><td>${esc(d.why)}</td></tr>`).join('') + `</tbody></table></div>`;
-  if (r.notes.length) h += `<h3>Notes</h3><div class="msgs">${r.notes.map(([k, t]) => `<div class="${NOTE[k] || 'm-info'}">${esc(t)}</div>`).join('')}</div>`;
+  h += `<h3>Notes</h3><div class="disclaimer">All the figures and calculations are based on the figures provided, and are subject to change based on changes in the figures / facts / assumptions.</div><div class="msgs">${r.notes.map(([k, t]) => `<div class="${NOTE[k] || 'm-info'}">${esc(t)}</div>`).join('')}</div>`;
 
   // provisions
-  h += `<h3>Provisions – Income-tax Act, 1961 and Income-tax Act, 2025</h3><div class="tw"><table class="t cmp"><thead><tr><th>Subject</th><th>${r.act === '1961' ? '<span class="act">ITA 1961 (applies)</span>' : 'ITA 1961'}</th><th>${r.act === '2025' ? '<span class="act">ITA 2025 (applies)</span>' : 'ITA 2025'}</th></tr></thead><tbody>` +
+  h += `<div class="screen-only"><h3>Provisions – Income-tax Act, 1961 and Income-tax Act, 2025 <span class="pill">for reference – not printed</span></h3><div class="tw"><table class="t cmp"><thead><tr><th>Subject</th><th>${r.act === '1961' ? '<span class="act">ITA 1961 (applies)</span>' : 'ITA 1961'}</th><th>${r.act === '2025' ? '<span class="act">ITA 2025 (applies)</span>' : 'ITA 2025'}</th></tr></thead><tbody>` +
     SECTIONS.map(s => `<tr><td>${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td></tr>`).join('') + `</tbody></table></div>
-    <p class="src">The Income-tax Act, 2025 applies to the tax year 2026-27 onwards (transfers from 01-04-2026); earlier transfers are under the Income-tax Act, 1961. Section numbers of the 2025 Act are from the published concordance tables – verify with the Act / CBDT concordance before quoting.
-    Working based on the figures entered${c.seller !== 'other' ? '; surcharge on the basis of total income of Rs. ' + num(r.other) + ' plus the taxable gain, marginal relief not considered' : ''}. CII${two ? `: ${fyLabel(r.baseFy)} = ${r.ciiP}, ${fyLabel(r.sfy)} = ${r.ciiS}` : ' not used'}.</p>`;
+    <p class="src">The Income-tax Act, 2025 applies to the tax year 2026-27 onwards (transfers from 01-04-2026); earlier transfers are under the Income-tax Act, 1961. Section numbers of the 2025 Act are from the published concordance tables – verify with the Act / CBDT concordance before quoting.</p></div>
+    <p class="src">Working based on the figures entered${c.seller !== 'other' ? '; surcharge on the basis of total income of Rs. ' + num(r.other) + ' plus the taxable gain, marginal relief not considered' : ''}. CII${two ? `: ${fyLabel(r.baseFy)} = ${r.ciiP}, ${fyLabel(r.sfy)} = ${r.ciiS}` : ' not used'}.</p>`;
   return h;
 }
 
@@ -335,7 +367,7 @@ window.addEventListener('afterprint', () => document.querySelectorAll('details.o
 $('#print').onclick = () => { if (calculate(false)) { const t = document.title; document.title = `Capital_Gain_${(c.name || '').trim().replace(/[^A-Za-z0-9]+/g, '_')}`; window.print(); document.title = t; } };
 $('#copy').onclick = () => {
   if (!calculate(false)) return;
-  const t = [...$('#out').querySelectorAll('.t1,.t2,.banner,h3,summary,tr,.msgs div')].map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
+  const t = [...$('#out').querySelectorAll('.t1,.t2,.banner,h3,summary,tr,.disclaimer,.msgs div')].filter(e => !e.closest('.screen-only')).map(e => e.tagName === 'TR' ? [...e.children].map(td => td.innerText.replace(/\n/g, ' ')).join('\t') : e.innerText).join('\n');
   const done = () => { $('#msgs').innerHTML = '<div class="m-ok">Working copied – paste it into Word or Excel.</div>'; };
   if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, () => {});
 };
