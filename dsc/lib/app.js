@@ -158,7 +158,7 @@ $('#saveBtn').onclick = async () => {
   if (mode === 'ro' || mode === 'closed') return msg('warn', mode === 'ro' ? 'The register is open with someone else – it is read only for you.' : 'The register is closed – click "Open again" to edit.');
   if (mode === 'local') {
     if (S.supported && await ask('Where should the register be saved?', 'The register is now kept only in this browser. Choose a folder to keep it as a file there (recommended – it is then saved there after every change), or Cancel to download a copy (JSON) instead.')) { $('#chooseFolder').click(); return; }
-    $('#saveJson').click(); savedAt = Date.now(); savedWhere = 'browser'; showSaved(); msg('ok', 'A copy (JSON) has been downloaded – keep it in a safe folder; open it next time with "Open a JSON file".'); return;
+    $('#saveJson').click(); savedAt = Date.now(); savedWhere = 'browser'; showSaved(); msg('ok', 'The register has been saved as a JSON file – keep it in a safe folder; open it next time with "Open a JSON file".'); return;
   }
   if (await persist('')) showSaved();
 };

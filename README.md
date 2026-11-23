@@ -54,3 +54,17 @@ Each tool's own README explains its inputs, checks and templates.
 Every tool has a desk calculator (`shared/calc.js`): click the flashing **Calculator** box at the bottom right
 of the page. It has GT, memory (M+, M−, MRC), %, √, 00, a tape, and "Use in field" to put the figure into the
 field last clicked. New tools must include `<script src="../shared/calc.js"></script>` before `</body>`.
+
+## Case files – Save and Save as
+
+Every tool saves its work as a case file (`.json`) on this computer (`shared/casefile.js`). In Chrome and Edge:
+
+- **Open case file** opens the file with the browser's file picker, and its name is shown next to the buttons.
+- **Save case file** writes back into that same file – no new copy in Downloads. With no file open, it asks where
+  to save the first time and then keeps saving into that file. The browser may ask once for permission to save
+  changes to the file.
+- **Save as…** saves into a new file (choose the name and folder) and continues with that file.
+- The ✕ next to the file name, and **New / Clear**, forget the file, so the next Save asks for a new file.
+
+The tool remembers the file in use for the next visit. In Firefox and Safari, Save downloads a copy as before.
+New tools load `<script src="../shared/casefile.js"></script>` before `calc.js`.
