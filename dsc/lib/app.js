@@ -25,7 +25,7 @@ const fillSelects = () => {
   $('#fTag').innerHTML = `<option value="">All key tags</option>${S2.tagColors.map(c => `<option${c.name === ft ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="-"${ft === '-' ? ' selected' : ''}>(no key tag)</option>`;
 };
 function renderSettings() {
-  const S2 = reg.settings, ro = mode === 'ro' || mode === 'closed';
+  const S2 = reg.settings, ro = locked() || mode === 'closed';
   const use = (k, v) => reg.records.filter(r => r[k] === v).length;
   $('#setTags').innerHTML = S2.tagColors.map((c, i) => `<div class="setrow"><input type="color" data-th="${i}" value="${esc(c.hex)}"${ro ? ' disabled' : ''}><input type="text" data-tn="${i}" value="${esc(c.name)}"${ro ? ' disabled' : ''}><span class="hint">${use('tagColor', c.name)} DSC(s)</span>${ro ? '' : `<button type="button" class="link sm danger" data-td="${i}">Delete</button>`}</div>`).join('') || '<p class="hint">None.</p>';
   $('#setLocs').innerHTML = S2.locations.map((l, i) => `<div class="setrow"><input type="text" data-ln="${i}" value="${esc(l)}"${ro ? ' disabled' : ''}><span class="hint">${use('storage', l)} DSC(s)</span>${ro ? '' : `<button type="button" class="link sm danger" data-ld="${i}">Delete</button>`}</div>`).join('') || '<p class="hint">None.</p>';
@@ -54,8 +54,19 @@ let reg = fixReg(get(LS.draft, {}));
 let mode = 'local';            // 'local' | 'rw' (folder, editing) | 'ro' (folder, read only – another person has it open)
 let otherLock = null, beatTimer = null, filter = 'all', savedAt = null, savedWhere = '';
 const user = () => ($('#user').value || '').trim();
-$('#user').value = get(LS.user, '');
-$('#user').onchange = () => set(LS.user, user());
+$('#user').value = get(LS.user, '') || (window.KitDB ? window.KitDB.user() : '');
+$('#user').onchange = () => { set(LS.user, user()); if (window.KitDB) window.KitDB.setUser(user()); };
+/* the database folder is known (connected earlier) but not opened yet in this visit – editing waits for it */
+const needConn = () => mode === 'local' && S.supported && S.hasDir();
+const locked = () => mode === 'ro' || needConn();  // no editing: someone else has it, or the folder is not opened yet
+/* name of the person (asked if missing), then the browser's permission for the folder, then open the register */
+async function connectKnown() {
+  if (!user()) { const n = (prompt('Your name – shown to others who open the register while you have it open:', '') || '').trim(); if (!n) { msg('warn', 'Enter your name to open the register.'); return false; } $('#user').value = n; }
+  set(LS.user, user()); if (window.KitDB) window.KitDB.setUser(user());
+  try { const p = await S.permit(); if (p !== 'granted') { msg('warn', 'Permission to the database folder was not given – click "Open the register" again and answer "Allow" / "Edit files".'); return false; } }
+  catch (e) { msg('err', window.KitDB.why(e)); return false; }
+  $('#reconnect').hidden = true; banner(); await openFolder(); return mode !== 'local';
+}
 
 /* ---------- dates ---------- */
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -92,7 +103,7 @@ function conflict(other) {
 function banner(kind, html) { $('#banner').innerHTML = kind ? `<div class="banner ${kind}">${html}</div>` : ''; }
 function msg(k, t) { $('#topMsgs').innerHTML = t ? `<div class="m-${k}">${esc(t)}</div>` : ''; }
 async function openFolder(silent) {
-  if (!user()) { $('#user').focus(); msg('warn', 'Enter your name first – it is shown to others who open the register while you have it open.'); return; }
+  if (!user()) { const n = (prompt('Your name – shown to others who open the register while you have it open:', '') || '').trim(); if (!n) { $('#user').focus(); msg('warn', 'Enter your name first – it is shown to others who open the register while you have it open.'); return; } $('#user').value = n; if (window.KitDB) window.KitDB.setUser(n); }
   set(LS.user, user());
   clearInterval(beatTimer); document.body.classList.remove('closed');
   const lk = await S.acquire(user(), false);
@@ -124,7 +135,7 @@ function showMode() {
   document.body.classList.toggle('readonly', ro);
   $$('.edit-only').forEach(b => b.classList.toggle('ro-hide', ro));
   $('#where').textContent = mode === 'local' ? 'in this browser only' : `folder: ${S.dirName()}${ro ? ' · read only' : mode === 'closed' ? ' · closed' : ''}`;
-  $$('.edit-only').forEach(b => b.classList.toggle('ro-hide', ro || mode === 'closed'));
+  $$('.edit-only').forEach(b => b.classList.toggle('ro-hide', ro || mode === 'closed' || needConn()));
   showSaved(); if ($('#setDlg').open) renderSettings();
   $('#folderInfo').innerHTML = mode === 'local' ? '' : `<span class="hint">File <b>${S.FILE}</b> in the folder <b>${esc(S.dirName())}</b>${reg.updated ? ` · last saved ${stamp(reg.updated)} by ${esc(reg.updatedBy || '–')}` : ''}. A backup of the previous version is kept in its <b>backup</b> folder once a day.</span>`;
   if (ro) {
@@ -143,7 +154,7 @@ $('#chooseFolder').onclick = async () => {
   if (!user()) { $('#user').focus(); msg('warn', 'Enter your name first.'); return; }
   try { await S.release(); await S.connect(); await openFolder(); } catch (e) { msg(e && e.name === 'AbortError' ? 'warn' : 'err', window.KitDB.why(e)); }
 };
-$('#reconnect').onclick = async () => { try { const p = await S.permit(); if (p === 'granted') { $('#reconnect').hidden = true; await openFolder(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
+$('#reconnect').onclick = () => connectKnown();
 window.addEventListener('pagehide', () => { if (mode === 'rw') S.release(); });
 
 function showSaved() {
@@ -156,8 +167,9 @@ function showSaved() {
 }
 $('#saveBtn').onclick = async () => {
   if (mode === 'ro' || mode === 'closed') return msg('warn', mode === 'ro' ? 'The register is open with someone else – it is read only for you.' : 'The register is closed – click "Open again" to edit.');
+  if (mode === 'local' && needConn()) { await connectKnown(); return; }
   if (mode === 'local') {
-    if (S.supported && await ask('Where should the register be saved?', 'The register is now kept only in this browser. Choose a folder to keep it as a file there (recommended – it is then saved there after every change), or Cancel to download a copy (JSON) instead.')) { $('#chooseFolder').click(); return; }
+    if (S.supported && await ask('Where should the register be saved?', 'The database folder is not connected on this computer yet, so the register is kept only in this browser. Continue – choose the tool kit folder (the one that contains "shared"); the register is then kept in its "database" folder and saved there after every change. Cancel – download a copy (JSON) instead.')) { $('#chooseFolder').click(); return; }
     $('#saveJson').click(); savedAt = Date.now(); savedWhere = 'browser'; showSaved(); msg('ok', 'The register has been saved as a JSON file – keep it in a safe folder; open it next time with "Open a JSON file".'); return;
   }
   if (await persist('')) showSaved();
@@ -189,7 +201,7 @@ function render() {
   const show = recs.filter(r => (filter === 'all' || (filter === 'office' ? r.location === 'Office' : band(daysLeft(r)) === filter))
     && (!fl || (fl === '-' ? !r.storage : r.storage === fl)) && (!ft || (ft === '-' ? !r.tagColor : r.tagColor === ft))
     && (!q || `${r.company} ${r.name} ${r.mobile} ${r.pan} ${r.din} ${r.storage || ''} ${r.tagColor || ''} ${purposeText(r).join(' ')}`.toLowerCase().includes(q)));
-  const ro = mode === 'ro';
+  const ro = locked();
   $('#tbl').innerHTML = `<thead><tr><th>#</th><th>Company / client</th><th>DSC holder</th><th>Valid till</th><th class="n">Days left</th><th>Purpose</th><th>Token with</th><th>Location</th><th>Key tag</th><th>Last movement</th><th></th></tr></thead><tbody>${show.map((r, i) => {
     const d = daysLeft(r), bd = band(d), last = (r.custody || [])[r.custody && r.custody.length - 1];
     return `<tr><td${r.tagColor ? ` style="box-shadow:inset 6px 0 0 ${esc(tagHex(r.tagColor))}"` : ''}>${i + 1}</td><td class="wrap" style="white-space:normal">${esc(r.company)}</td><td style="white-space:normal">${esc(r.name)}${r.mobile ? `<br><span class="hint">${esc(r.mobile)}</span>` : ''}</td><td>${dmy(r.validTill)}</td>
@@ -213,15 +225,15 @@ function edit(id) {
   ['company', 'name', 'validTill', 'location', 'storage', 'tagColor', 'purposeOther', 'mobile', 'email', 'pan', 'din', 'issuer', 'dscType', 'serial', 'remarks'].forEach(k => f.elements[k].value = r[k] || '');
   $$('#purposeBox input').forEach(c => c.checked = (r.purposes || []).includes(c.value));
   $('#editTitle').textContent = id ? `${r.name} – ${r.company}` : 'Add a DSC';
-  $('#delBtn').hidden = !id || mode === 'ro';
-  $$('#editForm input, #editForm select, #editForm textarea').forEach(el => el.disabled = mode === 'ro');
-  $('#editForm button[type=submit]').hidden = mode === 'ro';
+  $('#delBtn').hidden = !id || locked();
+  $$('#editForm input, #editForm select, #editForm textarea').forEach(el => el.disabled = locked());
+  $('#editForm button[type=submit]').hidden = locked();
   $('#editDlg').showModal();
 }
 $('#addBtn').onclick = () => { if (mode !== 'closed') edit(null); };
 $('#editCancel').onclick = () => $('#editDlg').close();
 $('#editForm').addEventListener('submit', async () => {
-  if (mode === 'ro') return;
+  if (locked()) return;
   const f = $('#editForm'), v = {};
   ['company', 'name', 'validTill', 'location', 'storage', 'tagColor', 'purposeOther', 'mobile', 'email', 'pan', 'din', 'issuer', 'dscType', 'serial', 'remarks'].forEach(k => v[k] = f.elements[k].value.trim());
   v.pan = v.pan.toUpperCase(); v.purposes = $$('#purposeBox input').filter(c => c.checked).map(c => c.value);
@@ -241,14 +253,14 @@ function custody(id) {
   f.elements.at.value = now.toISOString().slice(0, 16); f.elements.person.value = ''; f.elements.note.value = '';
   f.elements.dir.value = r.location === 'Office' ? 'Out' : 'In'; fillSelects(); f.elements.storage.value = r.storage || '';
   const inOnly = () => $('#custForm .inOnly').style.display = f.elements.dir.value === 'In' ? '' : 'none'; f.elements.dir.onchange = inOnly; inOnly();
-  $$('#custForm input, #custForm select').forEach(el => el.disabled = mode === 'ro');
+  $$('#custForm input, #custForm select').forEach(el => el.disabled = locked());
   $('#custLog').innerHTML = `<thead><tr><th>Date and time</th><th>Movement</th><th>From / to</th><th>Purpose</th><th>Recorded by</th></tr></thead><tbody>${(r.custody || []).slice().reverse().map(c => `<tr><td>${stamp(c.at)}</td><td>${c.dir === 'In' ? 'Received' : 'Handed over'}</td><td>${esc(c.person)}</td><td>${esc(c.note)}</td><td>${esc(c.by)}</td></tr>`).join('') || '<tr><td colspan="5" class="hint">No movements recorded.</td></tr>'}</tbody>`;
   $('#ackBtn').hidden = !(r.custody || []).length;
   $('#custDlg').showModal();
 }
 $('#custCancel').onclick = () => $('#custDlg').close();
 $('#custForm').addEventListener('submit', async () => {
-  if (mode === 'ro') return;
+  if (locked()) return;
   const r = reg.records.find(x => x.id === custId), f = $('#custForm');
   const c = { at: new Date(f.elements.at.value).toISOString(), dir: f.elements.dir.value, person: f.elements.person.value.trim(), note: f.elements.note.value.trim(), by: user() };
   if (c.dir === 'In') { c.storage = f.elements.storage.value; if (c.storage) r.storage = c.storage; }
@@ -278,7 +290,7 @@ $('#remCopy').onclick = async () => { try { await navigator.clipboard.writeText(
 $('#remClose').onclick = () => $('#remDlg').close();
 
 /* ---------- Excel import / export, JSON copy ---------- */
-$('#importX').onclick = () => { if (mode === 'ro') return msg('warn', 'The register is read only now.'); $('#importFile').click(); };
+$('#importX').onclick = () => { if (needConn()) return connectKnown(); if (locked()) return msg('warn', 'The register is read only now.'); $('#importFile').click(); };
 const matchList = (v, list) => { if (!v) return ''; const m = list.find(x => x.toLowerCase().replace(/\s+/g, '') === v.toLowerCase().replace(/\s+/g, '')); return m || v; };
 $('#importFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -323,7 +335,7 @@ $('#exportX').onclick = async () => {
 };
 function download(name, data, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 $('#saveJson').onclick = () => download(`dsc_register_${todayIso()}.json`, JSON.stringify(reg, null, 1), 'application/json');
-$('#openJson').onclick = () => { if (mode === 'ro') return msg('warn', 'The register is read only now.'); $('#jsonFile').click(); };
+$('#openJson').onclick = () => { if (locked()) return msg('warn', 'The register is read only now.'); $('#jsonFile').click(); };
 $('#jsonFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try { const d = JSON.parse(await f.text()); if (d.kind !== 'dsc-register') throw 0;
     if (reg.records.length && !(await ask('Replace the register?', `The ${reg.records.length} DSC(s) on screen${mode === 'rw' ? ' (and in the folder)' : ''} will be replaced by the ${d.records.length} in ${esc(f.name)}.`))) return;
@@ -339,7 +351,12 @@ function ask(title, html) { return new Promise(done => { $('#askTitle').textCont
   const p = await S.restore();
   if (p && S.legacy()) msg('info', `The register is in the folder "${S.dirName()}" chosen earlier. To move it to the tool kit's database folder: open it, then click "Connect the database folder" and choose the tool kit folder – the register on screen is put into the new folder.`);
   if (p === 'granted') await openFolder(!S.legacy());
-  else if (p) { $('#reconnect').hidden = false; $('#reconnect').textContent = `Reconnect to the folder "${S.dirName()}"`; msg('info', `The register is kept in the folder "${S.dirName()}" – click "Reconnect" to open it (the browser asks for permission once per visit).`); }
+  else if (p) {
+    $('#reconnect').hidden = false; $('#reconnect').textContent = `Open the register from "${S.dirName()}"`;
+    showMode(); render();
+    banner('info', `<b>The DSC register is in the database folder "${esc(S.dirName())}".</b> <button type="button" class="primary" id="openDbNow">Open the register</button><br><span style="font-size:.85rem">The browser asks for permission once per visit – answer "Allow". Editing is available after it is opened.</span>`);
+    $('#openDbNow').onclick = () => connectKnown();
+  }
 })();
 window.DscTool = { reg: () => reg, mode: () => mode, openFolder, tick };
 })();

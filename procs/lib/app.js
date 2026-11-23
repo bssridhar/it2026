@@ -26,7 +26,12 @@
       if (r.conflict) { if (r.other) { lib = normalise(r.other); keepLocal(); render(); } msg('warn', 'The library was changed in the folder by someone else – their version is now shown. Please make your change again.'); }
     } catch (e) { msg('err', 'Could not save in the database folder: ' + (e.message || e) + ' – the change is kept in this browser.'); }
   }
-  const canEdit = () => { if (mode !== 'ro') return true; msg('warn', `${otherLock && otherLock.user || 'Someone else'} has the library open for editing – it is read only for you. You can still copy items.`); return false; };
+  /* the database folder is known (connected earlier) but not opened yet in this visit – editing waits for it */
+  const needConn = () => mode === 'local' && K.supported && !!K.handle();
+  const canEdit = () => {
+    if (needConn()) { connectKnown(); return false; }
+    if (mode !== 'ro') return true;
+    msg('warn', `${otherLock && otherLock.user || 'Someone else'} has the library open for editing – it is read only for you. You can still copy items.`); return false; };
   const saveOpts = () => { try { localStorage.setItem(LSO, JSON.stringify(opts)); } catch (e) {} };
   const msg = (k, t) => { $('#topMsgs').innerHTML = t ? `<div class="m-${k}">${esc(t)}</div>` : ''; if (t && k === 'ok') setTimeout(() => { $('#topMsgs').innerHTML = ''; }, 4000); };
   const due = it => it.reviewBy && it.reviewBy < today();
@@ -271,7 +276,8 @@
   /* ---------- database folder ---------- */
   function showDb() {
     const st = $('#dbState'), nm = K.name();
-    document.body.classList.toggle('ro', mode === 'ro');
+    document.body.classList.toggle('ro', mode === 'ro' || needConn());
+    if (mode !== 'local') $('#dbBanner').hidden = true;
     st.className = 'dbstate ' + mode;
     st.textContent = mode === 'rw' ? `Database: folder "${nm}" – saved automatically` : mode === 'ro' ? `Database: folder "${nm}" – read only (${otherLock && otherLock.user || 'someone else'} is editing)` : 'Database: not connected – kept in this browser only';
     $('#dbConnect').hidden = mode !== 'local'; $('#dbTake').hidden = mode !== 'ro';
@@ -281,7 +287,9 @@
   }
   async function openDb(silent) {
     const u = ($('#dbUser').value || '').trim();
-    if (!u) { $('#dbUser').focus(); msg('warn', 'Enter your name first – it is shown to others while you have the library open.'); return; }
+    if (!u) { const n = (prompt('Your name – shown to others while you have the library open:', '') || '').trim();
+      if (!n) { $('#dbUser').focus(); msg('warn', 'Enter your name first – it is shown to others while you have the library open.'); return; }
+      $('#dbUser').value = n; return openDb(silent); }
     K.setUser(u); clearInterval(beat);
     try {
       const lk = await DB.acquire(u, false);
@@ -313,14 +321,22 @@
     try { await K.connect(name => ask('Use this folder?', `"${name}" is not the tool kit folder (it has no "shared" folder). Create the "database" folder inside "${name}" and use it? (Recommended: Cancel, and choose the tool kit folder.)`, 'Use it')); await openDb(); }
     catch (e) { msg(e && e.name === 'AbortError' ? 'warn' : 'err', K.why(e)); }
   };
-  $('#dbReconnect').onclick = async () => { try { if ((await K.permit()) === 'granted') { $('#dbReconnect').hidden = true; await openDb(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
+  async function connectKnown() {
+    try { if ((await K.permit()) !== 'granted') { msg('warn', 'Permission to the database folder was not given – click "Open the library" again and answer "Allow" / "Edit files".'); return; } }
+    catch (e) { msg('err', K.why(e)); return; }
+    $('#dbReconnect').hidden = true; $('#dbBanner').hidden = true; await openDb();
+  }
+  $('#dbReconnect').onclick = () => connectKnown();
+  $('#dbOpenNow').onclick = () => connectKnown();
   $('#dbTake').onclick = async () => { if (!(await ask('Open for editing?', `${otherLock && otherLock.user || 'The other person'} may be making changes now; if you take over, their changes after this may not be saved. Take over only after checking with them.`, 'Take over'))) return;
     try { await DB.acquire(K.user(), true); await openDb(); } catch (e) { msg('err', e.message || String(e)); } };
   window.addEventListener('pagehide', () => { if (mode === 'rw') { clearTimeout(wTimer); DB.release(); } });
   showDb();
   if (K.supported) K.restore().then(p => {
     if (p === 'granted' && K.user()) openDb(true);
-    else if (p) { $('#dbReconnect').hidden = false; $('#dbConnect').hidden = true; $('#dbReconnect').textContent = `Reconnect to the database folder "${K.name()}"`; }
+    else if (p === 'granted') { $('#dbBanner').hidden = false; $('#dbBannerName').textContent = K.name(); showDb(); }
+    else if (p) { $('#dbReconnect').hidden = false; $('#dbConnect').hidden = true; $('#dbReconnect').textContent = `Open the library from "${K.name()}"`;
+      $('#dbBanner').hidden = false; $('#dbBannerName').textContent = K.name(); showDb(); }
   });
 
   setTab();
