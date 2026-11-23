@@ -15,7 +15,18 @@
   let opts; try { opts = JSON.parse(localStorage.getItem(LSO) || 'null') || {}; } catch (e) { opts = {}; }
   opts = Object.assign({ greet: false, name: '', heading: true }, opts);
   let tab = 'active', cat = 'all', q = '', cur = null; const sel = new Set();
-  const save = () => { try { localStorage.setItem(LS, JSON.stringify(lib)); } catch (e) { msg('err', 'The library could not be kept in this browser (too large?) – save it as a file.'); } };
+  /* database folder (shared/db.js): mode 'local' (this browser only) | 'rw' (folder, editing) | 'ro' (someone else is editing) */
+  const K = window.KitDB, DB = K.store('procedures_library');
+  let mode = 'local', otherLock = null, beat = null, wTimer = null;
+  const keepLocal = () => { try { localStorage.setItem(LS, JSON.stringify(lib)); } catch (e) { msg('err', 'The library could not be kept in this browser (too large?).'); } };
+  const save = () => { keepLocal(); if (mode === 'rw') { clearTimeout(wTimer); wTimer = setTimeout(writeDb, 400); } };
+  async function writeDb() {
+    try {
+      const r = await DB.write(Object.assign({}, lib, { updated: new Date().toISOString(), updatedBy: K.user() }));
+      if (r.conflict) { if (r.other) { lib = normalise(r.other); keepLocal(); render(); } msg('warn', 'The library was changed in the folder by someone else – their version is now shown. Please make your change again.'); }
+    } catch (e) { msg('err', 'Could not save in the database folder: ' + (e.message || e) + ' – the change is kept in this browser.'); }
+  }
+  const canEdit = () => { if (mode !== 'ro') return true; msg('warn', `${otherLock && otherLock.user || 'Someone else'} has the library open for editing – it is read only for you. You can still copy items.`); return false; };
   const saveOpts = () => { try { localStorage.setItem(LSO, JSON.stringify(opts)); } catch (e) {} };
   const msg = (k, t) => { $('#topMsgs').innerHTML = t ? `<div class="m-${k}">${esc(t)}</div>` : ''; if (t && k === 'ok') setTimeout(() => { $('#topMsgs').innerHTML = ''; }, 4000); };
   const due = it => it.reviewBy && it.reviewBy < today();
@@ -91,9 +102,9 @@
       h += `<div class="bar" style="margin-bottom:6px">
         <button type="button" class="primary" id="copyOne">Copy for email</button>
         ${it.kind === 'link' ? '<button type="button" id="copyUrl">Copy link only</button><button type="button" id="openUrl">Open link</button>' : ''}
-        <button type="button" id="editIt">Edit</button>
-        <button type="button" id="dupIt" title="A copy to edit – e.g. for the next assessment year">Duplicate</button>
-        ${it.archived ? '<button type="button" id="restIt">Restore</button><button type="button" class="danger" id="delIt">Delete</button>' : '<button type="button" class="danger" id="archIt">Archive</button>'}
+        <button type="button" class="edit-only" id="editIt">Edit</button>
+        <button type="button" class="edit-only" id="dupIt" title="A copy to edit – e.g. for the next assessment year">Duplicate</button>
+        ${it.archived ? '<button type="button" class="edit-only" id="restIt">Restore</button><button type="button" class="danger edit-only" id="delIt">Delete</button>' : '<button type="button" class="danger edit-only" id="archIt">Archive</button>'}
       </div>`;
       h += optsHtml + `<div class="doc">${it.kind === 'link' ? linkBody(it) : (it.html || '<p class="hint">(no text)</p>')}</div>`;
     } else h += optsHtml;
@@ -112,12 +123,12 @@
     on('copyOne', () => copyItems([it]));
     on('copyUrl', () => copyText(it.url, 'Link copied.'));
     on('openUrl', () => window.open(it.url, '_blank', 'noopener'));
-    on('editIt', () => openEditor(it));
-    on('dupIt', () => { const d = Object.assign(clone(it), { id: uid(), title: it.title + ' (copy)', archived: false, archivedOn: '', created: today(), updated: today() }); lib.items.push(d); save(); cur = d.id; tab = 'active'; setTab(); openEditor(d); });
-    on('archIt', async () => { if (!(await ask('Archive this item?', `"${it.title}" moves to the Archive tab (under ${it.cat}). It stays there for reference and can be restored.`, 'Archive'))) return;
+    on('editIt', () => canEdit() && openEditor(it));
+    on('dupIt', () => { if (!canEdit()) return; const d = Object.assign(clone(it), { id: uid(), title: it.title + ' (copy)', archived: false, archivedOn: '', created: today(), updated: today() }); lib.items.push(d); save(); cur = d.id; tab = 'active'; setTab(); openEditor(d); });
+    on('archIt', async () => { if (!canEdit()) return; if (!(await ask('Archive this item?', `"${it.title}" moves to the Archive tab (under ${it.cat}). It stays there for reference and can be restored.`, 'Archive'))) return;
       it.archived = true; it.archivedOn = today(); it.updated = today(); save(); cur = null; render(); msg('ok', 'Archived.'); });
-    on('restIt', () => { it.archived = false; it.archivedOn = ''; it.updated = today(); save(); tab = 'active'; cur = it.id; setTab(); msg('ok', 'Restored to the Active tab.'); });
-    on('delIt', async () => { if (!(await ask('Delete permanently?', `"${it.title}" will be removed from the library. This cannot be undone (unless an earlier library file is opened).`, 'Delete'))) return;
+    on('restIt', () => { if (!canEdit()) return; it.archived = false; it.archivedOn = ''; it.updated = today(); save(); tab = 'active'; cur = it.id; setTab(); msg('ok', 'Restored to the Active tab.'); });
+    on('delIt', async () => { if (!canEdit()) return; if (!(await ask('Delete permanently?', `"${it.title}" will be removed from the library. This cannot be undone (unless an earlier library file is opened).`, 'Delete'))) return;
       lib.items = lib.items.filter(i => i !== it); save(); cur = null; render(); });
   }
 
@@ -203,7 +214,7 @@
   });
 
   /* ---------- bulk links ---------- */
-  $('#bulkLinks').onclick = () => { $('#b_cat').innerHTML = catOptions(cat !== 'all' ? cat : 'General'); $('#b_text').value = ''; $('#bulkDlg').showModal(); };
+  $('#bulkLinks').onclick = () => { if (!canEdit()) return; $('#b_cat').innerHTML = catOptions(cat !== 'all' ? cat : 'General'); $('#b_text').value = ''; $('#bulkDlg').showModal(); };
   $('#bulkCancel').onclick = () => $('#bulkDlg').close();
   $('#bulkAdd').onclick = () => {
     const lines = $('#b_text').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean); let n = 0; const bad = [];
@@ -224,7 +235,7 @@
     $('#catRows').innerHTML = lib.cats.map((c, i) => { const n = lib.items.filter(it => it.cat === c).length;
       return `<div class="catrow"><input data-i="${i}" value="${esc(c)}"><span class="hint" style="margin:0;width:70px">${n} item${n === 1 ? '' : 's'}</span><button type="button" class="small" data-up="${i}" ${i ? '' : 'disabled'} title="Move up">↑</button><button type="button" class="small danger" data-del="${i}" ${n ? 'disabled' : ''}>Delete</button></div>`; }).join('');
   }
-  $('#manageCats').onclick = () => { catRows(); $('#catDlg').showModal(); };
+  $('#manageCats').onclick = () => { if (!canEdit()) return; catRows(); $('#catDlg').showModal(); };
   $('#catRows').addEventListener('change', e => { const i = e.target.dataset.i; if (i == null) return; const old = lib.cats[i], nv = e.target.value.trim();
     if (!nv || lib.cats.includes(nv)) { e.target.value = old; return; } lib.cats[i] = nv; lib.items.forEach(it => { if (it.cat === old) it.cat = nv; }); if (cat === old) cat = nv; save(); catRows(); });
   $('#catRows').addEventListener('click', e => { const u = e.target.dataset.up, d = e.target.dataset.del;
@@ -240,19 +251,77 @@
   $('#list').onclick = e => { const s = e.target.dataset.sel; if (s) { e.target.checked ? sel.add(s) : sel.delete(s); render(); return; } const r = e.target.closest('.it'); if (r) { cur = r.dataset.id; render(); } };
   $('#selAll').onchange = e => { shown().forEach(i => e.target.checked ? sel.add(i.id) : sel.delete(i.id)); render(); };
   $('#q').oninput = e => { q = e.target.value.trim().toLowerCase(); render(); };
-  $('#newItem').onclick = () => openEditor(null);
+  $('#newItem').onclick = () => canEdit() && openEditor(null);
 
-  /* ---------- library file ---------- */
-  $('#saveCase').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(Object.assign({}, lib, { savedOn: new Date().toISOString() }), null, 1)], { type: 'application/json' })); a.download = 'Checklists_and_procedures_library.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); msg('ok', 'Library saved.'); };
-  $('#openCase').onclick = () => $('#caseFile').click();
-  $('#caseFile').onchange = async e => {
+  /* ---------- library file: export / import ---------- */
+  function normalise(d) {
+    const L = { kind: 'procedures-library', version: d.version || 1, cats: (d.cats || []).slice(), items: (d.items || []).map(it => Object.assign({ kind: 'doc', html: '', url: '', note: '', validFor: '', reviewBy: '', archived: false, archivedOn: '' }, it, { html: clean(it.html || '') })) };
+    L.items.forEach(it => { if (!L.cats.includes(it.cat)) L.cats.push(it.cat); });
+    return L;
+  }
+  $('#exportLib').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(Object.assign({}, lib, { exportedOn: new Date().toISOString() }), null, 1)], { type: 'application/json' })); a.download = `procedures_library_copy_${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); msg('ok', 'A copy of the library has been downloaded.'); };
+  $('#importLib').onclick = () => { if (canEdit()) $('#importFile').click(); };
+  $('#importFile').onchange = async e => {
     const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-    try { const d = JSON.parse(await f.text()); if (d.kind !== 'procedures-library' || !Array.isArray(d.items)) throw 0;
-      lib = { kind: d.kind, version: d.version || 1, cats: d.cats || [], items: d.items.map(it => Object.assign({ kind: 'doc', html: '', url: '', note: '', validFor: '', reviewBy: '', archived: false, archivedOn: '' }, it, { html: clean(it.html || '') })) };
-      lib.items.forEach(it => { if (!lib.cats.includes(it.cat)) lib.cats.push(it.cat); });
-      save(); tab = 'active'; cat = 'all'; cur = null; sel.clear(); setTab(); msg('ok', `Opened ${f.name}: ${lib.items.filter(i => !i.archived).length} active, ${lib.items.filter(i => i.archived).length} archived.`);
-    } catch (err) { msg('err', 'That file is not a checklists and procedures library.'); }
+    let d; try { d = JSON.parse(await f.text()); if (d.kind !== 'procedures-library' || !Array.isArray(d.items)) throw 0; } catch (err) { msg('err', 'That file is not a checklists and procedures library.'); return; }
+    if (!(await ask('Replace the library?', `The library ${mode === 'rw' ? 'in the database folder' : 'on this screen'} (${lib.items.length} items) will be replaced by "${f.name}" (${d.items.length} items).${mode === 'rw' ? ' The daily backup keeps the earlier version.' : ''}`, 'Replace'))) return;
+    lib = normalise(d); save(); tab = 'active'; cat = 'all'; cur = null; sel.clear(); setTab(); msg('ok', `Imported ${f.name}.`);
   };
+
+  /* ---------- database folder ---------- */
+  function showDb() {
+    const st = $('#dbState'), nm = K.name();
+    document.body.classList.toggle('ro', mode === 'ro');
+    st.className = 'dbstate ' + mode;
+    st.textContent = mode === 'rw' ? `Database: folder "${nm}" – saved automatically` : mode === 'ro' ? `Database: folder "${nm}" – read only (${otherLock && otherLock.user || 'someone else'} is editing)` : 'Database: not connected – kept in this browser only';
+    $('#dbConnect').hidden = mode !== 'local'; $('#dbTake').hidden = mode !== 'ro';
+    $('#dbHint').textContent = !K.supported ? 'This browser cannot keep the library in the database folder (use Chrome or Edge). Use Export / Import to keep it in a file.'
+      : mode === 'local' ? 'Connect the database folder once on this computer: choose the tool kit folder (the one that contains "shared") – the library is kept in its "database" folder (procedures_library.json) and the whole team uses the same file. Only one person can edit at a time; the others see it read only.'
+      : mode === 'rw' ? 'Every change is saved in the database folder at once. A backup of the previous version is kept daily in database/backup. Close the page when you finish so that others can edit.' : 'You can view and copy items. Editing opens when the other person closes the library (or after two minutes of inactivity).';
+  }
+  async function openDb(silent) {
+    const u = ($('#dbUser').value || '').trim();
+    if (!u) { $('#dbUser').focus(); msg('warn', 'Enter your name first – it is shown to others while you have the library open.'); return; }
+    K.setUser(u); clearInterval(beat);
+    try {
+      const lk = await DB.acquire(u, false);
+      if (lk.busy) { mode = 'ro'; otherLock = lk.lock; } else { mode = 'rw'; otherLock = null; }
+      const r = await DB.read();
+      if (r && r.data && Array.isArray(r.data.items)) lib = normalise(r.data);
+      else if (mode === 'rw') {
+        const n = lib.items.length;
+        if (!(await ask('Start the library in the database folder?', `There is no library in the folder "${K.name()}" yet. Put the ${n} item(s) on this screen into it?`, 'Yes'))) lib = clone(window.PROC_SEED);
+        await DB.write(lib);
+      }
+      keepLocal(); showDb(); render();
+      beat = setInterval(tickDb, 30000);
+      if (!silent || lk.stale) msg(mode === 'rw' ? 'ok' : 'warn', mode === 'rw' ? `Library opened from the folder "${K.name()}" – ${lib.items.length} items.${lk.stale ? ` ${lk.stale.user} had left it open; it is now open for you.` : ''}` : `${otherLock.user || 'Someone else'} has the library open for editing – it is read only for you.`);
+    } catch (e) { msg('err', 'The database folder could not be used: ' + (e.message || e)); mode = 'local'; showDb(); }
+  }
+  async function tickDb() {
+    try {
+      if (mode === 'rw') { const h = await DB.heartbeat(K.user()); if (h.lost) { mode = 'ro'; otherLock = h.lock; showDb(); msg('warn', `${h.lock.user || 'Someone else'} has taken over the library – it is read only for you now.`); } }
+      else if (mode === 'ro') { otherLock = await DB.peekLock(); const r = await DB.read(); if (r && r.data) { lib = normalise(r.data); keepLocal(); render(); }
+        if (!otherLock || Date.now() - (otherLock.beat || 0) >= DB.STALE_MS) { await openDb(true); if (mode === 'rw') msg('ok', 'The library is free now – open for editing.'); } else showDb(); }
+    } catch (e) { /* folder not reachable now – try again at the next tick */ }
+  }
+  $('#dbUser').value = K.user();
+  $('#dbUser').onchange = () => K.setUser($('#dbUser').value.trim());
+  $('#dbConnect').onclick = async () => {
+    if (!K.supported) return msg('warn', 'This needs Chrome or Edge.');
+    if (!($('#dbUser').value || '').trim()) { $('#dbUser').focus(); return msg('warn', 'Enter your name first.'); }
+    try { await K.connect(name => ask('Use this folder?', `"${name}" is not the tool kit folder. Keep the database in "${name}" anyway? (Recommended: choose the tool kit folder – the one that contains "shared".)`, 'Use it')); await openDb(); }
+    catch (e) { if (e && e.name !== 'AbortError') msg('err', e.message || String(e)); }
+  };
+  $('#dbReconnect').onclick = async () => { try { if ((await K.permit()) === 'granted') { $('#dbReconnect').hidden = true; await openDb(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
+  $('#dbTake').onclick = async () => { if (!(await ask('Open for editing?', `${otherLock && otherLock.user || 'The other person'} may be making changes now; if you take over, their changes after this may not be saved. Take over only after checking with them.`, 'Take over'))) return;
+    try { await DB.acquire(K.user(), true); await openDb(); } catch (e) { msg('err', e.message || String(e)); } };
+  window.addEventListener('pagehide', () => { if (mode === 'rw') { clearTimeout(wTimer); DB.release(); } });
+  showDb();
+  if (K.supported) K.restore().then(p => {
+    if (p === 'granted' && K.user()) openDb(true);
+    else if (p) { $('#dbReconnect').hidden = false; $('#dbConnect').hidden = true; $('#dbReconnect').textContent = `Reconnect to the database folder "${K.name()}"`; }
+  });
 
   setTab();
 })();

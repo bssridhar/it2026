@@ -78,7 +78,7 @@ async function persist(note) {
       msg('ok', `${note ? note + ' – ' : ''}saved in the folder at ${stamp(Date.now())}.`);
     } catch (e) { msg('err', `Not saved in the folder: ${e.message || e}. Your change is kept in this browser; try again.`); return false; }
   } else if (mode === 'local') { savedAt = Date.now(); savedWhere = 'browser'; showSaved(); }
-  if (mode === 'local' && note) msg('ok', `${note} – kept in this browser. Use "Save a copy (JSON)" to keep it in a file${S.supported ? ', or choose the folder of the register' : ''}.`);
+  if (mode === 'local' && note) msg('ok', `${note} – kept in this browser. Use "Save a copy (JSON)" to keep it in a file${S.supported ? ', or connect the database folder' : ''}.`);
   return true;
 }
 function conflict(other) {
@@ -135,7 +135,7 @@ function showMode() {
     if ($('#roTake')) $('#roTake').onclick = async () => { if (await ask('Take over?', `${esc(l.user || 'The other person')} may be making changes now; if you take over, their unsaved changes may not be saved (they will see that you took over). Take over only if you have checked with them.`)) { await S.acquire(user(), true); openFolder(); } };
   } else banner();
   $('#modeHint').textContent = mode === 'local'
-    ? (S.supported ? 'Choose the folder where the register is to be kept (e.g. a shared office folder). The tool remembers it; whoever opens the tool uses the same file, and only one person can edit at a time.' : 'This browser cannot keep the register in a folder (use Chrome or Edge for that). The register is kept in this browser – use "Save a copy (JSON)" and "Open a JSON file" to keep it in a file.')
+    ? (S.supported ? 'Click "Connect the database folder" and choose the tool kit folder (the one that contains "shared") – the register is kept in its "database" folder, which all the tools use. Choose it once on each computer; whoever opens the tool uses the same file, and only one person can edit at a time.' : 'This browser cannot keep the register in a folder (use Chrome or Edge for that). The register is kept in this browser – use "Save a copy (JSON)" and "Open a JSON file" to keep it in a file.')
     : (mode === 'rw' ? 'Every change is saved in the folder as soon as it is made. When you finish, click "Save and close" so that others can edit.' : '');
 }
 $('#chooseFolder').onclick = async () => {
@@ -337,7 +337,8 @@ function ask(title, html) { return new Promise(done => { $('#askTitle').textCont
   showMode(); render();
   if (!S.supported) return;
   const p = await S.restore();
-  if (p === 'granted') await openFolder(true);
+  if (p && S.legacy()) msg('info', `The register is in the folder "${S.dirName()}" chosen earlier. To move it to the tool kit's database folder: open it, then click "Connect the database folder" and choose the tool kit folder – the register on screen is put into the new folder.`);
+  if (p === 'granted') await openFolder(!S.legacy());
   else if (p) { $('#reconnect').hidden = false; $('#reconnect').textContent = `Reconnect to the folder "${S.dirName()}"`; msg('info', `The register is kept in the folder "${S.dirName()}" – click "Reconnect" to open it (the browser asks for permission once per visit).`); }
 })();
 window.DscTool = { reg: () => reg, mode: () => mode, openFolder, tick };

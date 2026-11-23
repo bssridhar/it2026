@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+# client data – the tool kit database folder is never committed
+database/

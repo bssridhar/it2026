@@ -56,6 +56,22 @@ Every tool has a desk calculator (`shared/calc.js`): click the flashing **Calcul
 of the page. It has GT, memory (M+, M−, MRC), %, √, 00, a tape, and "Use in field" to put the figure into the
 field last clicked. New tools must include `<script src="../shared/calc.js"></script>` before `</body>`.
 
+## Database folder – `database`
+
+The tools that keep a register shared by the whole team – **DSC Register** (`dsc_register.json`) and **Checklists and
+Procedures** (`procedures_library.json`) – keep it in the `database` folder of the tool kit, next to `shared`
+(`shared/db.js`). Connect it once on each computer, in Chrome or Edge: click **Connect** at the bottom of the home page
+(or in the tool) and choose the **tool kit folder** – the `database` folder is created there. The browser may ask
+"Allow" once per visit.
+
+- Only one person can edit a register at a time; the others see it read only, with the name of the person editing.
+- The first save of each day keeps the previous version in `database/backup`.
+- The `database` folder holds client data: it is not part of the zip files of the tool kit and is never committed to
+  the code repository. When updating the tool kit, copy the new files over the old ones – do not delete the old
+  folder – so that `database` stays. Keep a periodic copy of it elsewhere, and limit access to the folder to staff.
+- Use the tool kit from a shared office folder (server / NAS) so that everyone uses the same `database`. Cloud-sync
+  folders (OneDrive, Google Drive) may create "conflicted copies" if two people save within the sync delay.
+
 ## Case files – Save and Save as
 
 Every tool saves its work as a case file (`.json`) on this computer (`shared/casefile.js`). In Chrome and Edge:

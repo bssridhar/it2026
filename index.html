@@ -92,6 +92,8 @@ footer p{margin:4px 0}
 <footer class="wrap">
   <p>For internal use. Documents produced by these tools are drafts and must be checked before they are signed or filed.</p>
   <p>All tools run in this browser; client data is not uploaded anywhere.</p>
+  <p id="dbLine">Database folder (DSC Register, Checklists and Procedures): <span id="dbName">checking…</span>
+    <button type="button" id="dbBtn" hidden style="font:inherit;font-size:.8rem;padding:2px 9px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer"></button></p>
 </footer>
 
 <script src="home-config.js"></script>
@@ -168,6 +170,26 @@ document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('q').focus(); }
 });
 render();
+})();
+</script>
+<script src="shared/db.js"></script>
+<script>
+(function () { /* database folder status: <tool kit>/database, used by the tools that keep a shared register */
+  var K = window.KitDB, nm = document.getElementById('dbName'), b = document.getElementById('dbBtn');
+  if (!K || !K.supported) { nm.textContent = 'needs Chrome or Edge'; return; }
+  function show(p) {
+    if (p === 'granted') { nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change'; }
+    else if (p) { nm.textContent = '"' + K.name() + '" – chosen earlier (the browser asks for permission once per visit)'; b.hidden = false; b.textContent = 'Allow now'; }
+    else { nm.textContent = 'not connected'; b.hidden = false; b.textContent = 'Connect'; }
+  }
+  b.onclick = async function () {
+    try {
+      if (b.textContent === 'Allow now') { show(await K.permit()); return; }
+      await K.connect(function (name) { return Promise.resolve(confirm('"' + name + '" is not the tool kit folder. Keep the database in "' + name + '" anyway?\n\n(Recommended: choose the tool kit folder – the one that contains "shared" – and the "database" folder is created there.)')); });
+      show('granted');
+    } catch (e) { if (!e || e.name !== 'AbortError') alert(e.message || e); }
+  };
+  K.restore().then(show);
 })();
 </script>
 <script src="shared/calc.js"></script>

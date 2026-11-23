@@ -72,6 +72,10 @@ dialog h3{margin:0 0 12px}
 textarea{width:100%;min-height:160px;font-family:Consolas,Menlo,monospace;font-size:.85rem}
 .catrow{display:flex;gap:6px;align-items:center;margin:0 0 6px}
 .catrow input{flex:1}
+.dbbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.dbstate{font-size:.86rem;font-weight:600}
+.dbstate.rw{color:var(--ok)} .dbstate.ro{color:var(--warn)} .dbstate.local{color:var(--muted)}
+body.ro .edit-only{display:none}
 </style>
 </head>
 <body>
@@ -82,16 +86,23 @@ textarea{width:100%;min-height:160px;font-family:Consolas,Menlo,monospace;font-s
 
   <section class="card">
     <div class="bar">
-      <button type="button" class="primary" id="newItem">+ New item</button>
-      <button type="button" id="bulkLinks">+ Bulk add links</button>
-      <button type="button" id="manageCats">Categories…</button>
+      <button type="button" class="primary edit-only" id="newItem">+ New item</button>
+      <button type="button" class="edit-only" id="bulkLinks">+ Bulk add links</button>
+      <button type="button" class="edit-only" id="manageCats">Categories…</button>
       <span style="flex:1"></span>
       <input type="search" id="q" placeholder="Search titles and text" style="width:230px">
-      <button type="button" id="saveCase">Save library</button>
-      <button type="button" id="openCase">Open library</button>
-      <input type="file" id="caseFile" accept=".json" hidden>
+      <button type="button" id="exportLib" title="Download a copy of the library (JSON) – e.g. to keep outside the office">Export a copy</button>
+      <button type="button" class="edit-only" id="importLib" title="Replace the library with a library file (JSON)">Import a file</button>
+      <input type="file" id="importFile" accept=".json" hidden>
     </div>
-    <p class="hint">Keep the library file in a shared folder: open it there, and Save writes the changes back into it, so the whole team uses the same list. The library is also kept in this browser between visits.</p>
+    <div class="dbbar" id="dbbar">
+      <span id="dbState" class="dbstate">Database: not connected</span>
+      <input id="dbUser" placeholder="Your name" title="Shown to others who open the library while you have it open" style="width:150px">
+      <button type="button" class="small" id="dbConnect">Connect the database folder</button>
+      <button type="button" class="small" id="dbReconnect" hidden>Reconnect</button>
+      <button type="button" class="small" id="dbTake" hidden>Open for editing</button>
+    </div>
+    <p class="hint" id="dbHint"></p>
     <div id="topMsgs" class="msgs"></div>
   </section>
 
@@ -160,6 +171,7 @@ textarea{width:100%;min-height:160px;font-family:Consolas,Menlo,monospace;font-s
 
 <dialog id="askDlg"><h3 id="askT"></h3><p id="askM" style="margin:0 0 14px"></p><div class="bar" style="justify-content:flex-end"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">OK</button></div></dialog>
 
+<script src="../shared/db.js"></script>
 <script src="lib/seed.js"></script>
 <script src="lib/app.js"></script>
 <script src="../shared/casefile.js"></script>

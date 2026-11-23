@@ -2,9 +2,12 @@
 
 Open `index.html` (keep the `shared` folder of the tool kit next to this folder).
 
-**Where the register is kept.** In Chrome or Edge, click "Choose the folder of the register" and pick a folder – for
-example a folder on the office server that everyone can reach. The register is saved there as `dsc_register.json`
-after every change; the tool remembers the folder (the browser asks for permission once per visit – "Reconnect").
+**Where the register is kept.** In the tool kit's `database` folder (next to `shared`), as `dsc_register.json` – the
+same folder that the other tools with a shared register use. In Chrome or Edge, click "Connect the database folder"
+(here or at the bottom of the home page) and choose the tool kit folder; the `database` folder is created there. The
+register is saved after every change; the tool remembers the folder (the browser asks for permission once per visit –
+"Reconnect"). A folder chosen in the earlier version is still used until the database folder is connected – open the
+register, then connect the database folder: the register on screen is put into it.
 In other browsers the register is kept in the browser; use "Save a copy (JSON)" / "Open a JSON file".
 
 **Save / Save and close.** Every change is saved at once (in the folder, or in the browser if no folder is chosen); the
