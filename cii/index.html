@@ -104,7 +104,7 @@ details.opt summary{cursor:pointer;font-weight:600}
           <div><label>Title</label><select data-f="sal"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>M/s.</option></select></div>
           <div style="grid-column:span 2"><label>Name of the Assessee <span class="req">*</span></label><input data-f="name" placeholder="as in the PAN"></div>
           <div><label>PAN</label><input data-f="pan" maxlength="10" style="text-transform:uppercase" placeholder="optional"></div>
-          <div><label>Status</label><select data-f="seller"><option value="res">Resident individual / HUF</option><option value="other">Others (non-resident, firm, company, etc.)</option></select></div>
+          <div><label>Status</label><select data-f="seller"><option value="res">Resident individual / HUF</option><option value="nri">Non-resident individual / HUF</option><option value="other">Firm / LLP / company / others</option></select></div>
           <div class="ind"><label>Tax regime</label><select data-f="regime"><option value="new">New regime (s.115BAC / 2025 Act)</option><option value="old">Old regime</option></select></div>
           <div class="ind"><label>Age (old regime)</label><select data-f="age"><option value="lt60">Below 60</option><option value="60-80">60 to 80</option><option value="80+">80 and above</option></select></div>
           <div><label>Other income of the year (Rs.)</label><input type="number" min="0" step="1" data-f="other" placeholder="income other than this gain"><p class="hint">For the slab tax, the basic exemption shortfall and the surcharge.</p></div>
@@ -206,7 +206,7 @@ function bind(){
   renderImps(); vis();
 }
 function vis(){
-  const land = c.asset === 'land', res = c.seller === 'res';
+  const land = c.asset === 'land', res = c.seller !== 'other';
   $('#fmvWrap').hidden = !(c.pdate && c.pdate < '2001-04-01');
   $('#fmvSdvWrap').hidden = !land; $('#sdvWrap').hidden = !land; $('#resHouseWrap').hidden = !land;
   document.querySelectorAll('.ind').forEach(e => e.hidden = !res);
@@ -266,7 +266,7 @@ function render(r){
   h += `<div class="banner ${two ? 'yes' : 'no'}">${two ? `<b>Indexation applicable</b> – ${esc(ix.reason)}.` : `<b>Indexation not applicable due to ${esc(ix.reason)}.</b> The capital gain is computed without indexation.`}</div>`;
   h += `<h3>Facts</h3><table class="t"><tbody>
     <tr><td>Asset</td><td class="n">${esc($('[data-f=asset]').selectedOptions[0].text)}${c.asset === 'land' ? (c.resHouse === 'yes' ? ' – residential house' : ' – not a residential house') : ''}</td></tr>
-    <tr><td>Status</td><td class="n">${c.seller === 'res' ? 'Resident individual / HUF' : 'Others'}</td></tr>
+    <tr><td>Status</td><td class="n">${esc($('[data-f=seller]').selectedOptions[0].text)}</td></tr>
     <tr><td>Date of purchase</td><td class="n">${dmy(c.pdate)} (FY ${fyLabel(r.pfy)})</td></tr>
     <tr><td>Date of sale</td><td class="n">${dmy(c.sdate)} (${r.act === '2025' ? 'tax year' : 'FY'} ${fyLabel(r.sfy)})</td></tr>
     <tr><td>Period of holding</td><td class="n">${r.hold.months} months ${r.hold.days} days (${r.hold.totalDays.toLocaleString('en-IN')} days)</td></tr>
@@ -298,6 +298,7 @@ function render(r){
   const O = r.options, best = O.reduce((a, o) => o.total < a.total || (o.total === a.total && o.invested < a.invested) ? o : a, O[0]);
   h += `<h3>Tax planning options</h3><div class="tw"><table class="t cmp"><thead><tr><th>Option</th><th class="n">House</th><th class="n">Bonds</th><th class="n">Taxable gain</th><th class="n">Tax payable</th><th class="n">Tax saved</th><th class="n">Funds locked in</th><th class="n">Cash in hand after tax and investment</th></tr></thead><tbody>` +
     O.map(o => `<tr class="${o === best && O.length > 1 && o.saved > 0 ? 'best' : ''}"><td>${esc(o.title)}</td><td class="n">${o.H ? num(o.H) : '–'}</td><td class="n">${o.B ? num(o.B) : '–'}</td><td class="n">${num(o.pick.taxable)}</td><td class="n"><b>${num(o.total)}</b></td><td class="n">${o.id > 1 ? num(o.saved) : '–'}</td><td class="n">${o.invested ? num(o.invested) : '–'}</td><td class="n">${num(o.cash)}</td></tr>`).join('') +
+    (r.unavail || []).map(([t, why]) => `<tr><td colspan="8" style="color:var(--muted)"><i>${esc(t)}: not available – ${esc(why)}</i></td></tr>`).join('') +
     `</tbody></table></div><p class="hint">Amounts in Rs. Cash in hand = net consideration (sale value less expenses) – tax – amounts invested. Funds in bonds are locked in for five years; the new house is not to be sold for three years.</p>`;
   if (r.need) h += `<table class="t" style="margin:8px 0"><tbody><tr><td colspan="2"><b>Investment needed for full exemption</b> (gain ${rs(r.need.gain)})</td></tr>
     ${r.need.houseOnly != null ? `<tr><td>House alone (${r.houseSec === 's54' ? 's.54 / s.82 – the gain' : 's.54F / s.86 – the net consideration'})</td><td class="n">${rs(r.need.houseOnly)}${r.need.houseOnly > 1e8 ? ' (above the Rs. 10 crore cap)' : ''}</td></tr>` : ''}
@@ -314,7 +315,7 @@ function render(r){
   h += `<h3>Provisions – Income-tax Act, 1961 and Income-tax Act, 2025</h3><div class="tw"><table class="t cmp"><thead><tr><th>Subject</th><th>${r.act === '1961' ? '<span class="act">ITA 1961 (applies)</span>' : 'ITA 1961'}</th><th>${r.act === '2025' ? '<span class="act">ITA 2025 (applies)</span>' : 'ITA 2025'}</th></tr></thead><tbody>` +
     SECTIONS.map(s => `<tr><td>${esc(s[0])}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td></tr>`).join('') + `</tbody></table></div>
     <p class="src">The Income-tax Act, 2025 applies to the tax year 2026-27 onwards (transfers from 01-04-2026); earlier transfers are under the Income-tax Act, 1961. Section numbers of the 2025 Act are from the published concordance tables – verify with the Act / CBDT concordance before quoting.
-    Working based on the figures entered${c.seller === 'res' ? '; surcharge on the basis of total income of Rs. ' + num(r.other) + ' plus the taxable gain, marginal relief not considered' : ''}. CII${two ? `: ${fyLabel(r.baseFy)} = ${r.ciiP}, ${fyLabel(r.sfy)} = ${r.ciiS}` : ' not used'}.</p>`;
+    Working based on the figures entered${c.seller !== 'other' ? '; surcharge on the basis of total income of Rs. ' + num(r.other) + ' plus the taxable gain, marginal relief not considered' : ''}. CII${two ? `: ${fyLabel(r.baseFy)} = ${r.ciiP}, ${fyLabel(r.sfy)} = ${r.ciiS}` : ' not used'}.</p>`;
   return h;
 }
 

@@ -77,7 +77,7 @@
     if (errs.length) return { errs };
 
     const r = { errs: [], notes: [], sfy, act: c.sdate >= ITA2025 ? '2025' : '1961' };
-    const res = c.seller === 'res', after = c.sdate >= CUTOFF;
+    const res = c.seller === 'res', ind = c.seller === 'res' || c.seller === 'nri', after = c.sdate >= CUTOFF;
     const hold = heldFor(c.pdate, c.sdate), lim = ltLimit(c.asset, c.sdate), ltFrom = addDays(addMonths(c.pdate, lim), 1), longTerm = c.sdate >= ltFrom;
     Object.assign(r, { hold, lim, longTerm, after, ltFrom });
 
@@ -123,20 +123,24 @@
     const kind = !longTerm ? (c.asset === 'listed' ? 'stcg111A' : 'stcgSlab') : c.asset === 'listed' ? 'ltcg112A' : !after ? 'ltcgOld' : 'ltcg112';
     const rate = { stcg111A: after ? 20 : 15, ltcg112A: after ? 12.5 : 10, ltcgOld: 20, ltcg112: 12.5, stcgSlab: 0 }[kind];
     r.kind = kind;
-    r.rateText = { stcg111A: `${rate}% (s.111A / s.196)`, stcgSlab: res ? 'normal (slab) rates – added to the other income' : `normal rate of ${N(c.orate) || 30}%`,
+    r.rateText = { stcg111A: `${rate}% (s.111A / s.196)`, stcgSlab: ind ? 'normal (slab) rates – added to the other income' : `normal rate of ${N(c.orate) || 30}%`,
       ltcg112A: `${rate}% on the gain above Rs. ${after ? '1,25,000' : '1,00,000'} (s.112A / s.198)`, ltcgOld: '20% with indexation (s.112)',
       ltcg112: ix.both ? 'lower of 12.5% without indexation and 20% with indexation (s.112 / s.197)' : '12.5% without indexation (s.112 / s.197)' }[kind];
 
     // exemptions open to this sale
-    const house = longTerm && res ? (c.asset === 'land' && c.resHouse === 'yes' ? 's54' : 's54F') : null;
+    const house = longTerm && ind ? (c.asset === 'land' && c.resHouse === 'yes' ? 's54' : 's54F') : null;
     const bondsOk = longTerm && c.asset === 'land';
     const cap = c.sdate >= CAP_FROM ? HOUSE_CAP : Infinity;
     r.houseSec = house; r.bondsOk = bondsOk;
-    if (longTerm && !res) r.notes.push(['warn', 'Exemptions under s.54 / s.54F (s.82 / s.86) are for individuals and HUFs only; s.54EC (s.85) bonds are open to any assessee transferring land or building.']);
+    if (c.seller === 'nri') r.notes.push(['info', 'Non-resident individual / HUF: s.54 / s.54F / s.54EC (s.82 / s.86 / s.85) are available, but not the option of 20% with indexation for land or building and not the adjustment of the unexhausted basic exemption limit (both only for residents). TDS by the buyer is under s.195 (2025 Act: s.393 table) at the rates in force – the seller may apply for a lower deduction certificate.']);
+    r.unavail = [];
+    if (longTerm && !ind) r.unavail.push(['Options 2 and 4 – residential house (s.54 / s.54F; s.82 / s.86)', 'available only to an individual or HUF (resident or non-resident) – not to a firm, LLP, company or other assessee']);
+    if (longTerm && c.asset !== 'land') r.unavail.push(['Options 3 and 4 – capital gains bonds (s.54EC / s.85)', 'available only on the transfer of land or building (or both)']);
+    if (!longTerm) r.unavail.push(['Options 2 to 5 – house / bonds', 'the gain is short-term; these exemptions are only for long-term gains']);
     if (house === 's54F') r.notes.push(['info', 's.54F / s.86: on the date of transfer the assessee should not own more than one residential house other than the new one, and should not buy another within two years or build another within three years after the transfer. The exemption is the gain × amount invested ÷ net consideration.']);
 
     // basic exemption shortfall, losses
-    const other = N(c.other), sl = slabs(c.regime || 'new', sfy, c.age, res), belAmt = res ? sl[0][0] : 0, shortfall = res ? Math.max(0, belAmt - other) : 0;
+    const other = N(c.other), sl = slabs(c.regime || 'new', sfy, c.age, res), belAmt = ind ? sl[0][0] : 0, shortfall = res ? Math.max(0, belAmt - other) : 0;
     const stcl = N(c.stcl), ltcl = N(c.ltcl), lossAvail = longTerm ? ltcl + stcl : stcl;
     Object.assign(r, { bel: belAmt, shortfall, other, lossAvail });
 
@@ -150,7 +154,7 @@
       return { s54, s54F, s54EC, tot };
     }
     function surRate(ti) {
-      if (!res) return N(c.srate);
+      if (!ind) return N(c.srate);
       const newR = (c.regime || 'new') === 'new';
       const s = ti > 5e7 ? (newR ? 25 : 37) : ti > 2e7 ? 25 : ti > 1e7 ? 15 : ti > 5e6 ? 10 : 0;
       return kind === 'stcgSlab' ? s : Math.min(s, 15);
@@ -158,7 +162,7 @@
     function taxOn(G, H, B, rt) {
       const e = exemptions(G, H, B), afterEx = Math.max(0, G - e.tot), setoff = Math.min(lossAvail, afterEx), taxable = afterEx - setoff;
       let base = 0, adj = 0, thr = 0, net = taxable;
-      if (kind === 'stcgSlab') base = res ? slabTax(other + taxable, sl) - slabTax(other, sl) : taxable * (N(c.orate) || 30) / 100;
+      if (kind === 'stcgSlab') base = ind ? slabTax(other + taxable, sl) - slabTax(other, sl) : taxable * (N(c.orate) || 30) / 100;
       else { adj = Math.min(shortfall, net); net -= adj; if (kind === 'ltcg112A') { thr = Math.min(after ? 125000 : 100000, net); net -= thr; } base = net * rt / 100; }
       return { G, ...e, afterEx, setoff, taxable, adj, thr, net, base, rate: rt };
     }
@@ -201,7 +205,7 @@
     if (house && bondsOk) r.notes.push(['info', 'House and bonds together: each exemption is worked out on the gain and the total is limited to the gain.']);
     if (res && shortfall > 0 && kind !== 'stcgSlab') r.notes.push(['info', `Basic exemption limit: other income Rs. ${inr(other)} is below Rs. ${inr(belAmt)} (${(c.regime || 'new') === 'old' ? 'old' : 'new'} regime) – the shortfall of Rs. ${inr(shortfall)} is set off against the gain (provisos to s.111A, s.112, s.112A; s.196 to s.198).`]);
     if (lossAvail > 0) r.notes.push(['info', `Capital losses of Rs. ${inr(lossAvail)} set off against the gain${longTerm ? ' (long-term loss only against long-term gain; short-term loss against either)' : ' (short-term loss only; a long-term loss cannot be set off against a short-term gain)'}.`]);
-    if (res && kind === 'stcgSlab') r.notes.push(['info', 'Short-term gain at slab rates: the tax shown is the increase in tax on the other income because of the gain. Rebate under s.87A (and its 2025 Act equivalent) is not considered.']);
+    if (ind && kind === 'stcgSlab') r.notes.push(['info', 'Short-term gain at slab rates: the tax shown is the increase in tax on the other income because of the gain. Rebate under s.87A (and its 2025 Act equivalent) is not considered.']);
     if (r.act === '2025') r.notes.push(['info', `The transfer is in tax year ${fyLabel(sfy)} – the Income-tax Act, 2025 applies. Sections of both Acts are shown; the 2025 Act numbers are from the published concordance – verify before quoting.`]);
 
     // deadlines
@@ -219,7 +223,7 @@
       D.push(['Bonds not to be transferred or pledged before', '5 years from the date of allotment', 'lock-in']);
     }
     [[`${sfy}-06-15`, '15%'], [`${sfy}-09-15`, '45%'], [`${sfy}-12-15`, '75%'], [`${sfy + 1}-03-15`, '100%']].forEach(([d, p]) => { if (d >= S) D.push([`Advance tax instalment (cumulative ${p}) – include the tax on the capital gain`, d, 'tax on the gain paid in the instalments falling after the gain arises – no interest for the earlier instalments on that part (proviso to s.234C; verify the 2025 Act provision)']); });
-    if (c.asset === 'land' && Math.max(N(c.samt), N(c.sdv)) >= 5e6) D.push(['TDS by the buyer @ 1% (resident seller); the buyer deposits it and issues the certificate', 'with each payment', 's.194-IA / s.393 (table) of the 2025 Act – consideration or stamp duty value Rs. 50 lakh or more; a non-resident seller is covered by s.195 instead']);
+    if (c.asset === 'land' && c.seller !== 'nri' && Math.max(N(c.samt), N(c.sdv)) >= 5e6) D.push(['TDS by the buyer @ 1% (resident seller); the buyer deposits it and issues the certificate', 'with each payment', 's.194-IA / s.393 (table) of the 2025 Act – consideration or stamp duty value Rs. 50 lakh or more; a non-resident seller is covered by s.195 instead']);
     D.push(['Return of income – report the gain and the exemptions claimed (schedule CG)', due, 'due date as selected; the exemption is claimed in the return']);
     r.deadlines = D.map(([what, when, why]) => ({ what, when: when.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3-$2-$1'), why }));
     return r;
