@@ -14,6 +14,7 @@ window.HOME_CONFIG = {
   // Messages that scroll across the top (internal notices, what's new, reminders).
   // Leave the list empty ([]) to hide the ticker.
   ticker: [
+    "New: Checklists and Procedures – standard client checklists, procedures and links, copied into emails with the formatting; outdated items archived.",
     "New: ROC Compliance – appointment of a director: client checklist, procedure, resolutions, DIR-2 / DIR-8 / MBP-1, DIR-12 data sheet.",
     "New: DSC Register – validity of clients’ DSCs, token in / out, renewal reminders; one register file in a shared folder.",
     "New: GSTR-2B Analyser – sorts the ITC in GSTR-2B (blocked credit, insurance / motor vehicle, place of supply, RCM) and gives the GSTR-3B figures.",
@@ -190,6 +191,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Clients' Digital Signature Certificates: validity and days left, purpose, token in / out with acknowledgment, renewal reminders, Excel import / export. Kept as a JSON file in a shared folder, with a warning when someone else has it open.",
       added: "2026-11-17"
+    },
+    {
+      id: "procs",
+      title: "Checklists and Procedures",
+      category: "Office",
+      path: "procs/index.html",
+      status: "available",
+      description: "Standard lists of documents / information and procedures for clients (Income-tax, GST, ROC, General) and links to the firm's documents; copy one or more into an email with the formatting; archive outdated items – kept in the Archive tab by category.",
+      added: "2026-11-23"
     }
   ]
 };

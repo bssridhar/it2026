@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklists and Procedures</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--sel:#e6eefa}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--sel:#1f2d42}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--sel:#1f2d42}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1240px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--err)}
+button.small{padding:3px 9px;font-size:.85rem}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:4px 0 10px}
+.tabs button{border:none;border-radius:6px 6px 0 0;background:none;padding:8px 16px;font-weight:600;color:var(--muted);margin-bottom:-2px;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.pills button{border-radius:16px;padding:4px 12px;font-size:.88rem}
+.pills button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pills .n{opacity:.75;font-size:.8rem;margin-left:4px}
+.cols{display:grid;grid-template-columns:380px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:6px;max-height:70vh;overflow:auto}
+.it{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;background:var(--card)}
+.it:hover{border-color:var(--accent)}
+.it.cur{background:var(--sel);border-color:var(--accent)}
+.it .t{font-weight:600;font-size:.92rem}
+.it .m{font-size:.78rem;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.badge{display:inline-block;border-radius:10px;padding:0 7px;font-size:.74rem;background:var(--head);color:var(--muted)}
+.badge.link{background:#e3ecfa;color:#1f4f8f}
+.badge.due{background:var(--warn-bg);color:var(--warn)}
+.badge.arch{background:var(--err-bg);color:var(--err)}
+.empty{color:var(--muted);font-size:.9rem;padding:16px;text-align:center}
+.prev h2{margin:0 0 4px;font-size:1.15rem}
+.prev .meta{font-size:.82rem;color:var(--muted);margin:0 0 10px}
+.doc{border:1px solid var(--line);border-radius:8px;padding:12px 16px;background:var(--field);max-height:60vh;overflow:auto}
+.doc h4{margin:12px 0 4px}
+.doc table{border-collapse:collapse}.doc td,.doc th{border:1px solid var(--line);padding:4px 8px}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.copyopts{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:.88rem;margin:10px 0}
+.copyopts input[type=text]{width:220px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:18px 20px;width:min(860px,96vw)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h3{margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px}
+.full{grid-column:1/-1}
+.full input,.grid input,.grid select{width:100%}
+.tb{display:flex;gap:4px;flex-wrap:wrap;border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;padding:5px;background:var(--head)}
+.tb button{padding:3px 9px;font-size:.85rem;min-width:30px}
+.ed{border:1px solid var(--line);border-radius:0 0 8px 8px;min-height:260px;max-height:50vh;overflow:auto;padding:10px 14px;background:var(--field);outline:none}
+.ed:focus{border-color:var(--accent)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+textarea{width:100%;min-height:160px;font-family:Consolas,Menlo,monospace;font-size:.85rem}
+.catrow{display:flex;gap:6px;align-items:center;margin:0 0 6px}
+.catrow input{flex:1}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Checklists and Procedures</h1>
+  <p class="sub">Standard lists of documents and procedures for clients – Income-tax, GST, ROC, General. Copy one or more into an email with the formatting. Archive what is out of date: it stays in the Archive tab for reference and cannot be copied by mistake.</p>
+
+  <section class="card">
+    <div class="bar">
+      <button type="button" class="primary" id="newItem">+ New item</button>
+      <button type="button" id="bulkLinks">+ Bulk add links</button>
+      <button type="button" id="manageCats">Categories…</button>
+      <span style="flex:1"></span>
+      <input type="search" id="q" placeholder="Search titles and text" style="width:230px">
+      <button type="button" id="saveCase">Save library</button>
+      <button type="button" id="openCase">Open library</button>
+      <input type="file" id="caseFile" accept=".json" hidden>
+    </div>
+    <p class="hint">Keep the library file in a shared folder: open it there, and Save writes the changes back into it, so the whole team uses the same list. The library is also kept in this browser between visits.</p>
+    <div id="topMsgs" class="msgs"></div>
+  </section>
+
+  <div class="tabs" role="tablist"><button type="button" data-tab="active" class="on">Active</button><button type="button" data-tab="archive">Archive</button></div>
+  <div class="pills" id="pills"></div>
+
+  <div class="cols">
+    <section class="card">
+      <div class="bar" style="margin-bottom:8px;font-size:.85rem">
+        <label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="selAll"> Select all shown</label>
+        <span style="flex:1"></span><span id="count" class="hint" style="margin:0"></span>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+    <section class="card prev" id="prev"><div class="empty">Select an item on the left.</div></section>
+  </div>
+</main>
+
+<dialog id="edDlg">
+  <h3 id="edHead">New item</h3>
+  <div class="grid">
+    <div class="full"><label>Title</label><input id="e_title" placeholder="e.g. Payment of self-assessment tax – AY 2026-27"></div>
+    <div><label>Category</label><select id="e_cat"></select></div>
+    <div><label>Type</label><select id="e_kind"><option value="doc">Checklist / procedure (text)</option><option value="link">Link (Zoho, Google Docs, portal…)</option></select></div>
+    <div><label>Valid for (optional)</label><input id="e_valid" placeholder="e.g. AY 2026-27"></div>
+    <div><label>Review by (optional)</label><input type="date" id="e_review"><div class="hint">After this date the item is flagged "Review due".</div></div>
+    <div class="full" id="e_urlWrap" hidden><label>Link (URL)</label><input id="e_url" placeholder="https://…"></div>
+  </div>
+  <div style="margin-top:10px"><label id="e_bodyLbl">Text</label>
+    <div class="tb" id="tb">
+      <button type="button" data-c="bold" title="Bold"><b>B</b></button>
+      <button type="button" data-c="italic" title="Italic"><i>I</i></button>
+      <button type="button" data-c="underline" title="Underline"><u>U</u></button>
+      <button type="button" data-c="h4" title="Sub-heading">H</button>
+      <button type="button" data-c="p" title="Normal text">¶</button>
+      <button type="button" data-c="insertOrderedList" title="Numbered list">1.</button>
+      <button type="button" data-c="insertUnorderedList" title="Bullet list">•</button>
+      <button type="button" data-c="indent" title="Indent (sub-points)">→</button>
+      <button type="button" data-c="outdent" title="Outdent">←</button>
+      <button type="button" data-c="link" title="Insert link">Link</button>
+      <button type="button" data-c="table" title="Insert a table">Table</button>
+      <button type="button" data-c="removeFormat" title="Clear formatting">Clear</button>
+    </div>
+    <div class="ed" id="e_body" contenteditable="true"></div>
+    <div class="hint">You can paste from Word, Zoho Writer or Google Docs – headings, lists, bold, links and tables are kept; colours and fonts are dropped so that every email looks the same.</div>
+  </div>
+  <div style="margin-top:10px"><label>Internal note (not copied to the email)</label><input id="e_note" style="width:100%" placeholder="e.g. source, who updated it"></div>
+  <div class="bar" style="margin-top:14px;justify-content:flex-end"><button type="button" id="edCancel">Cancel</button><button type="button" class="primary" id="edSave">Save item</button></div>
+</dialog>
+
+<dialog id="bulkDlg">
+  <h3>Bulk add links</h3>
+  <p class="hint" style="margin-top:0">One link per line. To give a title, write it before the link with a "|": <code>Payment of advance tax | https://…</code>. Lines without a title get a provisional one – rename them afterwards.</p>
+  <div class="grid"><div><label>Category</label><select id="b_cat"></select></div></div>
+  <div style="margin-top:8px"><textarea id="b_text" placeholder="Title | https://writer.zohopublic.in/…&#10;https://workdrive.zohopublic.in/…"></textarea></div>
+  <div class="bar" style="margin-top:12px;justify-content:flex-end"><button type="button" id="bulkCancel">Cancel</button><button type="button" class="primary" id="bulkAdd">Add links</button></div>
+</dialog>
+
+<dialog id="catDlg">
+  <h3>Categories</h3>
+  <div id="catRows"></div>
+  <div class="catrow"><input id="newCat" placeholder="New category, e.g. Payroll"><button type="button" id="addCat">Add</button></div>
+  <p class="hint">A category can be deleted only when it has no items (active or archived). Renaming moves its items.</p>
+  <div class="bar" style="margin-top:12px;justify-content:flex-end"><button type="button" class="primary" id="catDone">Done</button></div>
+</dialog>
+
+<dialog id="askDlg"><h3 id="askT"></h3><p id="askM" style="margin:0 0 14px"></p><div class="bar" style="justify-content:flex-end"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">OK</button></div></dialog>
+
+<script src="lib/seed.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/casefile.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>
