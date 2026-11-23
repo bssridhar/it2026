@@ -27,14 +27,21 @@
   async function hasDir(h, name) { try { await h.getDirectoryHandle(name); return true; } catch (e) { return false; } }
   /* pick the folder: the tool kit folder (→ its "database" sub-folder), a folder named "database", or another folder */
   async function connect(confirmOther) {
-    const h = await root.showDirectoryPicker({ id: 'kit-database', mode: 'readwrite' });
+    let h;
+    try { h = await root.showDirectoryPicker({ id: 'kit-database', mode: 'readwrite' }); }
+    catch (e) { if (e && e.name === 'AbortError') e.stage = 'picker'; throw e; }
     let d = h;
     if (h.name.toLowerCase() !== 'database') {
       if (await hasDir(h, 'shared')) d = await h.getDirectoryHandle('database', { create: true });
-      else if (h.name.toLowerCase() === 'shared') throw new Error('This is the "shared" folder (program files). Choose the tool kit folder – the one that contains "shared" – and the "database" folder is created next to "shared".');
+      else if (h.name.toLowerCase() === 'shared') { const e = new Error('shared'); e.name = 'SharedFolder'; throw e; }
       else if (await hasDir(h, 'database')) d = await h.getDirectoryHandle('database');
-      else if (confirmOther && !(await confirmOther(h.name))) { const e = new Error('cancelled'); e.name = 'AbortError'; throw e; }
-      else d = await h.getDirectoryHandle('database', { create: true });
+      else {
+        // the folder that holds the tool kit folder (e.g. the folder made when the zip was extracted)?
+        const kits = []; for await (const [n, c] of h.entries()) if (c.kind === 'directory' && await hasDir(c, 'shared')) kits.push(c);
+        if (kits.length === 1) { h = kits[0]; d = await h.getDirectoryHandle('database', { create: true }); }
+        else if (confirmOther && !(await confirmOther(h.name))) { const e = new Error(h.name); e.name = 'NotKitFolder'; e.folder = h.name; throw e; }
+        else d = await h.getDirectoryHandle('database', { create: true });
+      }
     }
     picked = h.name; dir = d; await idbSet(d); return d;
   }
@@ -48,11 +55,13 @@
   /* a plain-language reason for an error from the folder picker / file access */
   function why(e) {
     const n = e && e.name, m = (e && e.message) || String(e);
-    if (n === 'AbortError') return 'No folder was chosen – nothing was changed.';
-    if (n === 'NotAllowedError') return 'Permission to edit the folder was not given. Click Connect again, choose the folder and answer "Edit files" / "Allow" when the browser asks.';
+    if (n === 'NotKitFolder') return `The folder "${e.folder}" is not the tool kit folder (it has no "shared" folder in it), so it was not used. Click the button again and choose the folder that contains index.html, "shared", "dsc" and the other tool folders.`;
+    if (n === 'SharedFolder') return 'You chose the "shared" folder (program files). Click the button again and choose the folder one level up – the tool kit folder that contains "shared".';
+    if (n === 'AbortError') return 'The folder was not connected. After you choose the folder and click "Select folder", the browser asks a second question – "Let this site edit files?" (or "View and edit files?"). Click "Edit files" / "Allow" there; "Cancel" stops the connection. If the browser said that the folder "contains system files", keep the tool kit in its own folder (e.g. D:\\\\Practice_tool_kit) and choose that.';
+    if (n === 'NotAllowedError') return 'Permission to edit the folder was not given. Click the button again, choose the folder and answer "Edit files" / "Allow" when the browser asks.';
     if (n === 'SecurityError' || /system files|not allowed|unsafe/i.test(m)) return 'The browser does not allow this folder (e.g. the top of a drive, or a system folder such as Desktop / Documents / Windows). Keep the tool kit in its own folder, e.g. D:\\Practice_tool_kit or Z:\\Office\\Practice_tool_kit, and choose that folder.';
-    if (n === 'NotFoundError') return 'The folder is not reachable now (network drive disconnected, or the folder was moved / renamed). Click Connect and choose it again.';
-    return m;
+    if (n === 'NotFoundError') return 'The folder is not reachable now (network drive disconnected, or the folder was moved / renamed). Click the button again and choose it.';
+    return `${m} (${n || 'error'})`;
   }
   /* folder chosen earlier: 'granted' | 'prompt' (needs a click – permit()) | null */
   async function restore() { const h = await idbGet(); if (!h) return null; dir = h; try { return await h.queryPermission({ mode: 'readwrite' }); } catch (e) { return 'prompt'; } }
