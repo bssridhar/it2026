@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 27,
+  version: 28,
   date: "2026-11-23",
   whatsNew: [
+    "Database folder: clearer Connect on the home page – says what to choose, checks that the folder can be written and lists the registers in it, and explains why if a folder cannot be used.",
     "Updating made simple: \"Update tool kit.bat\" backs up the database folder and installs a new version; your own settings are kept in my-settings.js.",
     "Version number and what's new shown at the bottom of the home page.",
     "Common database folder (next to \"shared\") for the DSC Register and Checklists and Procedures.",

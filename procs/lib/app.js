@@ -310,8 +310,8 @@
   $('#dbConnect').onclick = async () => {
     if (!K.supported) return msg('warn', 'This needs Chrome or Edge.');
     if (!($('#dbUser').value || '').trim()) { $('#dbUser').focus(); return msg('warn', 'Enter your name first.'); }
-    try { await K.connect(name => ask('Use this folder?', `"${name}" is not the tool kit folder. Keep the database in "${name}" anyway? (Recommended: choose the tool kit folder – the one that contains "shared".)`, 'Use it')); await openDb(); }
-    catch (e) { if (e && e.name !== 'AbortError') msg('err', e.message || String(e)); }
+    try { await K.connect(name => ask('Use this folder?', `"${name}" is not the tool kit folder (it has no "shared" folder). Create the "database" folder inside "${name}" and use it? (Recommended: Cancel, and choose the tool kit folder.)`, 'Use it')); await openDb(); }
+    catch (e) { msg(e && e.name === 'AbortError' ? 'warn' : 'err', K.why(e)); }
   };
   $('#dbReconnect').onclick = async () => { try { if ((await K.permit()) === 'granted') { $('#dbReconnect').hidden = true; await openDb(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
   $('#dbTake').onclick = async () => { if (!(await ask('Open for editing?', `${otherLock && otherLock.user || 'The other person'} may be making changes now; if you take over, their changes after this may not be saved. Take over only after checking with them.`, 'Take over'))) return;

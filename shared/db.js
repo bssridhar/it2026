@@ -5,12 +5,12 @@
  * A web page opened from disk can write only into a folder that the user has picked once (File System Access API:
  * Chrome / Edge). "Connect" asks for the folder once per computer / browser and remembers it; the browser may ask
  * "Allow" once per visit. If the tool kit folder is picked, its "database" sub-folder is created and used; if a folder
- * named "database" (or any other folder, after confirmation) is picked, that folder is used as it is.
+ * named "database" is picked, it is used as it is; any other folder (after confirmation) gets a "database" sub-folder.
  *
  * Each register is a JSON file with a lock file (who has it open; refreshed every 30 s; stale after 2 minutes) and a
  * daily backup of the previous version in database/backup/.
  *
- * window.KitDB = { supported, connect(confirmOther), restore(), permit(), handle(), name(), user(), setUser(n),
+ * window.KitDB = { supported, connect(confirmOther), restore(), permit(), verify(), why(err), handle(), name(), user(), setUser(n),
  *                  store(base) → { FILE, LOCK, STALE_MS, session, read(), write(obj), acquire(user, force),
  *                                  heartbeat(user), peekLock(), release() } }
  */
@@ -18,7 +18,7 @@
   'use strict';
   const supported = typeof root.showDirectoryPicker === 'function';
   const STALE_MS = 120000, session = Math.random().toString(36).slice(2) + Date.now().toString(36);
-  let dir = null;
+  let dir = null, picked = '';
 
   const idb = () => new Promise((res, rej) => { const r = indexedDB.open('kit-database', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
   async function idbSet(v) { try { const db = await idb(); await new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); t.objectStore('h').put(v, 'folder'); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) { /* not kept */ } }
@@ -34,8 +34,25 @@
       else if (h.name.toLowerCase() === 'shared') throw new Error('This is the "shared" folder (program files). Choose the tool kit folder – the one that contains "shared" – and the "database" folder is created next to "shared".');
       else if (await hasDir(h, 'database')) d = await h.getDirectoryHandle('database');
       else if (confirmOther && !(await confirmOther(h.name))) { const e = new Error('cancelled'); e.name = 'AbortError'; throw e; }
+      else d = await h.getDirectoryHandle('database', { create: true });
     }
-    dir = d; await idbSet(d); return d;
+    picked = h.name; dir = d; await idbSet(d); return d;
+  }
+  /* check that the folder can be written, and list the registers in it */
+  async function verify() {
+    if (!dir) throw new Error('No database folder is connected.');
+    const t = await dir.getFileHandle('.write-test', { create: true }); const w = await t.createWritable(); await w.write('ok'); await w.close(); await dir.removeEntry('.write-test');
+    const files = []; for await (const [n, h] of dir.entries()) if (h.kind === 'file' && /\.json$/i.test(n)) files.push(n);
+    return files.sort();
+  }
+  /* a plain-language reason for an error from the folder picker / file access */
+  function why(e) {
+    const n = e && e.name, m = (e && e.message) || String(e);
+    if (n === 'AbortError') return 'No folder was chosen – nothing was changed.';
+    if (n === 'NotAllowedError') return 'Permission to edit the folder was not given. Click Connect again, choose the folder and answer "Edit files" / "Allow" when the browser asks.';
+    if (n === 'SecurityError' || /system files|not allowed|unsafe/i.test(m)) return 'The browser does not allow this folder (e.g. the top of a drive, or a system folder such as Desktop / Documents / Windows). Keep the tool kit in its own folder, e.g. D:\\Practice_tool_kit or Z:\\Office\\Practice_tool_kit, and choose that folder.';
+    if (n === 'NotFoundError') return 'The folder is not reachable now (network drive disconnected, or the folder was moved / renamed). Click Connect and choose it again.';
+    return m;
   }
   /* folder chosen earlier: 'granted' | 'prompt' (needs a click – permit()) | null */
   async function restore() { const h = await idbGet(); if (!h) return null; dir = h; try { return await h.queryPermission({ mode: 'readwrite' }); } catch (e) { return 'prompt'; } }
@@ -87,5 +104,5 @@
     return { FILE, LOCK, STALE_MS, session, read, write, acquire, heartbeat, peekLock, release };
   }
 
-  root.KitDB = { supported, STALE_MS, session, connect, restore, permit, handle: () => dir, name: () => dir ? dir.name : '', useDir: h => { dir = h; }, user, setUser, store };
+  root.KitDB = { supported, STALE_MS, session, connect, restore, permit, verify, why, picked: () => picked, handle: () => dir, name: () => dir ? dir.name : '', useDir: h => { dir = h; }, user, setUser, store };
 })(window);

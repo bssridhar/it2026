@@ -141,7 +141,7 @@ function showMode() {
 $('#chooseFolder').onclick = async () => {
   if (!S.supported) { msg('warn', 'Keeping the register in a folder needs Chrome or Edge. In this browser use "Save a copy (JSON)".'); return; }
   if (!user()) { $('#user').focus(); msg('warn', 'Enter your name first.'); return; }
-  try { await S.release(); await S.connect(); await openFolder(); } catch (e) { if (e && e.name !== 'AbortError') msg('err', `The folder could not be used: ${e.message || e}`); }
+  try { await S.release(); await S.connect(); await openFolder(); } catch (e) { msg(e && e.name === 'AbortError' ? 'warn' : 'err', window.KitDB.why(e)); }
 };
 $('#reconnect').onclick = async () => { try { const p = await S.permit(); if (p === 'granted') { $('#reconnect').hidden = true; await openFolder(); } else msg('warn', 'Permission to the folder was not given.'); } catch (e) { msg('err', e.message || String(e)); } };
 window.addEventListener('pagehide', () => { if (mode === 'rw') S.release(); });

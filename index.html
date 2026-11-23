@@ -95,8 +95,9 @@ footer .whatsnew{margin:4px 0 8px;padding-left:20px}
   <p>For internal use. Documents produced by these tools are drafts and must be checked before they are signed or filed.</p>
   <p>All tools run in this browser; client data is not uploaded anywhere.</p>
   <p id="verLine"></p>
-  <p id="dbLine">Database folder (DSC Register, Checklists and Procedures): <span id="dbName">checking…</span>
+  <p id="dbLine">Database folder – one place for the shared registers of the DSC Register and Checklists and Procedures: <span id="dbName">checking…</span>
     <button type="button" id="dbBtn" hidden style="font:inherit;font-size:.8rem;padding:2px 9px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer"></button></p>
+  <p id="dbInfo" hidden style="margin-top:0"></p>
 </footer>
 
 <script src="home-config.js"></script>
@@ -200,19 +201,25 @@ render();
 <script src="shared/db.js"></script>
 <script>
 (function () { /* database folder status: <tool kit>/database, used by the tools that keep a shared register */
-  var K = window.KitDB, nm = document.getElementById('dbName'), b = document.getElementById('dbBtn');
-  if (!K || !K.supported) { nm.textContent = 'needs Chrome or Edge'; return; }
-  function show(p) {
-    if (p === 'granted') { nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change'; }
-    else if (p) { nm.textContent = '"' + K.name() + '" – chosen earlier (the browser asks for permission once per visit)'; b.hidden = false; b.textContent = 'Allow now'; }
-    else { nm.textContent = 'not connected'; b.hidden = false; b.textContent = 'Connect'; }
+  var K = window.KitDB, nm = document.getElementById('dbName'), b = document.getElementById('dbBtn'), info = document.getElementById('dbInfo');
+  function say(t, bad) { info.textContent = t || ''; info.style.color = bad ? '#a32020' : ''; info.hidden = !t; }
+  if (!K || !K.supported) { nm.textContent = 'needs Chrome or Edge (this browser cannot use the database folder)'; return; }
+  async function show(p) {
+    if (p === 'granted') {
+      nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change';
+      try { var f = await K.verify(); say('Checked: the folder can be written. ' + (f.length ? 'Registers in it: ' + f.join(', ') + '.' : 'It is empty – the DSC Register and Checklists and Procedures create their files there when they are first opened.')); }
+      catch (e) { say('The folder is connected but could not be written: ' + K.why(e), true); }
+    }
+    else if (p) { nm.textContent = '"' + K.name() + '" – chosen earlier; the browser asks for permission once per visit'; b.hidden = false; b.textContent = 'Allow now'; say(''); }
+    else { nm.textContent = 'not connected'; b.hidden = false; b.textContent = 'Connect'; say('Click Connect and choose the tool kit folder – the folder that contains index.html, "shared" and the tool folders. The "database" folder is created inside it. Do this once on each computer.'); }
   }
   b.onclick = async function () {
     try {
-      if (b.textContent === 'Allow now') { show(await K.permit()); return; }
-      await K.connect(function (name) { return Promise.resolve(confirm('"' + name + '" is not the tool kit folder. Keep the database in "' + name + '" anyway?\n\n(Recommended: choose the tool kit folder – the one that contains "shared" – and the "database" folder is created there.)')); });
-      show('granted');
-    } catch (e) { if (!e || e.name !== 'AbortError') alert(e.message || e); }
+      if (b.textContent === 'Allow now') { var p = await K.permit(); if (p !== 'granted') { say('Permission was not given – click "Allow now" again and answer "Allow".', true); return; } show(p); return; }
+      await K.connect(function (name) { return Promise.resolve(confirm('"' + name + '" is not the tool kit folder (it has no "shared" folder).\n\nOK – create the "database" folder inside "' + name + '" and use it.\nCancel – choose again (recommended: the tool kit folder).')); });
+      await show('granted');
+      if (K.picked() && K.picked() !== K.name()) say(info.textContent + ' (Folder "' + K.name() + '" inside "' + K.picked() + '".)');
+    } catch (e) { say(K.why(e), !(e && e.name === 'AbortError')); }
   };
   K.restore().then(show);
 })();

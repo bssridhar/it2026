@@ -21,7 +21,7 @@
 
   async function connect() {
     legacy = false;
-    return K.connect(async name => root.confirm(`"${name}" is not the tool kit folder. Keep the database in "${name}" anyway?\n\n(Recommended: choose the tool kit folder – the one that contains "shared" – and the "database" folder is created there.)`));
+    return K.connect(async name => root.confirm(`"${name}" is not the tool kit folder (it has no "shared" folder).\n\nOK – create the "database" folder inside "${name}" and use it.\nCancel – choose again (recommended: the tool kit folder).`));
   }
   async function restore() {
     const p = await K.restore(); if (p) return p;
