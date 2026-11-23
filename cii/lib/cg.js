@@ -131,7 +131,7 @@
     const house = longTerm && ind ? (c.asset === 'land' && c.resHouse === 'yes' ? 's54' : 's54F') : null;
     const bondsOk = longTerm && c.asset === 'land';
     const cap = c.sdate >= CAP_FROM ? HOUSE_CAP : Infinity;
-    r.houseSec = house; r.bondsOk = bondsOk;
+    r.houseSec = house; r.bondsOk = bondsOk; r.houseCap = cap;
     if (c.seller === 'nri') r.notes.push(['info', 'Non-resident individual / HUF: s.54 / s.54F / s.54EC (s.82 / s.86 / s.85) are available, but not the option of 20% with indexation for land or building and not the adjustment of the unexhausted basic exemption limit (both only for residents). TDS by the buyer is under s.195 (2025 Act: s.393 table) at the rates in force – the seller may apply for a lower deduction certificate.']);
     r.unavail = [];
     if (longTerm && !ind) r.unavail.push(['Options 2 and 4 – residential house (s.54 / s.54F; s.82 / s.86)', 'available only to an individual or HUF (resident or non-resident) – not to a firm, LLP, company or other assessee']);
@@ -200,7 +200,7 @@
     if (!longTerm) r.notes.push(['tip', `Long-term from ${dmy(ltFrom)}: the asset becomes long-term if it is transferred on or after this date (held for more than ${lim} months). Compare the tax before fixing the date of the transfer.`]);
     if (house === 's54' && gMax > 0 && gMax <= TWO_HOUSE) r.notes.push(['tip', 'Proviso to s.54(1) / s.82: as the long-term gain does not exceed Rs. 2 crore, the assessee may, once in a lifetime, invest in two residential houses in India and claim the exemption for both.']);
     if (house === 's54F' && r.need) r.notes.push(['tip', `s.54F / s.86 is based on the net consideration, not the gain: the whole gain is exempt only if Rs. ${inr(netCons)} (the net consideration) is invested in the house. Investing an amount equal to the gain (Rs. ${inr(gMax)}) is not enough. With bonds, each exemption is worked out on the gain – house exemption = gain × cost of the house ÷ net consideration – and the total is limited to the gain.`]);
-    if (r.need && r.need.capHit) r.notes.push(['warn', 'Investment in the new house above Rs. 10 crore is not counted for the exemption (s.54 / s.54F, sales from 01-04-2023; s.82 / s.86) – full exemption is not possible through the house alone.']);
+    if ((r.need && r.need.capHit) || (house && N(c.house) > cap)) r.notes.push(['warn', 'Investment in the new house above Rs. 10 crore is not counted for the exemption (s.54 / s.54F, sales from 01-04-2023; s.82 / s.86) – full exemption is not possible through the house alone.']);
     if (bondsOk) r.notes.push(['info', 'Bonds: the Rs. 50 lakh limit is for the year of transfer and the next year together (proviso to s.54EC(1) / s.85). Interest is taxable. If the bonds are transferred or used as security for a loan or advance within five years, the exempted gain becomes taxable in that year.']);
     if (house) r.notes.push(['info', 'House: it must be a residential house in India. If it is transferred within three years of its purchase / construction, the exemption is withdrawn as the section provides.']);
     if (house && bondsOk) r.notes.push(['info', 'House and bonds together: each exemption is worked out on the gain and the total is limited to the gain.']);

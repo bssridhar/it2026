@@ -269,8 +269,9 @@ function optionTable(o, r){
   const any = k => cols.some(x => x[k] > 0);
   let h = `<table class="t"><thead><tr><th></th>${two ? '<th class="n">Without indexation</th><th class="n">With indexation</th>' : '<th class="n">Amount</th>'}</tr></thead><tbody>`;
   h += row(`${r.longTerm ? 'Long-term' : 'Short-term'} capital gain`, x => rs(x.G));
-  if (any('s54')) h += row('Less: exemption – s.54 / s.82 (house)', x => rs(-x.s54));
-  if (any('s54F')) h += row(`Less: exemption – s.54F / s.86 (house)<div class="formula">gain × ${num(Math.min(o.H, r.netCons))} ÷ ${num(r.netCons)}</div>`, x => rs(-x.s54F));
+  const capped = o.H > r.houseCap, capTxt = capped ? `<div class="formula">cost of the house ${num(o.H)} – limited to Rs. 10 crore</div>` : '';
+  if (any('s54')) h += row(`Less: exemption – s.54 / s.82 (house)${capTxt}`, x => rs(-x.s54));
+  if (any('s54F')) h += row(`Less: exemption – s.54F / s.86 (house)${capTxt}<div class="formula">gain × ${num(Math.min(o.H, r.houseCap, r.netCons))} ÷ ${num(r.netCons)}</div>`, x => rs(-x.s54F));
   if (any('s54EC')) h += row('Less: exemption – s.54EC / s.85 (bonds)', x => rs(-x.s54EC));
   if (any('setoff')) h += row('Less: capital losses set off', x => rs(-x.setoff));
   h += row('Taxable capital gain', x => rs(x.taxable), 'tot');
