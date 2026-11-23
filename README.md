@@ -32,6 +32,9 @@ folder – `index.html`, `home-config.js`, `shared/` and the tool folders – to
 
 ## Home page settings – `home-config.js`
 
+Your own changes (firm name, notices, hidden tools) go in `my-settings.js` (see "Updating the tool kit"); `home-config.js` is replaced by every update.
+
+
 Open `home-config.js` in Notepad (or any text editor) to change:
 
 * **`firmName` and `tagline`** – shown at the top of the home page
@@ -55,6 +58,22 @@ Each tool's own README explains its inputs, checks and templates.
 Every tool has a desk calculator (`shared/calc.js`): click the flashing **Calculator** box at the bottom right
 of the page. It has GT, memory (M+, M−, MRC), %, √, 00, a tape, and "Use in field" to put the figure into the
 field last clicked. New tools must include `<script src="../shared/calc.js"></script>` before `</body>`.
+
+## Updating the tool kit
+
+1. Save the new zip file (e.g. `Practice_tool_kit_v28.zip`).
+2. Double-click **`Update tool kit.bat`** in the tool kit folder and choose the zip (or drop the zip on the `.bat`).
+   It shows the version installed and the version in the zip, warns if someone has a register open for editing,
+   backs up the `database` folder to `backups\database_<date>.zip` (the latest 20 are kept), copies the new files
+   over the tool kit and shows the version now installed.
+3. Ask everyone to close and reopen the tool kit pages (or press Ctrl+F5).
+
+The update never touches `database`, `backups` or `my-settings.js`. The version and "What's new" are shown at the
+bottom of the home page (`version.js`). The `.bat` needs Windows 10 / 11 (PowerShell).
+
+**Your own settings – `my-settings.js`.** The firm name, the line under it, your own notices for the ticker and the
+tools to hide go in `my-settings.js` (made from `my-settings.sample.js` at the first update; edit it in Notepad).
+Updates replace `home-config.js` but never `my-settings.js`.
 
 ## Database folder – `database`
 

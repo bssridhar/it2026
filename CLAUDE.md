@@ -17,3 +17,6 @@
 - Never commit client data (sample documents with Aadhaar, PAN, etc.); test with dummy data only. `database/` is
   git-ignored and must never be committed or put in the zip.
 - Outputs follow the ICAI Code of Ethics: nothing that solicits professional work.
+- Every release zip: raise `version` in `version.js`, set its date and "whatsNew"; the zip (git archive, top folder
+  `Practice_tool_kit/`) must not contain `database/`, `backups/` or `my-settings.js` (all git-ignored). Office-specific
+  settings belong in `my-settings.js` (sample: `my-settings.sample.js`), not in `home-config.js`.

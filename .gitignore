@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 # client data – the tool kit database folder is never committed
 database/
+# local to each office – kept by updates, never in the zip
+my-settings.js
+backups/

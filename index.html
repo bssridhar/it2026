@@ -62,6 +62,8 @@ a.tool:hover,a.tool:focus-visible{border-color:var(--accent);box-shadow:0 2px 10
 .empty{color:var(--muted);font-size:.92rem}
 footer.wrap{border-top:1px solid var(--line);color:var(--muted);font-size:.82rem;padding:16px 16px 30px}
 footer p{margin:4px 0}
+footer .vbtn{font:inherit;font-size:.8rem;padding:1px 8px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer}
+footer .whatsnew{margin:4px 0 8px;padding-left:20px}
 </style>
 </head>
 <body>
@@ -92,15 +94,38 @@ footer p{margin:4px 0}
 <footer class="wrap">
   <p>For internal use. Documents produced by these tools are drafts and must be checked before they are signed or filed.</p>
   <p>All tools run in this browser; client data is not uploaded anywhere.</p>
+  <p id="verLine"></p>
   <p id="dbLine">Database folder (DSC Register, Checklists and Procedures): <span id="dbName">checking…</span>
     <button type="button" id="dbBtn" hidden style="font:inherit;font-size:.8rem;padding:2px 9px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer"></button></p>
 </footer>
 
 <script src="home-config.js"></script>
+<script src="version.js"></script>
+<script src="my-settings.js"></script>
 <script>
 (function(){
 "use strict";
-const C = window.HOME_CONFIG || { tools: [] };
+/* the tool kit's settings (home-config.js), with the office's own settings (my-settings.js – kept by updates) on top */
+const C = Object.assign({ tools: [] }, window.HOME_CONFIG || {});
+const M = window.MY_SETTINGS || {};
+if (M.firmName) C.firmName = M.firmName;
+if (M.tagline) C.tagline = M.tagline;
+C.ticker = (M.myNotices || []).filter(Boolean).concat(M.onlyMyNotices ? [] : (C.ticker || []));
+if (Array.isArray(M.hideTools) && M.hideTools.length) C.tools = C.tools.filter(t => !M.hideTools.includes(t.id));
+// version and what's new
+(function () {
+  const V = window.KIT_VERSION, el = document.getElementById('verLine'); if (!V || !el) return;
+  const d = V.date.split('-').reverse().join('-');
+  el.innerHTML = '';
+  el.append(`Tool kit version ${V.version} · ${d}`);
+  if (V.whatsNew && V.whatsNew.length) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = "What's new"; b.className = 'vbtn';
+    const ul = document.createElement('ul'); ul.hidden = true; ul.className = 'whatsnew';
+    V.whatsNew.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    b.onclick = () => { ul.hidden = !ul.hidden; };
+    el.append(' ', b); el.after(ul);
+  }
+})();
 const RECENT_KEY = 'home-recent-v1';
 document.getElementById('firm').textContent = C.firmName || '';
 document.getElementById('tagline').textContent = C.tagline || '';
