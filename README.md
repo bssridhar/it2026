@@ -89,6 +89,10 @@ one data folder. No folder has to be connected or allowed on any computer.
 3. **Start** – double-click **`Start tool kit server.bat`**. The window shows the address, e.g.
    `http://BSS-SERVER:8080/`. Keep the window open (minimised); closing it stops the server. To start it with Windows,
    put a shortcut to the `.bat` in the Startup folder (Windows key + R → `shell:startup`).
+   **Without a window:** double-click **`Start tool kit server (hidden).vbs`** instead – it starts the server with no
+   window and shows a short message with the address (or the reason, if it did not start). Stop it with
+   **`Stop tool kit server.bat`**. For starting with Windows, put a shortcut to the `.vbs` in the Startup folder.
+   The server writes a log in `server\server.log`. `Update tool kit.bat` restarts a running server with the new version.
 4. **On every computer** – open that address in Chrome / Edge and bookmark it. Use the bookmark instead of opening
    `index.html` from the folder. The bottom of the home page shows "on the tool kit server …" and the data folder.
 

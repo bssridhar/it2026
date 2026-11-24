@@ -4,7 +4,8 @@
 #  3. warns if someone has a register (DSC, Procedures) open for editing
 #  4. backs up the "database" folder to backups\database_<date>.zip
 #  5. copies the new files over the tool kit (database, backups, my-settings.js and kit-config.json are never touched)
-#  6. creates my-settings.js from the sample the first time
+#  6. restarts the tool kit server if it is running
+#  7. creates my-settings.js from the sample the first time
 param([string]$Zip)
 $ErrorActionPreference = 'Stop'
 $Kit = Split-Path -Parent $PSScriptRoot
@@ -82,6 +83,17 @@ try {
   Write-Host 'Copying the new files ...'
   $rc = & robocopy $src $Kit /E /XD database backups /XF my-settings.js kit-config.json /R:2 /W:2 /NFL /NDL /NJH /NJS /NP
   if ($LASTEXITCODE -ge 8) { throw "Copying failed (robocopy code $LASTEXITCODE). Close any open tool files and run the update again. The database backup is in the backups folder." }
+
+  # restart the tool kit server if it is running, so that it uses the new version
+  $srvProcs = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' })
+  if ($srvProcs.Count) {
+    $wasHidden = @($srvProcs | Where-Object { $_.CommandLine -like '*-Hidden*' }).Count -gt 0
+    $srvProcs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Seconds 2
+    if ($wasHidden) { Start-Process -FilePath 'wscript.exe' -ArgumentList ('"' + (Join-Path $Kit 'Start tool kit server (hidden).vbs') + '"') }
+    else { Start-Process -FilePath (Join-Path $Kit 'Start tool kit server.bat') -WorkingDirectory $Kit }
+    Write-Host 'The tool kit server was restarted with the new version.' -ForegroundColor Green
+  }
 
   # own settings
   $mine = Join-Path $Kit 'my-settings.js'

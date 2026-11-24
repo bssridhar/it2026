@@ -6,3 +6,5 @@ database/
 my-settings.js
 backups/
 kit-config.json
+server/server.log
+server/server.log.old

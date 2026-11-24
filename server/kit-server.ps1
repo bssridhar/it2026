@@ -3,6 +3,8 @@
 #   Start:  double-click "Start tool kit server.bat" in the tool kit folder.
 #   Setup:  once, right-click "Set up tool kit server (run as administrator).bat" -> Run as administrator
 #           (allows other computers to connect: URL reservation and a Windows firewall rule for the port).
+#   Hidden: "Start tool kit server (hidden).vbs" runs it with no window (-Hidden); "Stop tool kit server.bat" stops it (-Stop).
+#   Log:    server\server.log (start, stop, errors).
 #
 # Serves the tool kit at http://<this computer>:<port>/ and keeps the shared registers (DSC Register,
 # Checklists and Procedures) as JSON files in the data folder named in kit-config.json:
@@ -15,12 +17,29 @@
 #   POST /api/beat/<name>   {user,session}       -> {"ok":true} | {"lost":true,"lock":{..}}
 #   GET  /api/lock/<name>                        -> lock or null
 #   POST /api/unlock/<name> {session}            -> {"ok":true}
-param([switch]$Setup)
+param([switch]$Setup, [switch]$Hidden, [switch]$Stop)
 $ErrorActionPreference = 'Stop'
 $Kit = Split-Path -Parent $PSScriptRoot
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $STALE_MS = 120000
 $NAMES = @('dsc_register', 'procedures_library')
+$LOG = Join-Path $PSScriptRoot 'server.log'
+function Log([string]$t) {
+  try {
+    if ((Test-Path -LiteralPath $LOG) -and (Get-Item -LiteralPath $LOG).Length -gt 1MB) { Move-Item -LiteralPath $LOG -Destination ($LOG + '.old') -Force }
+    Add-Content -LiteralPath $LOG -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + '  ' + $t) -Encoding UTF8
+  } catch { }
+}
+function Pause-End { if (-not $Hidden) { Read-Host 'Press Enter to close' | Out-Null } }
+
+if ($Stop) {
+  $mine = $PID
+  $p = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.ProcessId -ne $mine -and $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' })
+  if ($p.Count) { $p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }; Log 'Stopped (Stop tool kit server).'; Write-Host 'The tool kit server has been stopped.' -ForegroundColor Green }
+  else { Write-Host 'The tool kit server was not running.' }
+  Start-Sleep -Seconds 3
+  return
+}
 
 function Read-Config {
   $f = Join-Path $Kit 'kit-config.json'
@@ -90,7 +109,7 @@ function Handle-Api($req, $res, [string]$path) {
   $op = $parts[1]
   if ($op -eq 'info') {
     $files = @(Get-ChildItem -LiteralPath $cfg.Data -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object { Q $_.Name })
-    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"files":[' + ($files -join ',') + ']}')
+    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"lan":' + ($(if ($global:LanOk) { 'true' } else { 'false' })) + ',"files":[' + ($files -join ',') + ']}')
     return
   }
   $name = $parts[2]
@@ -186,9 +205,14 @@ try { $listener.Start() } catch {
   $lanOk = $false
   $listener = New-Object System.Net.HttpListener
   $listener.Prefixes.Add(("http://localhost:{0}/" -f $cfg.Port))
-  try { $listener.Start() } catch { Write-Host ("Could not start on port {0}: {1}" -f $cfg.Port, $_.Exception.Message) -ForegroundColor Red; Write-Host 'Another program may be using the port - change "port" in kit-config.json and run the setup again.'; Read-Host 'Press Enter to close' | Out-Null; return }
+  try { $listener.Start() } catch {
+    $msg = ("Could not start on port {0}: {1}" -f $cfg.Port, $_.Exception.Message)
+    Log ($msg + ' (Is the server already running? Another program may be using the port - change "port" in kit-config.json and run the setup again.)')
+    Write-Host $msg -ForegroundColor Red; Write-Host 'Is the server already running? Another program may be using the port - change "port" in kit-config.json and run the setup again.'; Pause-End; return }
 }
 $host.UI.RawUI.WindowTitle = 'Practice tool kit server - keep this window open'
+$global:LanOk = $lanOk
+if ($lanOk) { Log ("Started: http://{0}:{1}/  data folder {2}" -f $env:COMPUTERNAME, $cfg.Port, $cfg.Data) } else { Log ("Started for this computer only (http://localhost:{0}/) - run the setup as administrator for the other computers.  data folder {1}" -f $cfg.Port, $cfg.Data) }
 Write-Host ''
 Write-Host '=== Practice tool kit server ===' -ForegroundColor Cyan
 Write-Host ("Data folder:  {0}" -f $cfg.Data)
@@ -214,7 +238,7 @@ while ($listener.IsListening) {
     $path = [Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath)
     if ($path.StartsWith('/api/')) { Handle-Api $ctx.Request $ctx.Response $path } else { Handle-File $ctx.Request $ctx.Response $path }
   } catch {
-    try { Write-Host ((Get-Date -Format 'HH:mm:ss') + ' ' + $_.Exception.Message) -ForegroundColor DarkYellow; if ($ctx) { Send-Json $ctx.Response 500 ('{"error":' + (Q $_.Exception.Message) + '}') } } catch { }
+    try { Log ('Error: ' + $_.Exception.Message); Write-Host ((Get-Date -Format 'HH:mm:ss') + ' ' + $_.Exception.Message) -ForegroundColor DarkYellow; if ($ctx) { Send-Json $ctx.Response 500 ('{"error":' + (Q $_.Exception.Message) + '}') } } catch { }
   } finally {
     if ($ctx) { try { $ctx.Response.Close() } catch { } }
   }
