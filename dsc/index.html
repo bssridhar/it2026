@@ -87,6 +87,7 @@ fieldset[disabled] button.edit-only{opacity:.4}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:700px){.two{grid-template-columns:1fr}}
 .saved{font-size:.85rem;color:var(--ok)} .saved.warn{color:var(--warn)}
 body.closed #valCard{opacity:.55;pointer-events:none}
+td.inact{color:var(--muted);text-align:right}
 </style>
 </head>
 <body>
@@ -134,6 +135,7 @@ body.closed #valCard{opacity:.55;pointer-events:none}
     <div class="full"><label>Company / client</label><input name="company" required></div>
     <div class="full"><label>Name of the DSC holder</label><input name="name" required></div>
     <div><label>Valid till</label><input type="date" name="validTill" required></div>
+    <div><label>Status</label><select name="status"></select><div class="hint">Inactive – kept in the register, but not shown in the expired / renewal lists or reminders.</div></div>
     <div><label>Token with</label><select name="location"><option value="">–</option><option>Office</option><option>Client</option></select></div>
     <div><label>Location (in the office)</label><select name="storage"></select></div>
     <div><label>Key tag colour</label><div class="bar" style="flex-wrap:nowrap"><select name="tagColor"></select><span id="tagPrev"></span></div></div>
@@ -167,6 +169,11 @@ body.closed #valCard{opacity:.55;pointer-events:none}
   <div class="df"><button type="button" id="ackBtn">Acknowledgment (PDF) for the last movement</button><span style="flex:1"></span><button type="button" id="custCancel">Close</button><button class="primary edit-only" type="submit">Record the movement</button></div>
 </form></dialog>
 
+<dialog id="inactDlg"><form method="dialog"><div class="dh"><h3>Mark as inactive client</h3></div><div class="db">
+  <p id="inactWho" style="margin:0 0 10px;font-weight:600"></p>
+  <label>Reason</label><select id="inactReason"></select>
+  <p class="hint">The DSC stays in the register under "Inactive clients"; it is not shown in the expired / renewal lists or reminders. "Reactivate" brings it back.</p></div>
+  <div class="df"><span style="flex:1"></span><button type="button" onclick="this.closest('dialog').close()">Cancel</button><button type="button" class="primary" id="inactOk">Mark inactive</button></div></form></dialog>
 <dialog id="remDlg"><div class="dh">Reminder to the client</div>
   <div class="db"><textarea id="remText" rows="9"></textarea><p class="hint">A factual reminder for your client – copy it into email / WhatsApp. Edit as needed before sending.</p></div>
   <div class="df"><a id="remMail" class="link" href="#">Open in email</a><span style="flex:1"></span><button type="button" id="remCopy">Copy</button><button type="button" class="primary" id="remClose">Close</button></div></dialog>

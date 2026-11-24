@@ -191,27 +191,41 @@ function purposeText(r) { return (r.purposes || []).concat(r.purposeOther ? [r.p
 function render() {
   const q = ($('#q').value || '').toLowerCase();
   const recs = reg.records.slice().sort((a, b) => (a.validTill || '9999') < (b.validTill || '9999') ? -1 : 1);
-  const cnt = { exp: 0, d30: 0, d60: 0, d90: 0, ok: 0, none: 0, office: 0 };
-  recs.forEach(r => { cnt[band(daysLeft(r))]++; if (r.location === 'Office') cnt.office++; });
-  $('#kpis').innerHTML = [['DSCs', recs.length], ['Expired', cnt.exp], ['Expiring in 30 days', cnt.d30], ['31–60 days', cnt.d60], ['61–90 days', cnt.d90], ['Tokens in the office', cnt.office]].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
-  const chips = [['all', 'All'], ['exp', 'Expired'], ['d30', 'Within 30 days'], ['d60', '31–60 days'], ['d90', '61–90 days'], ['ok', 'Valid beyond 90 days'], ['office', 'Token in the office']];
+  const cnt = { exp: 0, d30: 0, d60: 0, d90: 0, ok: 0, none: 0, office: 0 }, act = recs.filter(r => !r.inactive), nIn = recs.length - act.length;
+  act.forEach(r => { cnt[band(daysLeft(r))]++; if (r.location === 'Office') cnt.office++; });
+  $('#kpis').innerHTML = [['DSCs (active)', act.length], ['Expired', cnt.exp], ['Expiring in 30 days', cnt.d30], ['31–60 days', cnt.d60], ['61–90 days', cnt.d90], ['Tokens in the office', cnt.office], ['Inactive clients', nIn]].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
+  const chips = [['all', 'All'], ['exp', 'Expired'], ['d30', 'Within 30 days'], ['d60', '31–60 days'], ['d90', '61–90 days'], ['ok', 'Valid beyond 90 days'], ['office', 'Token in the office'], ['inactive', `Inactive clients (${nIn})`]];
   $('#chips').innerHTML = chips.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${l}</button>`).join('');
   $$('#chips [data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; render(); });
   fillSelects(); const fl = $('#fLoc').value, ft = $('#fTag').value;
-  const show = recs.filter(r => (filter === 'all' || (filter === 'office' ? r.location === 'Office' : band(daysLeft(r)) === filter))
+  const show = recs.filter(r => (filter === 'inactive' ? !!r.inactive : !r.inactive && (filter === 'all' || (filter === 'office' ? r.location === 'Office' : band(daysLeft(r)) === filter)))
     && (!fl || (fl === '-' ? !r.storage : r.storage === fl)) && (!ft || (ft === '-' ? !r.tagColor : r.tagColor === ft))
     && (!q || `${r.company} ${r.name} ${r.mobile} ${r.pan} ${r.din} ${r.storage || ''} ${r.tagColor || ''} ${purposeText(r).join(' ')}`.toLowerCase().includes(q)));
   const ro = locked();
   $('#tbl').innerHTML = `<thead><tr><th>#</th><th>Company / client</th><th>DSC holder</th><th>Valid till</th><th class="n">Days left</th><th>Purpose</th><th>Token with</th><th>Location</th><th>Key tag</th><th>Last movement</th><th></th></tr></thead><tbody>${show.map((r, i) => {
     const d = daysLeft(r), bd = band(d), last = (r.custody || [])[r.custody && r.custody.length - 1];
     return `<tr><td${r.tagColor ? ` style="box-shadow:inset 6px 0 0 ${esc(tagHex(r.tagColor))}"` : ''}>${i + 1}</td><td class="wrap" style="white-space:normal">${esc(r.company)}</td><td style="white-space:normal">${esc(r.name)}${r.mobile ? `<br><span class="hint">${esc(r.mobile)}</span>` : ''}</td><td>${dmy(r.validTill)}</td>
-      <td class="n d-${bd === 'd30' ? '30' : bd === 'd60' ? '60' : bd === 'd90' ? '90' : bd}">${d === null ? '–' : d < 0 ? `expired ${-d} d ago` : d}</td>
+      <td class="n ${r.inactive ? 'inact' : `d-${bd === 'd30' ? '30' : bd === 'd60' ? '60' : bd === 'd90' ? '90' : bd}`}">${r.inactive ? `inactive<br><span class="small">${esc(r.inactiveReason || '')}${r.inactiveOn ? ' · ' + dmy(r.inactiveOn) : ''}</span>` : d === null ? '–' : d < 0 ? `expired ${-d} d ago` : d}</td>
       <td style="white-space:normal">${purposeText(r).map(p => `<span class="tag">${esc(p)}</span>`).join('')}</td><td>${esc(r.location || '–')}</td><td>${esc(r.storage || '–')}</td><td style="white-space:nowrap">${swatch(r.tagColor)}</td>
       <td class="small">${last ? `${last.dir === 'In' ? 'In from' : 'Out to'} ${esc(last.person)}<br>${stamp(last.at)}` : ''}</td>
-      <td style="white-space:nowrap"><button type="button" class="link sm" data-edit="${r.id}">${ro ? 'View' : 'Edit'}</button> · <button type="button" class="link sm" data-cust="${r.id}">In / out</button> · <button type="button" class="link sm" data-rem="${r.id}">Reminder</button></td></tr>`; }).join('') || `<tr><td colspan="11" class="hint" style="padding:14px">${reg.records.length ? 'Nothing matches.' : 'No DSCs yet – add one, or import your Excel list.'}</td></tr>`}</tbody>`;
+      <td style="white-space:nowrap"><button type="button" class="link sm" data-edit="${r.id}">${ro ? 'View' : 'Edit'}</button> · <button type="button" class="link sm" data-cust="${r.id}">In / out</button>${r.inactive ? '' : ` · <button type="button" class="link sm" data-rem="${r.id}">Reminder</button>`}${ro ? '' : r.inactive ? ` · <button type="button" class="link sm" data-react="${r.id}">Reactivate</button>` : d !== null && d < 0 ? ` · <button type="button" class="link sm" data-inact="${r.id}" title="Client not renewing / account closed – remove from the expired list">Mark inactive</button>` : ''}</td></tr>`; }).join('') || `<tr><td colspan="11" class="hint" style="padding:14px">${reg.records.length ? 'Nothing matches.' : 'No DSCs yet – add one, or import your Excel list.'}</td></tr>`}</tbody>`;
   $$('[data-edit]').forEach(b => b.onclick = () => edit(b.dataset.edit));
   $$('[data-cust]').forEach(b => b.onclick = () => custody(b.dataset.cust));
   $$('[data-rem]').forEach(b => b.onclick = () => remind(b.dataset.rem));
+  $$('[data-inact]').forEach(b => b.onclick = () => markInactive(b.dataset.inact));
+  $$('[data-react]').forEach(b => b.onclick = async () => { if (locked()) return; const r = reg.records.find(x => x.id === b.dataset.react);
+    if (!(await ask('Reactivate?', `${esc(r.name)} – ${esc(r.company)} will be shown again in the lists (and in the expired list, if expired).`))) return;
+    r.inactive = false; r.inactiveReason = ''; r.inactiveOn = ''; r.updatedAt = new Date().toISOString(); render(); await persist('Reactivated'); });
+}
+/* inactive client: the DSC is kept in the register, but not in the expired / renewal lists and reminders */
+const INACTIVE_REASONS = ['Client not renewing', 'Account / company closed', 'Client left the office', 'Other (see remarks)'];
+function markInactive(id) {
+  if (locked()) return;
+  const r = reg.records.find(x => x.id === id); if (!r) return;
+  $('#inactWho').textContent = `${r.name} – ${r.company}`;
+  $('#inactReason').innerHTML = INACTIVE_REASONS.map(x => `<option>${esc(x)}</option>`).join('');
+  $('#inactOk').onclick = async () => { r.inactive = true; r.inactiveReason = $('#inactReason').value; r.inactiveOn = todayIso(); r.updatedAt = new Date().toISOString(); $('#inactDlg').close(); render(); await persist('Marked inactive'); };
+  $('#inactDlg').showModal();
 }
 $('#q').oninput = render;
 
@@ -223,6 +237,8 @@ function edit(id) {
   editing = id || null; fillSelects();
   const tsel = f.elements.tagColor, prev = () => { $('#tagPrev').innerHTML = swatch(tsel.value); }; tsel.onchange = prev; setTimeout(prev, 0);
   ['company', 'name', 'validTill', 'location', 'storage', 'tagColor', 'purposeOther', 'mobile', 'email', 'pan', 'din', 'issuer', 'dscType', 'serial', 'remarks'].forEach(k => f.elements[k].value = r[k] || '');
+  f.elements.status.innerHTML = '<option value="">Active</option>' + INACTIVE_REASONS.map(x => `<option value="${esc(x)}">Inactive – ${esc(x)}</option>`).join('');
+  f.elements.status.value = r.inactive ? (INACTIVE_REASONS.includes(r.inactiveReason) ? r.inactiveReason : INACTIVE_REASONS[0]) : '';
   $$('#purposeBox input').forEach(c => c.checked = (r.purposes || []).includes(c.value));
   $('#editTitle').textContent = id ? `${r.name} – ${r.company}` : 'Add a DSC';
   $('#delBtn').hidden = !id || locked();
@@ -237,6 +253,8 @@ $('#editForm').addEventListener('submit', async () => {
   const f = $('#editForm'), v = {};
   ['company', 'name', 'validTill', 'location', 'storage', 'tagColor', 'purposeOther', 'mobile', 'email', 'pan', 'din', 'issuer', 'dscType', 'serial', 'remarks'].forEach(k => v[k] = f.elements[k].value.trim());
   v.pan = v.pan.toUpperCase(); v.purposes = $$('#purposeBox input').filter(c => c.checked).map(c => c.value);
+  { const st = f.elements.status.value, old = editing ? reg.records.find(x => x.id === editing) : null;
+    v.inactive = !!st; v.inactiveReason = st; v.inactiveOn = st ? (old && old.inactive && old.inactiveOn ? old.inactiveOn : todayIso()) : ''; }
   if (editing) Object.assign(reg.records.find(x => x.id === editing), v, { updatedAt: new Date().toISOString() });
   else reg.records.push(Object.assign({ id: uid(), custody: [], created: new Date().toISOString() }, v));
   render(); await persist(editing ? 'Changed' : 'Added');
@@ -303,14 +321,15 @@ $('#importFile').onchange = async e => {
       const hr = rn.find(r => { const v = Object.values(byRow[r]).map(x => String(x).trim()); return v.some(x => /valid/i.test(x)) && v.some(x => /^name|holder/i.test(x)); });
       if (!hr) continue; hdrFound = true;
       const H = byRow[hr], find = re => Object.keys(H).find(c => re.test(String(H[c]).trim()));
-      const C = { company: find(/^company|client|entity/i), name: find(/^name|holder/i), valid: find(/valid|expiry/i), purpose: find(/purpose|portal|use/i), mobile: find(/mobile|phone/i), email: find(/e-?mail/i), pan: find(/^pan/i), din: find(/^din/i), loc: find(/token\s*with|custody/i), storage: find(/^location|box|kept\s*at|place/i), tag: find(/key\s*tag|tag\s*colou?r|colou?r/i), remarks: find(/remark/i) };
+      const C = { status: find(/^status/i), company: find(/^company|client|entity/i), name: find(/^name|holder/i), valid: find(/valid|expiry/i), purpose: find(/purpose|portal|use/i), mobile: find(/mobile|phone/i), email: find(/e-?mail/i), pan: find(/^pan/i), din: find(/^din/i), loc: find(/token\s*with|custody/i), storage: find(/^location|box|kept\s*at|place/i), tag: find(/key\s*tag|tag\s*colou?r|colou?r/i), remarks: find(/remark/i) };
       rn.filter(r => r > hr).forEach(r => { const R = byRow[r], g = k => C[k] ? String(R[C[k]] ?? '').trim() : '';
         if (!g('name') && !g('company')) return;
         const vd = C.valid ? LLPXlsx.date(R[C.valid]) : '';
         const ps = g('purpose').split(/[,\/&+;]|\band\b/i).map(s => s.trim()).filter(Boolean);
         const known = ps.map(p => PURPOSES.find(k => k.toLowerCase() === p.toLowerCase() || (p.toLowerCase() === 'it' && k === 'Income Tax') || (/roc|mca/i.test(p) && k === 'MCA'))).filter(Boolean);
         const other = ps.filter(p => !PURPOSES.some(k => k.toLowerCase() === p.toLowerCase()) && !(p.toLowerCase() === 'it') && !/roc|mca/i.test(p));
-        rows.push({ id: uid(), company: g('company'), name: g('name'), validTill: vd || '', purposes: [...new Set(known)], purposeOther: other.join(', '), mobile: g('mobile'), email: g('email'), pan: g('pan').toUpperCase(), din: g('din'), location: /office/i.test(g('loc')) ? 'Office' : /client/i.test(g('loc')) ? 'Client' : '', storage: matchList(g('storage'), reg.settings.locations), tagColor: matchList(g('tag'), reg.settings.tagColors.map(c => c.name)), remarks: g('remarks'), custody: [], created: new Date().toISOString(), badDate: vd === null });
+        const ina = /inactive/i.test(g('status'));
+        rows.push({ id: uid(), inactive: ina, inactiveReason: ina ? (g('status').replace(/^inactive\s*[–-]?\s*/i, '') || INACTIVE_REASONS[0]) : '', inactiveOn: ina ? todayIso() : '', company: g('company'), name: g('name'), validTill: vd || '', purposes: [...new Set(known)], purposeOther: other.join(', '), mobile: g('mobile'), email: g('email'), pan: g('pan').toUpperCase(), din: g('din'), location: /office/i.test(g('loc')) ? 'Office' : /client/i.test(g('loc')) ? 'Client' : '', storage: matchList(g('storage'), reg.settings.locations), tagColor: matchList(g('tag'), reg.settings.tagColors.map(c => c.name)), remarks: g('remarks'), custody: [], created: new Date().toISOString(), badDate: vd === null });
       });
       break;
     }
@@ -328,8 +347,8 @@ $('#exportX').onclick = async () => {
   ws.addRow(H); ws.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; H.forEach((h, i) => { ws.getCell(1, i + 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F5FAE' } }; ws.getColumn(i + 1).width = [6, 32, 26, 12, 10, 16, 26, 10, 12, 12, 30, 13, 26, 12, 10, 18, 22, 18, 30][i]; });
   const lab = { exp: 'Expired', d30: 'Within 30 days', d60: '31–60 days', d90: '61–90 days', ok: 'Valid', none: '–' };
   reg.records.slice().sort((a, b) => (a.validTill || '9999') < (b.validTill || '9999') ? -1 : 1).forEach((r, i) => { const d = daysLeft(r), last = (r.custody || [])[r.custody.length - 1];
-    const row = ws.addRow([i + 1, r.company, r.name, r.validTill ? new Date(r.validTill + 'T00:00:00Z') : null, d, lab[band(d)], purposeText(r).join(', '), r.location || '', r.storage || '', r.tagColor || '', last ? `${last.dir === 'In' ? 'In from' : 'Out to'} ${last.person}, ${stamp(last.at)}` : '', r.mobile, r.email, r.pan, r.din, r.issuer, r.dscType, r.serial, r.remarks]);
-    row.getCell(4).numFmt = 'dd-mm-yyyy'; if (r.tagColor) row.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + tagHex(r.tagColor).slice(1).toUpperCase() } }; if (d !== null && d <= 30) row.getCell(6).font = { bold: true, color: { argb: 'FFA32020' } }; });
+    const row = ws.addRow([i + 1, r.company, r.name, r.validTill ? new Date(r.validTill + 'T00:00:00Z') : null, d, r.inactive ? `Inactive – ${r.inactiveReason || ''}` : lab[band(d)], purposeText(r).join(', '), r.location || '', r.storage || '', r.tagColor || '', last ? `${last.dir === 'In' ? 'In from' : 'Out to'} ${last.person}, ${stamp(last.at)}` : '', r.mobile, r.email, r.pan, r.din, r.issuer, r.dscType, r.serial, r.remarks]);
+    row.getCell(4).numFmt = 'dd-mm-yyyy'; if (r.tagColor) row.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + tagHex(r.tagColor).slice(1).toUpperCase() } }; if (!r.inactive && d !== null && d <= 30) row.getCell(6).font = { bold: true, color: { argb: 'FFA32020' } }; });
   ws.views = [{ state: 'frozen', ySplit: 1 }]; ws.autoFilter = { from: 'A1', to: `S${Math.max(2, reg.records.length + 1)}` };
   download(`DSC_register_${todayIso()}.xlsx`, await wb.xlsx.writeBuffer(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 };

@@ -34,3 +34,8 @@ is kept. Defaults: Pink, Orange, White, Green, Blue; BSS Cabin, Box 1, Box 2.
 
 Import from the existing Excel list (headings like Sl No / Company / Name / Valid Till / Purpose / Location / Key Tag Colour; other columns such
 as Mobile, Email, PAN are picked up if present); export to Excel; renewal reminder text for the client.
+
+**Inactive clients.** A DSC that the client will not renew (account closed, not renewing, left the office) can be marked
+**inactive** – "Mark inactive" on an expired row, or Status in Edit. It stays in the register under the filter
+"Inactive clients", but is not counted or shown in the expired / renewal lists and has no reminder. "Reactivate" brings
+it back. In the Excel export the Status column shows "Inactive – <reason>"; an import reads it back.
