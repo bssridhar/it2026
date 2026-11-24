@@ -1,10 +1,11 @@
-/* Notices, Holidays and Birthdays – edits office_notices.json and team_birthdays.json in the database folder / server. */
+/* Notices and Birthdays – edits office_notices.json and team_birthdays.json in the database folder / server (holidays: Holiday List). */
 (function () {
   'use strict';
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const K = window.KitDB, N = window.KitNotices;
-  const SN = K.store('office_notices'), SB = K.store('team_birthdays');
+  const SN = K.store('office_notices'), SB = K.store('team_birthdays'), SH = K.store('office_holidays');
+  let hols = null;   // the Holiday List file – read only here, for the preview
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   let mode = 'off', other = null, beat = null, tN = null, tB = null;
@@ -19,9 +20,6 @@
     $('#tN tbody').innerHTML = notices.notices.map((x, i) => `<tr class="${x.until && x.until < today ? 'past' : ''}"><td><input data-t="n" data-i="${i}" data-k="text" value="${esc(x.text)}" placeholder="e.g. TDS returns for Q3 due on 31-01-2027"></td>
       <td><input type="date" data-t="n" data-i="${i}" data-k="from" value="${esc(x.from)}"></td><td><input type="date" data-t="n" data-i="${i}" data-k="until" value="${esc(x.until)}"></td>
       <td><button type="button" class="link danger edit-only" data-del="n" data-i="${i}" title="Delete">✕</button></td></tr>`).join('') || '<tr><td colspan="4" class="hint">No notices.</td></tr>';
-    const hs = notices.holidays.map((h, i) => [h, i]).sort((a, b) => (a[0].date || '9') < (b[0].date || '9') ? -1 : 1);
-    $('#tH tbody').innerHTML = hs.map(([h, i]) => `<tr class="${h.date && h.date < today ? 'past' : ''}"><td><input type="date" data-t="h" data-i="${i}" data-k="date" value="${esc(h.date)}"></td>
-      <td><input data-t="h" data-i="${i}" data-k="name" value="${esc(h.name)}" placeholder="e.g. Christmas"></td><td><button type="button" class="link danger edit-only" data-del="h" data-i="${i}" title="Delete">✕</button></td></tr>`).join('') || '<tr><td colspan="3" class="hint">No holidays.</td></tr>';
     $('#tB tbody').innerHTML = bdays.people.map((p, i) => `<tr><td><input data-t="b" data-i="${i}" data-k="name" value="${esc(p.name)}" placeholder="Name"></td>
       <td><select data-t="b" data-i="${i}" data-k="day"><option value="">–</option>${Array.from({ length: 31 }, (_, d) => `<option${+p.day === d + 1 ? ' selected' : ''}>${d + 1}</option>`).join('')}</select></td>
       <td><select data-t="b" data-i="${i}" data-k="month"><option value="">–</option>${MONTHS.map((m, k) => `<option value="${k + 1}"${+p.month === k + 1 ? ' selected' : ''}>${m}</option>`).join('')}</select></td>
@@ -29,17 +27,17 @@
     preview();
   }
   function preview() {
-    const lines = N.important(notices), names = N.birthdaysOn(bdays), soon = N.upcoming(bdays, null, 30);
+    const lines = N.important(notices, hols), names = N.birthdaysOn(bdays), soon = N.upcoming(bdays, null, 30);
     $('#preview').innerHTML = (lines.length ? `<div class="pv-imp">${lines.map(t => `<div>${esc(t)}</div>`).join('')}</div>` : '<div class="hint" style="padding:8px 12px">No important notice today – the strip is not shown.</div>') +
       (names.length ? `<div class="pv-bday">🎂 Happy Birthday wishes to our Team member${names.length > 1 ? 's' : ''} ${names.map(n => '“' + esc(n) + '”').join(', ')} 🎉🎈</div>` : '');
     $('#soon').innerHTML = soon.length ? '<b>Coming up (30 days):</b> ' + soon.map(x => `${esc(x.name)} – ${N.dmy(x.date).slice(0, 5)}${x.inDays === 0 ? ' (today)' : x.inDays === 1 ? ' (tomorrow)' : ''}`).join(' · ') : '';
   }
-  const listOf = t => t === 'n' ? notices.notices : t === 'h' ? notices.holidays : bdays.people;
+  const listOf = t => t === 'n' ? notices.notices : bdays.people;
   document.addEventListener('change', e => {
     const el = e.target, t = el.dataset.t; if (!t || mode !== 'rw') return;
     const row = listOf(t)[+el.dataset.i]; if (!row) return;
     row[el.dataset.k] = el.value.trim(); if (t === 'b' && el.dataset.k !== 'name') row[el.dataset.k] = el.value ? +el.value : '';
-    if (t === 'h' && el.dataset.k === 'date') render(); else preview();
+    preview();
     save(t === 'b' ? 'b' : 'n');
   });
   document.addEventListener('click', e => {
@@ -48,7 +46,6 @@
   });
   const add = (t, row) => { if (mode !== 'rw') return msg('warn', 'Open for editing first.'); const L = listOf(t); L.push(row); render(); const el = document.querySelector(`[data-t="${t}"][data-i="${L.length - 1}"]`); if (el) el.focus(); };
   $('#addN').onclick = () => add('n', { id: uid(), text: '', from: '', until: '' });
-  $('#addH').onclick = () => add('h', { id: uid(), date: '', name: '' });
   $('#addB').onclick = () => add('b', { id: uid(), name: '', day: '', month: '' });
 
   /* ---------- saving ---------- */
@@ -63,7 +60,7 @@
       else msg('ok', 'Saved – the home page shows it (refresh the home page to see it).');
     } catch (e) { msg('err', 'Not saved: ' + K.why(e)); }
   }
-  const fixN = d => Object.assign(N.blankNotices(), { notices: [], holidays: [] }, d || {});
+  const fixN = d => Object.assign(N.blankNotices(), { notices: [] }, d || {});
   const fixB = d => Object.assign(N.blankBirthdays(), d || {});
 
   /* ---------- opening (lock) ---------- */
@@ -83,6 +80,7 @@
       const a = await SN.acquire(user(), !!force), b = a.busy ? null : await SB.acquire(user(), !!force);
       if (a.busy || (b && b.busy)) { if (!a.busy) await SN.release(); mode = 'ro'; other = a.busy ? a.lock : b.lock; } else { mode = 'rw'; other = null; }
       const rn = await SN.read(), rb = await SB.read();
+      try { const rh = await SH.read(); hols = rh && rh.data; } catch (e) { hols = null; }
       notices = rn && rn.data ? fixN(rn.data) : N.blankNotices();
       bdays = rb && rb.data ? fixB(rb.data) : N.blankBirthdays();
       if (mode === 'rw') { if (!(rn && rn.data)) await SN.write(notices); if (!(rb && rb.data)) await SB.write(bdays); }

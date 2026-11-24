@@ -9,7 +9,7 @@ window.addEventListener('error', function (e) { var s = e.target; if (!s || s.ta
     document.body.insertBefore(d, document.body.firstChild); };
   if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Notices, Holidays and Birthdays</title>
+<title>Notices and Birthdays</title>
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833}}
@@ -48,7 +48,7 @@ body.ro .edit-only{display:none} body.ro input, body.ro select{pointer-events:no
 <body>
 <main>
   <a class="home" href="../index.html">&larr; All tools</a>
-  <h1>Notices, Holidays and Birthdays</h1>
+  <h1>Notices and Birthdays</h1>
   <p class="sub">The "Important" strip and the birthday wishes on the home page. Changes are saved at once and everyone in the office sees them.</p>
 
   <section class="card">
@@ -77,9 +77,7 @@ body.ro .edit-only{display:none} body.ro input, body.ro select{pointer-events:no
   <div class="cols">
     <section class="card">
       <h2>Holidays</h2>
-      <table id="tH"><thead><tr><th>Date</th><th style="width:55%">Occasion</th><th></th></tr></thead><tbody></tbody></table>
-      <button type="button" class="link edit-only" id="addH">+ Add a holiday</button>
-      <p class="hint">The strip shows a holiday from 10 days before it ("Holiday on Friday, 25-12-2026 – Christmas"), and "Tomorrow …" / "Today is a holiday …".</p>
+      <p style="margin:0">The list of holidays is kept in its own file – <a href="../holidays/index.html">Office → Holiday List</a>. The "Important" strip shows a holiday from 5 days before it.</p>
     </section>
     <section class="card">
       <h2>Birthdays of the team <span class="hint">(separate file: team_birthdays.json)</span></h2>

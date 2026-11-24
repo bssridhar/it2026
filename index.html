@@ -222,7 +222,8 @@ render();
   var a = null, b = null;
   try { a = await K.store('office_notices').read(); } catch (e) { /* not readable now */ }
   try { b = await K.store('team_birthdays').read(); } catch (e) { /* not readable now */ }
-  var lines = N.important(a && a.data ? a.data : N.blankNotices());
+  var h = null; try { h = await K.store('office_holidays').read(); } catch (e) { /* not readable now */ }
+  var lines = N.important(a && a.data ? a.data : N.blankNotices(), h && h.data);
   if (lines.length) {
     var tr = document.getElementById('impTrack');
     [false, true].forEach(function (dup) { lines.forEach(function (t) { var s = document.createElement('span'); s.textContent = t; if (dup) { s.className = 'dup'; s.setAttribute('aria-hidden', 'true'); } tr.appendChild(s); }); });

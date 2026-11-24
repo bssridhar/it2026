@@ -22,7 +22,7 @@ $ErrorActionPreference = 'Stop'
 $Kit = Split-Path -Parent $PSScriptRoot
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $STALE_MS = 120000
-$NAMES = @('dsc_register', 'procedures_library', 'office_notices', 'team_birthdays')
+$NAMES = @('dsc_register', 'procedures_library', 'office_notices', 'office_holidays', 'team_birthdays')
 $LOG = Join-Path $PSScriptRoot 'server.log'
 function Log([string]$t) {
   try {

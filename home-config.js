@@ -203,12 +203,21 @@ window.HOME_CONFIG = {
     },
     {
       id: "notices",
-      title: "Notices, Holidays and Birthdays",
+      title: "Notices and Birthdays",
       category: "Office",
       path: "notices/index.html",
       status: "available",
-      description: "The \"Important\" strip on the home page (notices with show-from / until dates, coming holidays) and birthday wishes for team members on their birthday. Kept in the shared database – everyone sees the same.",
+      description: "The \"Important\" strip on the home page (notices with show-from / until dates) and birthday wishes for team members on their birthday. Kept in the shared database – everyone sees the same.",
       added: "2026-11-24"
+    },
+    {
+      id: "holidays",
+      title: "Holiday List",
+      category: "Office",
+      path: "holidays/index.html",
+      status: "available",
+      description: "The office's list of holidays – shown year-wise with the day of the week; the coming holiday is announced in the \"Important\" strip from 5 days before. Kept in its own file in the shared database.",
+      added: "2026-11-25"
     }
   ]
 };
