@@ -205,6 +205,9 @@ render();
   function say(t, bad) { info.textContent = t || ''; info.style.color = bad ? '#a32020' : ''; info.hidden = !t; }
   if (!K || !K.supported) { nm.textContent = 'needs Chrome or Edge (this browser cannot use the database folder)'; return; }
   async function show(p) {
+    var S = K.server && K.server();
+    if (S) { nm.textContent = 'on the tool kit server ' + S.computer; b.hidden = true;
+      say('Data folder: ' + S.dataFolder + (S.files && S.files.length ? ' – registers: ' + S.files.join(', ') : ' – empty; the DSC Register and Checklists and Procedures create their files there when first opened') + '. Nothing to connect on this computer.'); return; }
     if (p === 'granted') {
       nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change';
       try { var f = await K.verify(); say('Checked: the folder can be written. ' + (f.length ? 'Registers in it: ' + f.join(', ') + '.' : 'It is empty – the DSC Register and Checklists and Procedures create their files there when they are first opened.')); }

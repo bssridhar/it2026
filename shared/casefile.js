@@ -13,6 +13,15 @@
  */
 (function () {
   'use strict';
+  /* pages opened from the tool kit server (http://…) have no navigator.clipboard – plain-text copy through the copy command */
+  if (!navigator.clipboard) {
+    const writeText = t => new Promise((res, rej) => {
+      const on = e => { e.clipboardData.setData('text/plain', String(t)); e.preventDefault(); };
+      document.addEventListener('copy', on); let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.removeEventListener('copy', on); ok ? res() : rej(new Error('The browser did not allow copying.'));
+    });
+    try { Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true }); } catch (e) { /* not possible */ }
+  }
   const FS = typeof window.showSaveFilePicker === 'function' && typeof window.showOpenFilePicker === 'function';
   if (!FS) return;
   const KEY = 'cf:' + location.pathname.replace(/\/index\.html$/, '/').split('/').slice(-2).join('/');

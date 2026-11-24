@@ -3,7 +3,7 @@
 #  2. checks that it is a tool kit zip and shows the old and new version
 #  3. warns if someone has a register (DSC, Procedures) open for editing
 #  4. backs up the "database" folder to backups\database_<date>.zip
-#  5. copies the new files over the tool kit (database, backups and my-settings.js are never touched)
+#  5. copies the new files over the tool kit (database, backups, my-settings.js and kit-config.json are never touched)
 #  6. creates my-settings.js from the sample the first time
 param([string]$Zip)
 $ErrorActionPreference = 'Stop'
@@ -80,7 +80,7 @@ try {
 
   # copy the new files over the tool kit
   Write-Host 'Copying the new files ...'
-  $rc = & robocopy $src $Kit /E /XD database backups /XF my-settings.js /R:2 /W:2 /NFL /NDL /NJH /NJS /NP
+  $rc = & robocopy $src $Kit /E /XD database backups /XF my-settings.js kit-config.json /R:2 /W:2 /NFL /NDL /NJH /NJS /NP
   if ($LASTEXITCODE -ge 8) { throw "Copying failed (robocopy code $LASTEXITCODE). Close any open tool files and run the update again. The database backup is in the backups folder." }
 
   # own settings

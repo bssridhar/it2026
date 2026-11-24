@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 32,
-  date: "2026-11-23",
+  version: 33,
+  date: "2026-11-24",
   whatsNew: [
+    "Tool kit server for the office LAN: start it on the main computer (\"Start tool kit server.bat\"), open the tool kit at its address on every computer; the DSC Register and Checklists and Procedures are kept by the server in the data folder set in kit-config.json – nothing to connect or allow in the browser.",
     "Home page: the database folder line no longer stays at \"checking…\" – it shows the result or the reason within a few seconds.",
     "Database folder: when the browser refuses without asking, the message explains how to switch on its \"File editing\" permission, and shows the browser's own error text.",
     "Connecting the database folder: says exactly what went wrong (the browser's \"Edit files\" question cancelled, a folder that is not the tool kit, the \"shared\" folder, a system folder); choosing the folder that contains the tool kit folder now works too.",

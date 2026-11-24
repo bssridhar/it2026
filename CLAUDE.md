@@ -11,6 +11,8 @@
     file) / Save as… / Open with the browser's file picker;
   - a register shared by the team (like DSC, Procedures) is kept in the database folder through `shared/db.js`
     (`KitDB.store('<name>')`: JSON file, lock, daily backup) instead of a case file;
+    with the tool kit server (`server/kit-server.ps1`, opened at http://<main computer>:8080) the same KitDB API goes
+    through the server – a new register name must be added to `$NAMES` in kit-server.ps1;
   - carry the "shared folder missing" check (the `__sharedMissing` script) right after `<meta charset>`.
 - Register each tool in `home-config.js` and add a row to `README.md`. The home page (`index.html`) also loads
   `shared/calc.js`.
@@ -18,5 +20,5 @@
   git-ignored and must never be committed or put in the zip.
 - Outputs follow the ICAI Code of Ethics: nothing that solicits professional work.
 - Every release zip: raise `version` in `version.js`, set its date and "whatsNew"; the zip (git archive, top folder
-  `Practice_tool_kit/`) must not contain `database/`, `backups/` or `my-settings.js` (all git-ignored). Office-specific
+  `Practice_tool_kit/`) must not contain `database/`, `backups/`, `my-settings.js` or `kit-config.json` (all git-ignored). Office-specific
   settings belong in `my-settings.js` (sample: `my-settings.sample.js`), not in `home-config.js`.

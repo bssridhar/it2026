@@ -75,9 +75,31 @@ bottom of the home page (`version.js`). The `.bat` needs Windows 10 / 11 (PowerS
 tools to hide go in `my-settings.js` (made from `my-settings.sample.js` at the first update; edit it in Notepad).
 Updates replace `home-config.js` but never `my-settings.js`.
 
+## Tool kit server – using the tool kit on the office LAN (recommended)
+
+The main computer runs a small server (Windows PowerShell – nothing to install); everyone opens the tool kit in the
+browser at its address, and the shared registers (DSC Register, Checklists and Procedures) are kept by the server in
+one data folder. No folder has to be connected or allowed on any computer.
+
+1. **Data folder** – in `kit-config.json` (made from `kit-config.sample.json` at the first start; edit in Notepad):
+   `{ "port": 8080, "dataFolder": "database" }`. `dataFolder` may be a full path, e.g. `"D:\\OfficeData\\Toolkit"`
+   (write each `\` twice); a plain name is a folder inside the tool kit folder. Updates never replace this file.
+2. **Once, on the main computer** – right-click **`Set up tool kit server (run as administrator).bat`** → *Run as
+   administrator*. It allows the other computers to connect (URL reservation and a Windows firewall rule for the port).
+3. **Start** – double-click **`Start tool kit server.bat`**. The window shows the address, e.g.
+   `http://BSS-SERVER:8080/`. Keep the window open (minimised); closing it stops the server. To start it with Windows,
+   put a shortcut to the `.bat` in the Startup folder (Windows key + R → `shell:startup`).
+4. **On every computer** – open that address in Chrome / Edge and bookmark it. Use the bookmark instead of opening
+   `index.html` from the folder. The bottom of the home page shows "on the tool kit server …" and the data folder.
+
+Data entered earlier "in this browser only" is brought in with **Open a JSON file** (DSC) / **Import a file**
+(Procedures) from the copies saved with "Save a copy (JSON)" / "Export a copy".
+Pages opened through the server cannot use the browser's "save into the opened file" (it needs a secure https
+address) – Save case file downloads a copy as before; copying for email works.
+
 ## Database folder – `database`
 
-The tools that keep a register shared by the whole team – **DSC Register** (`dsc_register.json`) and **Checklists and
+Without the tool kit server (the tool kit opened from the folder), the tools that keep a register shared by the whole team – **DSC Register** (`dsc_register.json`) and **Checklists and
 Procedures** (`procedures_library.json`) – keep it in the `database` folder of the tool kit, next to `shared`
 (`shared/db.js`). Connect it once on each computer, in Chrome or Edge: click **Connect** at the bottom of the home page
 (or in the tool) and choose the **tool kit folder** – the `database` folder is created there. The browser may ask

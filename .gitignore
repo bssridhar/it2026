@@ -5,3 +5,4 @@ database/
 # local to each office – kept by updates, never in the zip
 my-settings.js
 backups/
+kit-config.json
