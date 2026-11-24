@@ -35,7 +35,19 @@ header{background:var(--band);color:var(--band-ink)}
 .ticker .track span{margin-right:60px}
 .ticker .track span::before{content:"•";margin-right:10px;opacity:.6}
 @keyframes scroll{to{transform:translateX(-50%)}}
+/* "Important" strip: dark brown with bold yellow letters */
+.ticker.imp{background:#4a2511;border-top:1px solid #6e3a1a;color:#ffd84d}
+.ticker.imp .label{background:#7a2e0b;color:#ffd84d;padding:0 14px}
+.ticker.imp .track{font-weight:700;font-size:.95rem;padding-left:130px}
+.ticker.imp .track span::before{content:"\25B8";opacity:1}
+/* birthday banner */
+.bday{text-align:center;padding:14px 16px;font-size:1.3rem;font-weight:800;color:#fff;letter-spacing:.2px;text-shadow:0 1px 3px rgba(0,0,0,.45);
+  background:linear-gradient(90deg,#e8336f,#ff8a3d,#f2c200,#2fbf71,#2b8cff,#8f5bff,#e8336f);background-size:300% 100%;animation:bdayMove 10s linear infinite}
+.bday .em{font-size:1.5rem;vertical-align:-2px}
+.bday small{display:block;font-size:.85rem;font-weight:600;opacity:.95;margin-top:2px}
+@keyframes bdayMove{to{background-position:300% 0}}
 @media (prefers-reduced-motion: reduce){
+  .bday{animation:none}
   .ticker .track{animation:none;padding-left:110px;white-space:normal}
   .ticker .track span{display:block;margin:2px 0}
   .ticker .track span.dup{display:none}
@@ -76,6 +88,8 @@ footer .whatsnew{margin:4px 0 8px;padding-left:20px}
     <div class="today" id="today"></div>
   </div>
   <div class="ticker" id="ticker" hidden><div class="label">NOTICES</div><div class="track" id="track"></div></div>
+  <div class="ticker imp" id="imp" hidden><div class="label">IMPORTANT</div><div class="track" id="impTrack"></div></div>
+  <div class="bday" id="bday" hidden></div>
 </header>
 
 <main class="wrap">
@@ -199,6 +213,32 @@ render();
 })();
 </script>
 <script src="shared/db.js"></script>
+<script src="shared/notices.js"></script>
+<script>
+(async function () { /* "Important" strip and birthday banner – from the database folder / tool kit server */
+  var K = window.KitDB, N = window.KitNotices; if (!K || !N || !K.supported) return;
+  var p; try { p = await Promise.race([K.restore(), new Promise(function (r, j) { setTimeout(function () { j(new Error('timeout')); }, 6000); })]); } catch (e) { return; }
+  if (p !== 'granted') return;
+  var a = null, b = null;
+  try { a = await K.store('office_notices').read(); } catch (e) { /* not readable now */ }
+  try { b = await K.store('team_birthdays').read(); } catch (e) { /* not readable now */ }
+  var lines = N.important(a && a.data ? a.data : N.blankNotices());
+  if (lines.length) {
+    var tr = document.getElementById('impTrack');
+    [false, true].forEach(function (dup) { lines.forEach(function (t) { var s = document.createElement('span'); s.textContent = t; if (dup) { s.className = 'dup'; s.setAttribute('aria-hidden', 'true'); } tr.appendChild(s); }); });
+    tr.style.setProperty('--dur', Math.max(18, lines.join(' ').length / 5) + 's');
+    document.getElementById('imp').hidden = false;
+  }
+  var names = N.birthdaysOn(b && b.data);
+  if (names.length) {
+    var el = document.getElementById('bday'), who = names.map(function (n) { return '\u201C' + n + '\u201D'; });
+    var list = who.length > 1 ? who.slice(0, -1).join(', ') + ' and ' + who[who.length - 1] : who[0];
+    el.innerHTML = '<span class="em">\uD83C\uDF82</span> Happy Birthday wishes to our Team member' + (names.length > 1 ? 's ' : ' ') + '<span id="bdayNames"></span> <span class="em">\uD83C\uDF89\uD83C\uDF88</span><small>Many happy returns of the day \u2013 from all of us!</small>';
+    document.getElementById('bdayNames').textContent = list;
+    el.hidden = false;
+  }
+})();
+</script>
 <script>
 (function () { /* database folder status: <tool kit>/database, used by the tools that keep a shared register */
   var K = window.KitDB, nm = document.getElementById('dbName'), b = document.getElementById('dbBtn'), info = document.getElementById('dbInfo');

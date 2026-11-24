@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 36,
+  version: 37,
   date: "2026-11-24",
   whatsNew: [
+    "Home page: \"Important\" strip (dark brown, bold yellow) below the notices, and colourful birthday wishes for team members. Edit them in Office → Notices, Holidays and Birthdays. Restart is automatic with Update tool kit.bat.",
     "DSC Register: mark a DSC as an inactive client (not renewing / account closed) – it moves out of the expired list and reminders into its own \"Inactive clients\" filter; Reactivate brings it back.",
     "Tool kit server without a window: \"Start tool kit server (hidden).vbs\" and \"Stop tool kit server.bat\"; log in server\\server.log; Update tool kit.bat restarts a running server with the new version.",
     "Tool kit server: fixed \"Not saved in the folder … The path is not of a legal form\" when a register was saved the second time. Restart the server after updating.",

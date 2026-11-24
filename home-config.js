@@ -200,6 +200,15 @@ window.HOME_CONFIG = {
       status: "available",
       description: "Standard lists of documents / information and procedures for clients (Income-tax, GST, ROC, General) and links to the firm's documents; copy one or more into an email with the formatting; archive outdated items – kept in the Archive tab by category.",
       added: "2026-11-23"
+    },
+    {
+      id: "notices",
+      title: "Notices, Holidays and Birthdays",
+      category: "Office",
+      path: "notices/index.html",
+      status: "available",
+      description: "The \"Important\" strip on the home page (notices with show-from / until dates, coming holidays) and birthday wishes for team members on their birthday. Kept in the shared database – everyone sees the same.",
+      added: "2026-11-24"
     }
   ]
 };

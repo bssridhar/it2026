@@ -28,6 +28,7 @@ folder – `index.html`, `home-config.js`, `shared/` and the tool folders – to
 | `gst9/` | GSTR-9 / 9C Working: reads GSTR-1 and GSTR-3B PDFs (1 to 12 months) – GSTR Recon sheet with formulas, month-wise data, GSTR-9 draft, books-vs-returns summary, filing dates, checks |
 | `dsc/` | DSC Register: validity, purpose, token custody with acknowledgment, reminders; JSON register in a chosen (shared) folder with a lock against simultaneous editing |
 | `procs/` | Checklists and Procedures: client checklists, procedures and links by category (Income-tax, GST, ROC, General), copy into email with formatting, archive with category tabs |
+| `notices/` | Notices, Holidays and Birthdays: the "Important" strip on the home page (notices with dates, coming holidays) and birthday wishes for the team; kept in the shared database (`office_notices.json`, `team_birthdays.json`) |
 | `shared/` | Code used by the tools – keep it next to the tool folders |
 
 ## Home page settings – `home-config.js`
