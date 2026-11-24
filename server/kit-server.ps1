@@ -72,7 +72,9 @@ function Q([string]$s) { return '"' + ($s -replace '\\', '\\' -replace '"', '\"'
 function Read-Body($req) { $sr = New-Object IO.StreamReader($req.InputStream, $utf8); try { return $sr.ReadToEnd() } finally { $sr.Close() } }
 function Write-Atomic([string]$f, [string]$text) {
   $tmp = $f + '.tmp'; [IO.File]::WriteAllText($tmp, $text, $utf8)
-  if (Test-Path -LiteralPath $f) { [IO.File]::Replace($tmp, $f, $null) } else { [IO.File]::Move($tmp, $f) }
+  # (not File.Replace: PowerShell passes $null for its backup path as "" - "The path is not of a legal form")
+  [IO.File]::Copy($tmp, $f, $true)
+  [IO.File]::Delete($tmp)
 }
 function Lock-Json([string]$user, [string]$session, [int64]$since, [int64]$beat) {
   return '{"user":' + (Q $user) + ',"session":' + (Q $session) + ',"since":' + $since + ',"beat":' + $beat + '}'

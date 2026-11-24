@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 33,
+  version: 34,
   date: "2026-11-24",
   whatsNew: [
+    "Tool kit server: fixed \"Not saved in the folder … The path is not of a legal form\" when a register was saved the second time. Restart the server after updating.",
     "Tool kit server for the office LAN: start it on the main computer (\"Start tool kit server.bat\"), open the tool kit at its address on every computer; the DSC Register and Checklists and Procedures are kept by the server in the data folder set in kit-config.json – nothing to connect or allow in the browser.",
     "Home page: the database folder line no longer stays at \"checking…\" – it shows the result or the reason within a few seconds.",
     "Database folder: when the browser refuses without asking, the message explains how to switch on its \"File editing\" permission, and shows the browser's own error text.",
