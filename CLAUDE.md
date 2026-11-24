@@ -12,7 +12,7 @@
   - a register shared by the team (like DSC, Procedures) is kept in the database folder through `shared/db.js`
     (`KitDB.store('<name>')`: JSON file, lock, daily backup) instead of a case file;
     with the tool kit server (`server/kit-server.ps1`, opened at http://<main computer>:8080) the same KitDB API goes
-    through the server – a new register name must be added to `$NAMES` in kit-server.ps1;
+    through the server – any register name of lower-case letters / digits / _ is accepted (no server change needed);
   - carry the "shared folder missing" check (the `__sharedMissing` script) right after `<meta charset>`.
 - Register each tool in `home-config.js` and add a row to `README.md`. The home page (`index.html`) also loads
   `shared/calc.js`.

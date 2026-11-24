@@ -10,7 +10,7 @@
 # Checklists and Procedures) as JSON files in the data folder named in kit-config.json:
 #   { "port": 8080, "dataFolder": "database" }      (a relative folder is inside the tool kit folder)
 # Data API (used by shared/db.js):
-#   GET  /api/info                      -> {"server":true,"computer":..,"dataFolder":..,"files":[..]}
+#   GET  /api/info                      -> {"server":true,"computer":..,"dataFolder":..,"version":<kit version at start>,"files":[..]}
 #   GET  /api/db/<name>                 -> {"data":<register or null>,"modified":<ms>}
 #   PUT  /api/db/<name>?known=<ms>      -> {"ok":true,"modified":<ms>} | 409 {"conflict":true,"other":<register>}
 #   POST /api/lock/<name>   {user,session,force} -> {"ok":true,..} | {"busy":true,"lock":{..}}
@@ -22,7 +22,8 @@ $ErrorActionPreference = 'Stop'
 $Kit = Split-Path -Parent $PSScriptRoot
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $STALE_MS = 120000
-$NAMES = @('dsc_register', 'procedures_library', 'office_notices', 'office_holidays', 'team_birthdays')
+# any register name of lower-case letters and _ (no restart needed when a tool adds a new register)
+$NAME_RE = '^[a-z][a-z0-9_]{2,40}$'
 $LOG = Join-Path $PSScriptRoot 'server.log'
 function Log([string]$t) {
   try {
@@ -56,6 +57,8 @@ function Read-Config {
 }
 
 $cfg = Read-Config
+$KIT_VERSION = 0
+try { $vt = Get-Content -LiteralPath (Join-Path $Kit 'version.js') -Raw -Encoding UTF8; $vm = [regex]::Match($vt, 'version:\s*(\d+)'); if ($vm.Success) { $KIT_VERSION = [int]$vm.Groups[1].Value } } catch { }
 
 if ($Setup) {
   $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -109,11 +112,11 @@ function Handle-Api($req, $res, [string]$path) {
   $op = $parts[1]
   if ($op -eq 'info') {
     $files = @(Get-ChildItem -LiteralPath $cfg.Data -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object { Q $_.Name })
-    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"lan":' + ($(if ($global:LanOk) { 'true' } else { 'false' })) + ',"files":[' + ($files -join ',') + ']}')
+    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"version":' + $KIT_VERSION + ',"lan":' + ($(if ($global:LanOk) { 'true' } else { 'false' })) + ',"files":[' + ($files -join ',') + ']}')
     return
   }
   $name = $parts[2]
-  if ($NAMES -notcontains $name) { Send-Json $res 404 '{"error":"unknown register"}'; return }
+  if (-not $name -or $name -cnotmatch $NAME_RE) { Send-Json $res 404 '{"error":"unknown register"}'; return }
   $file = Join-Path $cfg.Data ($name + '.json')
   $lockf = Join-Path $cfg.Data ($name + '.lock')
   $m = $req.HttpMethod

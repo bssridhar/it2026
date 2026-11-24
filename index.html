@@ -248,6 +248,8 @@ render();
   async function show(p) {
     var S = K.server && K.server();
     if (S) { nm.textContent = 'on the tool kit server ' + S.computer; b.hidden = true;
+      var V = window.KIT_VERSION && window.KIT_VERSION.version;
+      if (V && (!S.version || S.version < V)) { say('The tool kit server is running an older version (' + (S.version || 'before 39') + ') than the tool kit files (' + V + '). Restart it on the main computer: double-click "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs" (or "Start tool kit server.bat").', true); return; }
       say('Data folder: ' + S.dataFolder + (S.files && S.files.length ? ' – registers: ' + S.files.join(', ') : ' – empty; the DSC Register and Checklists and Procedures create their files there when first opened') + '. Nothing to connect on this computer.'); return; }
     if (p === 'granted') {
       nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change';

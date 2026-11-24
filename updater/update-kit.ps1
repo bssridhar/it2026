@@ -92,7 +92,12 @@ try {
     Start-Sleep -Seconds 2
     if ($wasHidden) { Start-Process -FilePath 'wscript.exe' -ArgumentList ('"' + (Join-Path $Kit 'Start tool kit server (hidden).vbs') + '"') }
     else { Start-Process -FilePath (Join-Path $Kit 'Start tool kit server.bat') -WorkingDirectory $Kit }
-    Write-Host 'The tool kit server was restarted with the new version.' -ForegroundColor Green
+    # check that the server now runs the new version
+    $port = 8080; try { $kc = Get-Content -LiteralPath (Join-Path $Kit 'kit-config.json') -Raw | ConvertFrom-Json; if ($kc.port) { $port = [int]$kc.port } } catch { }
+    $newV = (Get-KitVersion $Kit).Version; $ok = $false
+    for ($i = 0; $i -lt 20 -and -not $ok; $i++) { Start-Sleep -Seconds 1; try { $inf = Invoke-RestMethod -Uri ("http://localhost:{0}/api/info" -f $port) -TimeoutSec 2; if ([int]$inf.version -ge $newV) { $ok = $true } } catch { } }
+    if ($ok) { Write-Host ('The tool kit server was restarted and runs version {0}.' -f $newV) -ForegroundColor Green }
+    else { Write-Host 'The tool kit server could not be confirmed after the restart. Double-click "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs", and check server\server.log.' -ForegroundColor Yellow }
   }
 
   # own settings

@@ -84,6 +84,7 @@
     const n = e && e.name, m = (e && e.message) || String(e);
     if (n === 'NoPicker') return 'This browser cannot connect a folder for pages opened in this way. Open the tool kit from the tool kit server (http://<main computer>:8080), or use Chrome / Edge.';
     if (n === 'TypeError' && /fetch/i.test(m)) return 'The tool kit server does not answer – check that "Start tool kit server" is running on the main computer, and that this computer is on the office network.';
+    if (n === 'ServerError' && /unknown register/.test(m)) return 'The tool kit server is running an older version that does not know this register. Restart it on the main computer: double-click "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs" (or "Start tool kit server.bat"), and press Ctrl+F5 here.';
     if (n === 'ServerError') return 'The tool kit server reported a problem: ' + m;
     if (n === 'NotKitFolder') return `The folder "${e.folder}" is not the tool kit folder (it has no "shared" folder in it), so it was not used. Click the button again and choose the folder that contains index.html, "shared", "dsc" and the other tool folders.`;
     if (n === 'SharedFolder') return 'You chose the "shared" folder (program files). Click the button again and choose the folder one level up – the tool kit folder that contains "shared".';

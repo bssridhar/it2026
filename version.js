@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 38,
+  version: 39,
   date: "2026-11-25",
   whatsNew: [
+    "Tool kit server: accepts new registers without a restart; the home page warns if the running server is older than the tool kit files (with how to restart it).",
     "Holiday List (Office): holidays in their own file, shown year-wise with the day; edit, add several at once, print, copy. The Important strip shows a coming holiday from 5 days before (\"Holiday tomorrow …\"). Notices and Birthdays no longer has the holidays.",
     "Home page: \"Important\" strip (dark brown, bold yellow) below the notices, and colourful birthday wishes for team members. Edit them in Office → Notices, Holidays and Birthdays. Restart is automatic with Update tool kit.bat.",
     "DSC Register: mark a DSC as an inactive client (not renewing / account closed) – it moves out of the expired list and reminders into its own \"Inactive clients\" filter; Reactivate brings it back.",
