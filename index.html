@@ -221,7 +221,14 @@ render();
       if (K.picked() && K.picked() !== K.name()) say(info.textContent + ' (Folder "' + K.name() + '" inside "' + K.picked() + '".)');
     } catch (e) { say(K.why(e), !(e && e.name === 'AbortError')); }
   };
-  K.restore().then(show);
+  var where = location.protocol === 'file:' ? (location.host ? 'a network path (\\\\' + location.host + '\\…)' : 'this computer / a mapped drive') : location.protocol + '//' + location.host;
+  Promise.race([K.restore(), new Promise(function (r, j) { setTimeout(function () { j(new Error('no answer from the browser within 6 seconds')); }, 6000); })])
+    .then(function (p) {
+      show(p);
+      var se = K.storageError && K.storageError();
+      if (se) say('The browser could not use its storage to remember the folder: ' + (se.message || se) + '. The tool kit is opened from ' + where + '. Connect still works for this visit.', true);
+    })
+    .catch(function (e) { nm.textContent = 'could not be checked'; b.hidden = false; b.textContent = 'Connect'; say('The check failed: ' + (e && e.message || e) + '. The tool kit is opened from ' + where + '. Please send a screenshot of this line.', true); });
 })();
 </script>
 <script src="shared/calc.js"></script>

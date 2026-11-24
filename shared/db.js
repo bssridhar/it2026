@@ -20,9 +20,18 @@
   const STALE_MS = 120000, session = Math.random().toString(36).slice(2) + Date.now().toString(36);
   let dir = null, picked = '';
 
-  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('kit-database', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-  async function idbSet(v) { try { const db = await idb(); await new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); t.objectStore('h').put(v, 'folder'); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) { /* not kept */ } }
-  async function idbGet() { try { const db = await idb(); return await new Promise(res => { const t = db.transaction('h').objectStore('h').get('folder'); t.onsuccess = () => res(t.result || null); t.onerror = () => res(null); }); } catch (e) { return null; } }
+  /* the browser's storage, where the chosen folder is remembered; gives up after 4 s instead of waiting for ever */
+  const idb = () => new Promise((res, rej) => {
+    const t = setTimeout(() => rej(new Error('the browser did not open its storage (IndexedDB) within 4 seconds')), 4000);
+    let r; try { r = indexedDB.open('kit-database', 1); } catch (e) { clearTimeout(t); rej(e); return; }
+    r.onupgradeneeded = () => r.result.createObjectStore('h');
+    r.onsuccess = () => { clearTimeout(t); res(r.result); };
+    r.onerror = () => { clearTimeout(t); rej(r.error || new Error('IndexedDB error')); };
+    r.onblocked = () => { clearTimeout(t); rej(new Error('the browser storage is in use by another tab of the tool kit – close the other tabs and try again')); };
+  });
+  let storeErr = null;
+  async function idbSet(v) { try { const db = await idb(); await new Promise((res, rej) => { const t = db.transaction('h', 'readwrite'); t.objectStore('h').put(v, 'folder'); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) { storeErr = e; } }
+  async function idbGet() { try { storeErr = null; const db = await idb(); return await new Promise(res => { const t = db.transaction('h').objectStore('h').get('folder'); t.onsuccess = () => res(t.result || null); t.onerror = () => res(null); }); } catch (e) { storeErr = e; return null; } }
 
   async function hasDir(h, name) { try { await h.getDirectoryHandle(name); return true; } catch (e) { return false; } }
   /* pick the folder: the tool kit folder (→ its "database" sub-folder), a folder named "database", or another folder */
@@ -113,5 +122,5 @@
     return { FILE, LOCK, STALE_MS, session, read, write, acquire, heartbeat, peekLock, release };
   }
 
-  root.KitDB = { supported, STALE_MS, session, connect, restore, permit, verify, why, picked: () => picked, handle: () => dir, name: () => dir ? dir.name : '', useDir: h => { dir = h; }, user, setUser, store };
+  root.KitDB = { storageError: () => storeErr, supported, STALE_MS, session, connect, restore, permit, verify, why, picked: () => picked, handle: () => dir, name: () => dir ? dir.name : '', useDir: h => { dir = h; }, user, setUser, store };
 })(window);
