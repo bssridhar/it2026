@@ -38,7 +38,12 @@
   let mode = FS ? 'fs' : 'none', handle = null, srvName = '', pending = null, label = null, lastSaved = '', inputEl = null;
 
   /* is the page served by the tool kit server? */
-  const serverReady = HTTP ? fetch('/api/info', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.server) { mode = 'server'; return true; } return false; }).catch(() => false) : Promise.resolve(false);
+  /* case files on the server need server version 40 or later; an older running server – Save downloads a copy, as before */
+  let srvOld = false;
+  const serverReady = HTTP ? fetch('/api/info', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
+    if (j && j.server && (+j.version || 0) >= 40) { mode = 'server'; return true; }
+    if (j && j.server) srvOld = true;
+    return false; }).catch(() => false) : Promise.resolve(false);
 
   /* ---- remember the file across visits ---- */
   const idb = () => new Promise((res, rej) => { const r = indexedDB.open('casefile', 1); r.onupgradeneeded = () => r.result.createObjectStore('h'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -59,7 +64,7 @@
   /* ---- server: case files in <data>\cases\<tool>\ ---- */
   const cleanName = n => { n = String(n || '').trim().replace(/\.json$/i, '').replace(/[^A-Za-z0-9 _.,()&+-]+/g, '_').replace(/^[ .]+|[ .]+$/g, '').slice(0, 120); return n ? n + '.json' : ''; };
   const caseUrl = n => `/api/case/${encodeURIComponent(TOOL)}/${encodeURIComponent(n)}`;
-  async function srvList() { const r = await fetch(`/api/cases/${encodeURIComponent(TOOL)}`, { cache: 'no-store' }); if (!r.ok) throw new Error('The tool kit server did not list the case files (' + r.status + ') – is it the latest version? Restart it if needed.'); return r.json(); }
+  async function srvList() { const r = await fetch(`/api/cases/${encodeURIComponent(TOOL)}`, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status === 404 ? 'The tool kit server on the main computer is running an older version. Restart it there: "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs". Meanwhile use "Download a copy to this computer".' : 'The tool kit server did not list the case files (' + r.status + ').'); return r.json(); }
   async function srvPut(n, blob) { const r = await fetch(caseUrl(n), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: await blob.text() }); if (!r.ok) { let j = null; try { j = await r.json(); } catch (e) { /* none */ } throw new Error((j && j.error) || ('the server answered ' + r.status)); } }
   async function srvGet(n) { const r = await fetch(caseUrl(n), { cache: 'no-store' }); if (!r.ok) throw new Error('The case file could not be read (' + r.status + ').'); return r.text(); }
   const fmtTime = ms => { const d = new Date(ms); return d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-') + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
@@ -184,6 +189,7 @@
       if (/^(newCase|clear|clearAll|clearReg)$/.test(b.id)) setTimeout(forget, 0);
     }, true);
     await serverReady;
+    if (srvOld) saveBtn.title = 'The tool kit server is an older version – Save downloads a copy. Restart the server on the main computer to save case files on the server.';
     if (mode === 'none') return;
     if (!copyBtn) {
       const sa = document.createElement('button'); sa.type = 'button'; sa.id = 'saveCaseAs'; sa.textContent = 'Save as…';
