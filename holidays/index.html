@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holiday List</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--field:#fff;--head:#eef1f6;--next:#fff3c4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--next:#3d3410}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--field:#15181d;--head:#232833;--next:#3d3410}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:900px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 14px}
+.card h2{font-size:1.1rem;margin:0 0 8px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.danger{color:var(--err)}
+input,select,textarea{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit;width:100%}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{background:var(--head);font-weight:600}
+td.n{width:40px;color:var(--muted)}
+tr.past td{color:var(--muted)}
+tr.next td{background:var(--next);font-weight:600}
+.badge{display:inline-block;margin-left:6px;padding:0 8px;border-radius:10px;font-size:.75rem;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.nextbox{font-size:1.05rem;padding:10px 14px;border-radius:8px;background:var(--next);margin:0 0 12px}
+.hint{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 8px;font-size:.9rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)}
+.state{font-weight:600;font-size:.9rem} .state.rw{color:var(--ok)} .state.ro{color:var(--warn)}
+#editCard[hidden],#viewCard[hidden]{display:none}
+@media print{ body{background:#fff;color:#000} .home,.sub,.noprint{display:none!important} .card{border:none;padding:0} tr.next td{background:#fff3c4;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>Holiday List</h1>
+  <p class="sub">Holidays of the office. The coming holiday is shown in the "Important" strip on the home page from 5 days before it.</p>
+
+  <section class="card noprint">
+    <div class="bar">
+      <button type="button" class="primary" id="editBtn">Edit the list</button>
+      <button type="button" id="doneBtn" hidden>Done – back to the list</button>
+      <button type="button" id="printBtn">Print</button>
+      <button type="button" id="copyBtn">Copy the list</button>
+      <span style="flex:1"></span>
+      <span class="state" id="state"></span>
+    </div>
+    <div id="msgs" class="msgs" style="margin-top:8px"></div>
+  </section>
+
+  <section class="card" id="viewCard">
+    <div id="next"></div>
+    <div id="years"></div>
+  </section>
+
+  <section class="card noprint" id="editCard" hidden>
+    <h2>Edit the holidays</h2>
+    <table id="tE"><thead><tr><th style="width:170px">Date</th><th>Occasion</th><th style="width:40px"></th></tr></thead><tbody></tbody></table>
+    <div class="bar" style="margin-top:8px"><button type="button" class="link" id="addOne">+ Add a holiday</button></div>
+    <h2 style="margin-top:16px">Add several at once</h2>
+    <textarea id="bulk" rows="6" placeholder="One holiday per line – date, then the occasion:&#10;26-01-2027 Republic Day&#10;14-04-2027 Tamil New Year / Dr. Ambedkar Jayanti"></textarea>
+    <div class="bar" style="margin-top:6px"><button type="button" id="bulkAdd">Add these</button><span class="hint" style="margin:0">Date as dd-mm-yyyy (or dd/mm/yyyy). Dates already in the list are not added again.</span></div>
+    <p class="hint">Changes are saved at once in the shared database (office_holidays.json). Only one person can edit at a time.</p>
+  </section>
+</main>
+<script src="../shared/db.js"></script>
+<script src="../shared/notices.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/casefile.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

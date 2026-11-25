@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* shows a clear message if the "shared" folder is not next to this tool's folder */
+window.addEventListener('error', function (e) { var s = e.target; if (!s || s.tagName !== 'SCRIPT' || !/\/shared\//.test(s.src) || window.__sharedMissing) return; window.__sharedMissing = true;
+  var show = function () { var d = document.createElement('div'); d.setAttribute('role', 'alert'); d.style.cssText = 'position:sticky;top:0;z-index:99;background:#a32020;color:#fff;padding:12px 16px;font:15px/1.4 system-ui,sans-serif';
+    d.innerHTML = '<b>Part of the tool kit is missing.</b> This tool needs the <b>shared</b> folder of the tool kit next to its own folder. Copy the whole tool kit folder (with <b>shared</b>, <b>index.html</b> and <b>home-config.js</b>) – not only this tool\'s folder – and open it again.';
+    document.body.insertBefore(d, document.body.firstChild); };
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show); }, true);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSC Register</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2330;--muted:#5b6475;--line:#d9dde5;--accent:#1f5fae;--accent-ink:#fff;--warn-bg:#fff6e0;--warn:#8a5a00;--err-bg:#fdecec;--err:#a32020;--ok-bg:#e9f6ec;--ok:#1d6b34;--info-bg:#eaf1fb;--info:#1f4f8f;--field:#fff;--head:#eef1f6;--lock:#f0f2f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2128;--ink:#e7e9ee;--muted:#a2a9b7;--line:#343a45;--accent:#6ea6ec;--accent-ink:#0d1117;--warn-bg:#3a2f12;--warn:#f2c46b;--err-bg:#3b1d1d;--err:#f29a9a;--ok-bg:#16301f;--ok:#8fd6a4;--info-bg:#18273c;--info:#9cc2f2;--field:#15181d;--head:#232833;--lock:#20252d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:1280px;margin:0 auto;padding:20px 16px 90px}
+.home{display:inline-block;margin:0 0 8px;color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.45rem;margin:4px 0}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.hint{font-size:.8rem;color:var(--muted);margin-top:3px}
+button{font:inherit;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.link{border:none;background:none;color:var(--accent);padding:2px 4px}
+button.sm{padding:3px 8px;font-size:.82rem}
+button.danger{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msgs div{padding:8px 12px;border-radius:8px;margin:0 0 6px;font-size:.88rem}
+.m-err{background:var(--err-bg);color:var(--err)} .m-warn{background:var(--warn-bg);color:var(--warn)} .m-ok{background:var(--ok-bg);color:var(--ok)} .m-info{background:var(--info-bg);color:var(--info)}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.84rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+table.t thead th{background:var(--head);font-weight:600;position:sticky;top:0;z-index:1}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tfoot td{font-weight:700;background:var(--head);position:sticky;bottom:0}
+table.t input,table.t select{padding:3px 5px;font-size:.84rem}
+table.t input.w-s{width:60px} table.t input.w-m{width:110px} table.t input.w-l{width:190px} table.t input.num{text-align:right;width:90px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpis div{background:var(--head);border-radius:8px;padding:10px 12px}
+.kpis span{display:block;font-size:.78rem;color:var(--muted)}
+.kpis b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.outs button{text-align:left;padding:10px 12px}
+.outs button small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.outs button.primary small{color:inherit;opacity:.85}
+dialog{border:1px solid var(--line);border-radius:12px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700}
+dialog .db{padding:16px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 16px}
+.tabs button{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:none;color:var(--muted);padding:8px 14px;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--card);border-color:var(--line);color:var(--ink);margin-bottom:-1px}
+.pane[hidden]{display:none}
+.steps{margin:0;padding-left:20px;font-size:.9rem}
+.steps li{margin:3px 0}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.75rem;background:var(--head);color:var(--muted);margin-left:6px}
+td.c{background:var(--lock)}
+.radio{display:flex;gap:16px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:flex-start;color:var(--ink);font-size:.9rem;margin:0}
+.radio input{width:auto;margin-top:3px}
+.banner{position:sticky;top:0;z-index:20;margin:0 0 12px;padding:10px 14px;border-radius:8px;font-size:.9rem}
+.banner.ro{background:var(--err-bg);color:var(--err);border:1px solid var(--err)}
+.banner.info{background:var(--info-bg);color:var(--info)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{padding:4px 10px;font-size:.8rem;border-radius:14px}
+.chips button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tag{display:inline-block;padding:1px 7px;border-radius:9px;font-size:.74rem;background:var(--head);margin:1px 2px 1px 0}
+td.d-exp{color:var(--err);font-weight:700} td.d-30{color:var(--err)} td.d-60{color:var(--warn);font-weight:600} td.d-90{color:var(--warn)} td.d-ok{color:var(--ok)}
+.chk{display:flex;flex-wrap:wrap;gap:4px 14px}.chk label{display:flex;gap:6px;align-items:center;color:var(--ink);margin:0;font-size:.88rem}.chk input{width:auto}
+fieldset[disabled] button.edit-only{opacity:.4}
+.ro-hide{display:none !important}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #8a93a3;vertical-align:-2px;margin-right:5px}
+.keytag{display:inline-block;min-width:64px;text-align:center;padding:3px 10px;border-radius:12px;border:1px solid rgba(0,0,0,.25);font-weight:600;font-size:.82rem}
+.setrow{display:flex;gap:6px;align-items:center;margin:4px 0}.setrow input[type=text]{flex:1}.setrow input[type=color]{width:40px;padding:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:700px){.two{grid-template-columns:1fr}}
+.saved{font-size:.85rem;color:var(--ok)} .saved.warn{color:var(--warn)}
+body.closed #valCard{opacity:.55;pointer-events:none}
+td.inact{color:var(--muted);text-align:right}
+.tok{display:inline-block;min-width:46px;padding:3px 8px;border:2px solid #1d2330;border-radius:7px;font-weight:800;font-size:1.25rem;line-height:1.2;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.tok.dup{border:2px dashed #a32020;outline:2px solid #f3b4b4}
+td.c,th.c{text-align:center}
+#kpis .dupwarn span,#kpis .dupwarn b{color:#a32020}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="../index.html">&larr; All tools</a>
+  <h1>DSC Register</h1>
+  <p class="sub">Digital Signature Certificates of clients – validity, purpose, where the token is, movements in and out, and reminders before expiry. Token PINs and passwords are not stored.</p>
+
+  <div id="banner"></div>
+
+  <div class="card">
+    <h2>Register file <span class="pill" id="where"></span></h2>
+    <div class="grid">
+      <div><label>Your name (shown to others who open the register)</label><input id="user" placeholder="e.g. Sridhar"></div>
+      <div class="full" id="folderInfo"></div>
+    </div>
+    <div class="bar" style="margin-top:10px">
+      <button type="button" class="primary" id="chooseFolder">Connect the database folder</button>
+      <button type="button" id="reconnect" hidden>Reconnect to the folder</button>
+      <button type="button" class="primary" id="saveBtn">Save</button>
+      <button type="button" id="closeBtn">Save and close</button>
+      <span class="saved" id="savedAt"></span>
+      <span style="flex:1"></span>
+      <button type="button" id="importX">Import from Excel</button><input type="file" id="importFile" accept=".xlsx" hidden>
+      <button type="button" id="exportX">Export to Excel</button>
+      <button type="button" id="setBtn">Settings</button>
+      <button type="button" id="saveJson">Save a copy (JSON)</button>
+      <button type="button" id="openJson">Open a JSON file</button><input type="file" id="jsonFile" accept=".json" hidden>
+    </div>
+    <p class="hint" id="modeHint"></p>
+    <div id="topMsgs" class="msgs"></div>
+  </div>
+
+  <section class="card" id="valCard">
+    <h2>Validity <span class="bar"><select id="sortBy" title="Order of the list" style="width:auto"><option value="valid">Sort: valid till</option><option value="token">Sort: token Sl No</option></select><select id="fLoc" title="Location" style="width:auto"></select><select id="fTag" title="Key tag colour" style="width:auto"></select><input id="q" placeholder="Search company / name / mobile / PAN" style="width:240px"><button type="button" class="primary edit-only" id="addBtn">+ Add DSC</button></span></h2>
+    <div class="kpis" id="kpis" style="margin-bottom:12px"></div>
+    <div class="chips" id="chips"></div>
+    <div class="tw"><table class="t" id="tbl"></table></div>
+  </section>
+</main>
+
+<dialog id="editDlg"><form method="dialog" id="editForm">
+  <div class="dh" id="editTitle">DSC</div>
+  <div class="db"><div class="grid">
+    <div><label>Token Sl No (number on the key tag)</label><input name="tokenNo" maxlength="12" style="font-weight:700;font-size:1.1rem;width:120px"><div class="hint" id="tokHint"></div></div>
+    <div class="full"><label>Company / client</label><input name="company" required></div>
+    <div class="full"><label>Name of the DSC holder</label><input name="name" required></div>
+    <div><label>Valid till</label><input type="date" name="validTill" required></div>
+    <div><label>Status</label><select name="status"></select><div class="hint">Inactive – kept in the register, but not shown in the expired / renewal lists or reminders.</div></div>
+    <div><label>Token with</label><select name="location"><option value="">–</option><option>Office</option><option>Client</option></select></div>
+    <div><label>Location (in the office)</label><select name="storage"></select></div>
+    <div><label>Key tag colour</label><div class="bar" style="flex-wrap:nowrap"><select name="tagColor"></select><span id="tagPrev"></span></div></div>
+    <div class="full"><label>Purpose / registered on</label><div class="chk" id="purposeBox"></div></div>
+    <div class="full"><label>Other purpose</label><input name="purposeOther" placeholder="e.g. tender portal, bank"></div>
+    <div><label>Mobile (linked to the DSC)</label><input name="mobile" inputmode="tel"></div>
+    <div><label>Email</label><input name="email" type="email"></div>
+    <div><label>PAN of the holder</label><input name="pan" maxlength="10" style="text-transform:uppercase"></div>
+    <div><label>DIN</label><input name="din" maxlength="8" inputmode="numeric"></div>
+    <div><label>Issued by (certifying authority / vendor)</label><input name="issuer"></div>
+    <div><label>Class and type</label><select name="dscType"><option value="">–</option><option>Class 3 – Signing</option><option>Class 3 – Signing and Encryption</option><option>Class 3 – Encryption</option><option>DGFT</option><option>Other</option></select></div>
+    <div><label>Token make / serial no.</label><input name="serial"></div>
+    <div class="full"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+  </div><p class="hint">Do not record token PINs or passwords here.</p></div>
+  <div class="df"><button type="button" class="danger" id="delBtn">Delete</button><span style="flex:1"></span><button type="button" id="editCancel">Cancel</button><button class="primary" type="submit">Save</button></div>
+</form></dialog>
+
+<dialog id="custDlg"><form method="dialog" id="custForm">
+  <div class="dh" id="custTitle">Token in / out</div>
+  <div class="db">
+    <div class="grid">
+      <div><label>Movement</label><select name="dir"><option value="In">Received into the office (In)</option><option value="Out">Returned / handed over (Out)</option></select></div>
+      <div class="inOnly"><label>Keep at (location)</label><select name="storage"></select></div>
+      <div><label>Date and time</label><input type="datetime-local" name="at" required></div>
+      <div><label>Received from / handed to</label><input name="person" required></div>
+      <div><label>Purpose / remarks</label><input name="note" placeholder="e.g. GST return filing"></div>
+    </div>
+    <h3 style="font-size:.95rem;margin:14px 0 6px">Movements</h3>
+    <div class="tw" style="max-height:220px"><table class="t" id="custLog"></table></div>
+  </div>
+  <div class="df"><button type="button" id="ackBtn">Acknowledgment (PDF) for the last movement</button><span style="flex:1"></span><button type="button" id="custCancel">Close</button><button class="primary edit-only" type="submit">Record the movement</button></div>
+</form></dialog>
+
+<dialog id="inactDlg"><form method="dialog"><div class="dh"><h3>Mark as inactive client</h3></div><div class="db">
+  <p id="inactWho" style="margin:0 0 10px;font-weight:600"></p>
+  <label>Reason</label><select id="inactReason"></select>
+  <p class="hint">The DSC stays in the register under "Inactive clients"; it is not shown in the expired / renewal lists or reminders. "Reactivate" brings it back.</p></div>
+  <div class="df"><span style="flex:1"></span><button type="button" onclick="this.closest('dialog').close()">Cancel</button><button type="button" class="primary" id="inactOk">Mark inactive</button></div></form></dialog>
+<dialog id="remDlg"><div class="dh">Reminder to the client</div>
+  <div class="db"><textarea id="remText" rows="9"></textarea><p class="hint">A factual reminder for your client – copy it into email / WhatsApp. Edit as needed before sending.</p></div>
+  <div class="df"><a id="remMail" class="link" href="#">Open in email</a><span style="flex:1"></span><button type="button" id="remCopy">Copy</button><button type="button" class="primary" id="remClose">Close</button></div></dialog>
+
+<dialog id="setDlg"><div class="dh">Settings – key tag colours and locations</div>
+  <div class="db">
+    <p class="hint" style="margin-top:0">These lists are saved in the register file, so everyone who opens it sees the same choices. Renaming changes the DSCs that use the name; deleting clears it from them.</p>
+    <div class="two">
+      <div><h3 style="font-size:.95rem;margin:0 0 6px">Key tag colours</h3><div id="setTags"></div><div class="bar" style="margin-top:6px"><input id="newTag" placeholder="New colour, e.g. Yellow" style="width:170px"><input type="color" id="newTagHex" value="#f2d24b" style="width:44px;padding:2px"><button type="button" class="sm" id="addTag">Add</button></div></div>
+      <div><h3 style="font-size:.95rem;margin:0 0 6px">Locations</h3><div id="setLocs"></div><div class="bar" style="margin-top:6px"><input id="newLoc" placeholder="New location, e.g. Box 3" style="width:200px"><button type="button" class="sm" id="addLoc">Add</button></div></div>
+    </div>
+  </div>
+  <div class="df"><button type="button" class="primary" id="setClose">Done</button></div></dialog>
+
+<dialog id="askDlg"><div class="dh" id="askTitle"></div><div class="db" id="askBody"></div>
+  <div class="df"><button type="button" id="askNo">Cancel</button><button type="button" class="primary" id="askYes">Continue</button></div></dialog>
+
+<script src="../home-config.js"></script>
+<script src="../shared/pizzip.min.js"></script>
+<script src="../shared/xlsxread.js"></script>
+<script src="../shared/exceljs.min.js"></script>
+<script src="../shared/jspdf.umd.min.js"></script>
+<script src="../shared/db.js"></script>
+<script src="lib/store.js"></script>
+<script src="lib/app.js"></script>
+<script src="../shared/casefile.js"></script>
+<script src="../shared/calc.js"></script>
+</body>
+</html>

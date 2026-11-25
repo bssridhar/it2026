@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice Tool Kit</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#d9dde5;
+  --accent:#1f5fae; --accent-soft:#e8f0fb; --band:#1f3b63; --band-ink:#ffffff; --soon:#8a5a00; --soon-bg:#fff6e0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+    --accent:#6ea6ec; --accent-soft:#1a2433; --band:#0f1d31; --band-ink:#e7e9ee; --soon:#f2c46b; --soon-bg:#3a2f12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171c; --card:#1d2128; --ink:#e7e9ee; --muted:#a2a9b7; --line:#343a45;
+  --accent:#6ea6ec; --accent-soft:#1a2433; --band:#0f1d31; --band-ink:#e7e9ee; --soon:#f2c46b; --soon-bg:#3a2f12;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--band);color:var(--band-ink)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.wrap.top{padding:22px 16px 18px}
+.firm{font-size:1.5rem;font-weight:700;margin:0;letter-spacing:.2px}
+.tagline{margin:2px 0 0;opacity:.8;font-size:.92rem}
+.today{font-size:.88rem;opacity:.85;text-align:right}
+.ticker{background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.12);overflow:hidden;white-space:nowrap;position:relative}
+.ticker .label{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;padding:0 12px;background:var(--band);font-size:.78rem;font-weight:700;letter-spacing:.6px;z-index:1}
+.ticker .track{display:inline-block;padding:9px 0 9px 110px;animation:scroll var(--dur,40s) linear infinite;font-size:.9rem}
+.ticker:hover .track{animation-play-state:paused}
+.ticker .track span{margin-right:60px}
+.ticker .track span::before{content:"•";margin-right:10px;opacity:.6}
+@keyframes scroll{to{transform:translateX(-50%)}}
+/* "Important" strip: dark brown with bold yellow letters */
+.ticker.imp{background:#4a2511;border-top:1px solid #6e3a1a;color:#ffd84d}
+.ticker.imp .label{background:#7a2e0b;color:#ffd84d;padding:0 14px}
+.ticker.imp .track{font-weight:700;font-size:.95rem;padding-left:130px}
+.ticker.imp .track span::before{content:"\25B8";opacity:1}
+/* birthday banner */
+.bday{text-align:center;padding:14px 16px;font-size:1.3rem;font-weight:800;color:#fff;letter-spacing:.2px;text-shadow:0 1px 3px rgba(0,0,0,.45);
+  background:linear-gradient(90deg,#e8336f,#ff8a3d,#f2c200,#2fbf71,#2b8cff,#8f5bff,#e8336f);background-size:300% 100%;animation:bdayMove 10s linear infinite}
+.bday .em{font-size:1.5rem;vertical-align:-2px}
+.bday small{display:block;font-size:.85rem;font-weight:600;opacity:.95;margin-top:2px}
+@keyframes bdayMove{to{background-position:300% 0}}
+@media (prefers-reduced-motion: reduce){
+  .bday{animation:none}
+  .ticker .track{animation:none;padding-left:110px;white-space:normal}
+  .ticker .track span{display:block;margin:2px 0}
+  .ticker .track span.dup{display:none}
+}
+main.wrap{padding-top:22px;padding-bottom:40px}
+.search{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.search input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.search input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.kbd{font-size:.78rem;color:var(--muted);white-space:nowrap}
+@media (max-width:600px){.kbd{display:none}}
+h2{font-size:1rem;margin:22px 0 10px;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tool{display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;color:inherit;text-decoration:none;min-height:150px;transition:border-color .15s, box-shadow .15s}
+a.tool:hover,a.tool:focus-visible{border-color:var(--accent);box-shadow:0 2px 10px rgba(31,95,174,.12);outline:none}
+.tool h3{margin:0;font-size:1.05rem;color:var(--accent)}
+.tool p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+.tool .meta{display:flex;gap:8px;align-items:center;font-size:.78rem;color:var(--muted)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.74rem;font-weight:600}
+.badge.new{background:var(--accent-soft);color:var(--accent)}
+.badge.soon{background:var(--soon-bg);color:var(--soon)}
+.tool.planned{opacity:.75;cursor:default}
+.tool.planned h3{color:var(--ink)}
+.recent .tool{min-height:auto}
+.empty{color:var(--muted);font-size:.92rem}
+footer.wrap{border-top:1px solid var(--line);color:var(--muted);font-size:.82rem;padding:16px 16px 30px}
+footer p{margin:4px 0}
+footer .vbtn{font:inherit;font-size:.8rem;padding:1px 8px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer}
+footer .whatsnew{margin:4px 0 8px;padding-left:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div>
+      <p class="firm" id="firm"></p>
+      <p class="tagline" id="tagline"></p>
+    </div>
+    <div class="today" id="today"></div>
+  </div>
+  <div class="ticker" id="ticker" hidden><div class="label">NOTICES</div><div class="track" id="track"></div></div>
+  <div class="ticker imp" id="imp" hidden><div class="label">IMPORTANT</div><div class="track" id="impTrack"></div></div>
+  <div class="bday" id="bday" hidden></div>
+</header>
+
+<main class="wrap">
+  <div class="search">
+    <input id="q" type="search" placeholder="Search tools (e.g. LLP, company, deed)" aria-label="Search tools">
+    <span class="kbd">Press / to search</span>
+  </div>
+  <section id="recentWrap" class="recent" hidden>
+    <h2>Recently used</h2>
+    <div class="grid" id="recent"></div>
+  </section>
+  <div id="cats"></div>
+  <p class="empty" id="none" hidden>No tool matches your search.</p>
+</main>
+
+<footer class="wrap">
+  <p>For internal use. Documents produced by these tools are drafts and must be checked before they are signed or filed.</p>
+  <p>All tools run in this browser; client data is not uploaded anywhere.</p>
+  <p id="verLine"></p>
+  <p id="dbLine">Database folder – one place for the shared registers of the DSC Register and Checklists and Procedures: <span id="dbName">checking…</span>
+    <button type="button" id="dbBtn" hidden style="font:inherit;font-size:.8rem;padding:2px 9px;border-radius:5px;border:1px solid var(--line);background:none;color:inherit;cursor:pointer"></button></p>
+  <p id="dbInfo" hidden style="margin-top:0"></p>
+</footer>
+
+<script src="home-config.js"></script>
+<script src="version.js"></script>
+<script src="my-settings.js"></script>
+<script>
+(function(){
+"use strict";
+/* the tool kit's settings (home-config.js), with the office's own settings (my-settings.js – kept by updates) on top */
+const C = Object.assign({ tools: [] }, window.HOME_CONFIG || {});
+const M = window.MY_SETTINGS || {};
+if (M.firmName) C.firmName = M.firmName;
+if (M.tagline) C.tagline = M.tagline;
+C.ticker = (M.myNotices || []).filter(Boolean).concat(M.onlyMyNotices ? [] : (C.ticker || []));
+if (Array.isArray(M.hideTools) && M.hideTools.length) C.tools = C.tools.filter(t => !M.hideTools.includes(t.id));
+// version and what's new
+(function () {
+  const V = window.KIT_VERSION, el = document.getElementById('verLine'); if (!V || !el) return;
+  const d = V.date.split('-').reverse().join('-');
+  el.innerHTML = '';
+  el.append(`Tool kit version ${V.version} · ${d}`);
+  if (V.whatsNew && V.whatsNew.length) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = "What's new"; b.className = 'vbtn';
+    const ul = document.createElement('ul'); ul.hidden = true; ul.className = 'whatsnew';
+    V.whatsNew.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    b.onclick = () => { ul.hidden = !ul.hidden; };
+    el.append(' ', b); el.after(ul);
+  }
+})();
+const RECENT_KEY = 'home-recent-v1';
+document.getElementById('firm').textContent = C.firmName || '';
+document.getElementById('tagline').textContent = C.tagline || '';
+document.title = (C.firmName ? C.firmName + ' – ' : '') + 'Practice Tool Kit';
+document.getElementById('today').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// ticker
+if (C.ticker && C.ticker.length) {
+  const track = document.getElementById('track');
+  // the messages are written twice so the loop runs on without a gap
+  [false, true].forEach(dup => C.ticker.forEach(t => {
+    const s = document.createElement('span'); s.textContent = t; if (dup) { s.className = 'dup'; s.setAttribute('aria-hidden', 'true'); }
+    track.appendChild(s);
+  }));
+  track.style.setProperty('--dur', Math.max(20, C.ticker.join(' ').length / 6) + 's');
+  document.getElementById('ticker').hidden = false;
+}
+
+// recently used (this browser only)
+let recent = [];
+try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) {}
+function remember(id){
+  recent = [id].concat(recent.filter(x => x !== id)).slice(0, 3);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch(e) {}
+}
+
+const isNew = t => t.added && (Date.now() - new Date(t.added + 'T00:00:00')) < 30 * 864e5;
+function card(t){
+  const el = document.createElement(t.status === 'available' ? 'a' : 'div');
+  el.className = 'tool' + (t.status === 'available' ? '' : ' planned');
+  if (t.status === 'available') { el.href = t.path; el.addEventListener('click', () => remember(t.id)); }
+  const h = document.createElement('h3'); h.textContent = t.title;
+  const p = document.createElement('p'); p.textContent = t.description || '';
+  const m = document.createElement('div'); m.className = 'meta';
+  const cat = document.createElement('span'); cat.textContent = t.category || '';
+  m.appendChild(cat);
+  if (t.status !== 'available') { const b = document.createElement('span'); b.className = 'badge soon'; b.textContent = 'Coming soon'; m.appendChild(b); }
+  else if (isNew(t)) { const b = document.createElement('span'); b.className = 'badge new'; b.textContent = 'New'; m.appendChild(b); }
+  el.append(h, p, m);
+  return el;
+}
+
+function render(){
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const match = t => !q || [t.title, t.description, t.category].join(' ').toLowerCase().includes(q);
+  const cats = document.getElementById('cats'); cats.innerHTML = '';
+  const order = (C.categories || []).concat([...new Set(C.tools.map(t => t.category))].filter(c => !(C.categories || []).includes(c)));
+  let shown = 0;
+  order.forEach(cat => {
+    const list = C.tools.filter(t => t.category === cat && match(t))
+      .sort((a, b) => (a.status === 'available' ? 0 : 1) - (b.status === 'available' ? 0 : 1));
+    if (!list.length) return;
+    const sec = document.createElement('section');
+    const h = document.createElement('h2'); h.textContent = cat;
+    const g = document.createElement('div'); g.className = 'grid';
+    list.forEach(t => g.appendChild(card(t)));
+    sec.append(h, g); cats.appendChild(sec); shown += list.length;
+  });
+  document.getElementById('none').hidden = shown > 0;
+  const rw = document.getElementById('recentWrap'), rg = document.getElementById('recent');
+  const rt = recent.map(id => C.tools.find(t => t.id === id && t.status === 'available')).filter(Boolean);
+  rw.hidden = !!q || !rt.length; rg.innerHTML = '';
+  rt.forEach(t => rg.appendChild(card(t)));
+}
+document.getElementById('q').addEventListener('input', render);
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('q').focus(); }
+});
+render();
+})();
+</script>
+<script src="shared/db.js"></script>
+<script src="shared/notices.js"></script>
+<script>
+(async function () { /* "Important" strip and birthday banner – from the database folder / tool kit server */
+  var K = window.KitDB, N = window.KitNotices; if (!K || !N || !K.supported) return;
+  var p; try { p = await Promise.race([K.restore(), new Promise(function (r, j) { setTimeout(function () { j(new Error('timeout')); }, 6000); })]); } catch (e) { return; }
+  if (p !== 'granted') return;
+  var a = null, b = null;
+  try { a = await K.store('office_notices').read(); } catch (e) { /* not readable now */ }
+  try { b = await K.store('team_birthdays').read(); } catch (e) { /* not readable now */ }
+  var h = null; try { h = await K.store('office_holidays').read(); } catch (e) { /* not readable now */ }
+  var lines = N.important(a && a.data ? a.data : N.blankNotices(), h && h.data);
+  if (lines.length) {
+    var tr = document.getElementById('impTrack');
+    [false, true].forEach(function (dup) { lines.forEach(function (t) { var s = document.createElement('span'); s.textContent = t; if (dup) { s.className = 'dup'; s.setAttribute('aria-hidden', 'true'); } tr.appendChild(s); }); });
+    tr.style.setProperty('--dur', Math.max(18, lines.join(' ').length / 5) + 's');
+    document.getElementById('imp').hidden = false;
+  }
+  var names = N.birthdaysOn(b && b.data);
+  if (names.length) {
+    var el = document.getElementById('bday'), who = names.map(function (n) { return '\u201C' + n + '\u201D'; });
+    var list = who.length > 1 ? who.slice(0, -1).join(', ') + ' and ' + who[who.length - 1] : who[0];
+    el.innerHTML = '<span class="em">\uD83C\uDF82</span> Happy Birthday wishes to our Team member' + (names.length > 1 ? 's ' : ' ') + '<span id="bdayNames"></span> <span class="em">\uD83C\uDF89\uD83C\uDF88</span><small>Many happy returns of the day \u2013 from all of us!</small>';
+    document.getElementById('bdayNames').textContent = list;
+    el.hidden = false;
+  }
+})();
+</script>
+<script>
+(function () { /* database folder status: <tool kit>/database, used by the tools that keep a shared register */
+  var K = window.KitDB, nm = document.getElementById('dbName'), b = document.getElementById('dbBtn'), info = document.getElementById('dbInfo');
+  function say(t, bad) { info.textContent = t || ''; info.style.color = bad ? '#a32020' : ''; info.hidden = !t; }
+  if (!K || !K.supported) { nm.textContent = 'needs Chrome or Edge (this browser cannot use the database folder)'; return; }
+  async function show(p) {
+    var S = K.server && K.server();
+    if (S) { nm.textContent = 'on the tool kit server ' + S.computer; b.hidden = true;
+      var V = window.KIT_VERSION && window.KIT_VERSION.version;
+      if (V && (!S.version || S.version < V)) { say('The tool kit server is running an older version (' + (S.version || 'before 39') + ') than the tool kit files (' + V + '). Restart it on the main computer: double-click "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs" (or "Start tool kit server.bat").', true); return; }
+      say('Data folder: ' + S.dataFolder + (S.files && S.files.length ? ' – registers: ' + S.files.join(', ') : ' – empty; the DSC Register and Checklists and Procedures create their files there when first opened') + '. Nothing to connect on this computer.'); return; }
+    if (p === 'granted') {
+      nm.textContent = '"' + K.name() + '" – connected'; b.hidden = false; b.textContent = 'Change';
+      try { var f = await K.verify(); say('Checked: the folder can be written. ' + (f.length ? 'Registers in it: ' + f.join(', ') + '.' : 'It is empty – the DSC Register and Checklists and Procedures create their files there when they are first opened.')); }
+      catch (e) { say('The folder is connected but could not be written: ' + K.why(e), true); }
+    }
+    else if (p) { nm.textContent = '"' + K.name() + '" – chosen earlier; the browser asks for permission once per visit'; b.hidden = false; b.textContent = 'Allow now'; say(''); }
+    else { nm.textContent = 'not connected'; b.hidden = false; b.textContent = 'Connect'; say('Click Connect and choose the tool kit folder – the folder that contains index.html, "shared" and the tool folders. The "database" folder is created inside it. Do this once on each computer.'); }
+  }
+  b.onclick = async function () {
+    try {
+      if (b.textContent === 'Allow now') { var p = await K.permit(); if (p !== 'granted') { say('Permission was not given – click "Allow now" again and answer "Allow".', true); return; } show(p); return; }
+      await K.connect(function (name) { return Promise.resolve(confirm('"' + name + '" is not the tool kit folder (it has no "shared" folder).\n\nOK – create the "database" folder inside "' + name + '" and use it.\nCancel – choose again (recommended: the tool kit folder).')); });
+      await show('granted');
+      if (K.picked() && K.picked() !== K.name()) say(info.textContent + ' (Folder "' + K.name() + '" inside "' + K.picked() + '".)');
+    } catch (e) { say(K.why(e), !(e && e.name === 'AbortError')); }
+  };
+  var where = location.protocol === 'file:' ? (location.host ? 'a network path (\\\\' + location.host + '\\…)' : 'this computer / a mapped drive') : location.protocol + '//' + location.host;
+  Promise.race([K.restore(), new Promise(function (r, j) { setTimeout(function () { j(new Error('no answer from the browser within 6 seconds')); }, 6000); })])
+    .then(function (p) {
+      show(p);
+      var se = K.storageError && K.storageError();
+      if (se) say('The browser could not use its storage to remember the folder: ' + (se.message || se) + '. The tool kit is opened from ' + where + '. Connect still works for this visit.', true);
+    })
+    .catch(function (e) { nm.textContent = 'could not be checked'; b.hidden = false; b.textContent = 'Connect'; say('The check failed: ' + (e && e.message || e) + '. The tool kit is opened from ' + where + '. Please send a screenshot of this line.', true); });
+})();
+</script>
+<script src="shared/calc.js"></script>
+</body>
+</html>
