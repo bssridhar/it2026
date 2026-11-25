@@ -26,9 +26,36 @@
   let srv = null;
   const ready = viaHttp ? fetch('/api/info', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { srv = j && j.server ? j : null; return srv; }).catch(() => null) : Promise.resolve(null);
   const supported = picker || viaHttp;
-  async function api(method, path, body, opts) {
-    const r = await fetch(path, Object.assign({ method, cache: 'no-store', headers: body !== undefined ? { 'Content-Type': 'application/json' } : {}, body: body !== undefined ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined }, opts || {}));
+  /* editing password (registers protected on the server): asked once, kept until this browser window is closed */
+  const PWK = 'kit-edit-password';
+  const pwGet = () => { try { return sessionStorage.getItem(PWK) || ''; } catch (e) { return ''; } };
+  const pwSet = v => { try { v ? sessionStorage.setItem(PWK, v) : sessionStorage.removeItem(PWK); } catch (e) { /* not kept */ } };
+  function askPassword(again) {
+    return new Promise(resolve => {
+      const d = document.createElement('dialog');
+      d.style.cssText = 'border:1px solid #c9d2df;border-radius:12px;padding:16px 18px;width:min(420px,92vw);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2330;background:#fff';
+      d.innerHTML = '<h3 style="margin:0 0 6px">Password needed</h3><p style="margin:0 0 10px;color:#5b6475;font-size:.9rem">' + (again ? '<b style="color:#a32020">The password was not correct.</b> ' : '') + 'Changing this list needs the editing password.</p>' +
+        '<input type="password" id="kpw" autocomplete="current-password" style="width:100%;padding:8px 10px;border:1px solid #c9d2df;border-radius:6px;font:inherit">' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button type="button" id="kpwNo" style="font:inherit;padding:7px 12px;border:1px solid #c9d2df;border-radius:6px;background:#fff;cursor:pointer">Cancel</button><button type="button" id="kpwOk" style="font:inherit;padding:7px 12px;border:1px solid #1f5fae;border-radius:6px;background:#1f5fae;color:#fff;font-weight:600;cursor:pointer">OK</button></div>';
+      document.body.appendChild(d);
+      const done = v => { d.close(); d.remove(); resolve(v); };
+      d.querySelector('#kpwNo').onclick = () => done(null);
+      d.querySelector('#kpwOk').onclick = () => done(d.querySelector('#kpw').value);
+      d.querySelector('#kpw').addEventListener('keydown', e => { if (e.key === 'Enter') done(d.querySelector('#kpw').value); });
+      d.addEventListener('cancel', e => { e.preventDefault(); done(null); });
+      d.showModal(); d.querySelector('#kpw').focus();
+    });
+  }
+  async function api(method, path, body, opts, tries) {
+    const headers = body !== undefined ? { 'Content-Type': 'application/json' } : {};
+    if (pwGet()) headers['X-Kit-Password'] = encodeURIComponent(pwGet());
+    const r = await fetch(path, Object.assign({ method, cache: 'no-store', headers, body: body !== undefined ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined }, opts || {}));
     let j = null; try { j = await r.json(); } catch (e) { /* no body */ }
+    if (r.status === 401 && j && j.error === 'password') {
+      const had = !!pwGet(); pwSet('');
+      if ((tries || 0) < 3) { const pw = await askPassword(had); if (pw) { pwSet(pw); return api(method, path, body, opts, (tries || 0) + 1); } }
+      const e = new Error('password'); e.name = 'PasswordError'; throw e;
+    }
     if (!r.ok && r.status !== 409) { const e = new Error((j && j.error) || ('the server answered ' + r.status)); e.name = 'ServerError'; throw e; }
     return j;
   }
@@ -84,6 +111,7 @@
     const n = e && e.name, m = (e && e.message) || String(e);
     if (n === 'NoPicker') return 'This browser cannot connect a folder for pages opened in this way. Open the tool kit from the tool kit server (http://<main computer>:8080), or use Chrome / Edge.';
     if (n === 'TypeError' && /fetch/i.test(m)) return 'The tool kit server does not answer – check that "Start tool kit server" is running on the main computer, and that this computer is on the office network.';
+    if (n === 'PasswordError') return 'This list is protected by the editing password – it can be seen by everyone, but changed only with the password.';
     if (n === 'ServerError' && /unknown register/.test(m)) return 'The tool kit server is running an older version that does not know this register. Restart it on the main computer: double-click "Stop tool kit server.bat", then "Start tool kit server (hidden).vbs" (or "Start tool kit server.bat"), and press Ctrl+F5 here.';
     if (n === 'ServerError') return 'The tool kit server reported a problem: ' + m;
     if (n === 'NotKitFolder') return `The folder "${e.folder}" is not the tool kit folder (it has no "shared" folder in it), so it was not used. Click the button again and choose the folder that contains index.html, "shared", "dsc" and the other tool folders.`;

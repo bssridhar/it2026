@@ -85,7 +85,7 @@ try {
   if ($LASTEXITCODE -ge 8) { throw "Copying failed (robocopy code $LASTEXITCODE). Close any open tool files and run the update again. The database backup is in the backups folder." }
 
   # restart the tool kit server if it is running, so that it uses the new version
-  $srvProcs = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' })
+  $srvProcs = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' -and $_.CommandLine -notlike '*-SetPassword*' })
   if ($srvProcs.Count) {
     $wasHidden = @($srvProcs | Where-Object { $_.CommandLine -like '*-Hidden*' }).Count -gt 0
     $srvProcs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }

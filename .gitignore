@@ -8,3 +8,4 @@ backups/
 kit-config.json
 server/server.log
 server/server.log.old
+server/edit-password.sha256

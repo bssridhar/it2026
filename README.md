@@ -100,8 +100,17 @@ one data folder. No folder has to be connected or allowed on any computer.
 
 Data entered earlier "in this browser only" is brought in with **Open a JSON file** (DSC) / **Import a file**
 (Procedures) from the copies saved with "Save a copy (JSON)" / "Export a copy".
-Pages opened through the server cannot use the browser's "save into the opened file" (it needs a secure https
-address) – Save case file downloads a copy as before; copying for email works.
+**Case files through the server.** When the tool kit is opened from the server, **Open case file** lists the case files
+of that tool kept on the server (`<data folder>\cases\<tool>\`; "From this computer…" opens a file from the computer),
+**Save case file** saves into the file that was opened – no dialog – and **Save as…** saves under a new name ("Download
+a copy to this computer" is in the same box). A copy of the previous version is kept once a day in `backup`.
+
+**Editing password.** On the main computer double-click **`Set editing password.bat`** and type the password twice.
+From then on the notices, holidays and birthdays (the `protect` list in `kit-config.json`) can be seen by everyone but
+changed only with the password; the browser asks for it when "Open for editing" / "Edit the list" is clicked and keeps it
+until the window is closed. Run the `.bat` again with an empty password to remove it. Only a fingerprint (SHA-256) of the
+password is stored, in `server\edit-password.sha256`. The protection works through the server only – keep the data
+folder itself out of reach of the staff's Windows accounts if that matters.
 
 ## Database folder – `database`
 

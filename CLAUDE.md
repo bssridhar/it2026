@@ -8,7 +8,8 @@
   - have Save / Open case file (JSON) and keep a draft in localStorage; the save button is `#saveCase` (it downloads a
     `.json` through an `<a download>` click) and the open button clicks a hidden `<input type="file" accept=".json">`;
     load `<script src="../shared/casefile.js"></script>` before `calc.js` – it turns these into Save (into the opened
-    file) / Save as… / Open with the browser's file picker;
+    file) / Save as… / Open with the browser's file picker, or – when opened from the tool kit server – into case files kept
+    on the server (`/api/cases/<tool>`, `/api/case/<tool>/<name>.json`);
   - a register shared by the team (like DSC, Procedures) is kept in the database folder through `shared/db.js`
     (`KitDB.store('<name>')`: JSON file, lock, daily backup) instead of a case file;
     with the tool kit server (`server/kit-server.ps1`, opened at http://<main computer>:8080) the same KitDB API goes

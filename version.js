@@ -3,9 +3,11 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 39,
+  version: 40,
   date: "2026-11-25",
   whatsNew: [
+    "Case files through the tool kit server: Open lists the case files on the server, Save saves into the opened file without a dialog, Save as… asks for a new name – in all the tools.",
+    "Editing password for the notices, holidays and birthdays (\"Set editing password.bat\" on the main computer): everyone can see them, only you can change them.",
     "Tool kit server: accepts new registers without a restart; the home page warns if the running server is older than the tool kit files (with how to restart it).",
     "Holiday List (Office): holidays in their own file, shown year-wise with the day; edit, add several at once, print, copy. The Important strip shows a coming holiday from 5 days before (\"Holiday tomorrow …\"). Notices and Birthdays no longer has the holidays.",
     "Home page: \"Important\" strip (dark brown, bold yellow) below the notices, and colourful birthday wishes for team members. Edit them in Office → Notices, Holidays and Birthdays. Restart is automatic with Update tool kit.bat.",

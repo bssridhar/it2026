@@ -17,7 +17,11 @@
 #   POST /api/beat/<name>   {user,session}       -> {"ok":true} | {"lost":true,"lock":{..}}
 #   GET  /api/lock/<name>                        -> lock or null
 #   POST /api/unlock/<name> {session}            -> {"ok":true}
-param([switch]$Setup, [switch]$Hidden, [switch]$Stop)
+#   GET  /api/cases/<tool>               -> [{"name":..,"modified":<ms>,"size":..}]   case files of a tool (<data>\cases\<tool>\)
+#   GET  /api/case/<tool>/<file.json>    -> the case file;   PUT -> saves it (previous version kept daily in backup\)
+# Editing password (Set editing password.bat): registers listed in "protect" (kit-config.json; by default the notices,
+# holidays and birthdays) can be changed only with the password (header X-Kit-Password); everyone can still read them.
+param([switch]$Setup, [switch]$Hidden, [switch]$Stop, [switch]$SetPassword)
 $ErrorActionPreference = 'Stop'
 $Kit = Split-Path -Parent $PSScriptRoot
 $utf8 = New-Object System.Text.UTF8Encoding($false)
@@ -35,7 +39,7 @@ function Pause-End { if (-not $Hidden) { Read-Host 'Press Enter to close' | Out-
 
 if ($Stop) {
   $mine = $PID
-  $p = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.ProcessId -ne $mine -and $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' })
+  $p = @(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.ProcessId -ne $mine -and $_.CommandLine -like '*kit-server.ps1*' -and $_.CommandLine -notlike '*-Stop*' -and $_.CommandLine -notlike '*-Setup*' -and $_.CommandLine -notlike '*-SetPassword*' })
   if ($p.Count) { $p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }; Log 'Stopped (Stop tool kit server).'; Write-Host 'The tool kit server has been stopped.' -ForegroundColor Green }
   else { Write-Host 'The tool kit server was not running.' }
   Start-Sleep -Seconds 3
@@ -53,12 +57,30 @@ function Read-Config {
   $port = 8080; if ($c.port) { $port = [int]$c.port }
   $df = 'database'; if ($c.dataFolder) { $df = [string]$c.dataFolder }
   if (-not [IO.Path]::IsPathRooted($df)) { $df = Join-Path $Kit $df }
-  return [pscustomobject]@{ Port = $port; Data = [IO.Path]::GetFullPath($df); File = $f }
+  $protect = @('office_notices', 'office_holidays', 'team_birthdays'); if ($c.protect) { $protect = @($c.protect) }
+  return [pscustomobject]@{ Port = $port; Data = [IO.Path]::GetFullPath($df); File = $f; Protect = $protect }
 }
 
 $cfg = Read-Config
 $KIT_VERSION = 0
 try { $vt = Get-Content -LiteralPath (Join-Path $Kit 'version.js') -Raw -Encoding UTF8; $vm = [regex]::Match($vt, 'version:\s*(\d+)'); if ($vm.Success) { $KIT_VERSION = [int]$vm.Groups[1].Value } } catch { }
+
+$PWFILE = Join-Path $PSScriptRoot 'edit-password.sha256'
+function Hash-Text([string]$t) { $sha = [Security.Cryptography.SHA256]::Create(); try { return (($sha.ComputeHash($utf8.GetBytes($t)) | ForEach-Object { $_.ToString('x2') }) -join '') } finally { $sha.Dispose() } }
+if ($SetPassword) {
+  Write-Host ''
+  Write-Host '=== Editing password for the notices, holidays and birthdays ===' -ForegroundColor Cyan
+  Write-Host ('Protected: ' + ($cfg.Protect -join ', '))
+  Write-Host 'Everyone can still see them; changing them needs this password. Leave it empty to remove the password.'
+  $a = Read-Host 'New password' -AsSecureString; $b = Read-Host 'Type it again' -AsSecureString
+  $pa = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($a))
+  $pb = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($b))
+  if ($pa -ne $pb) { Write-Host 'The two entries are not the same - nothing was changed.' -ForegroundColor Red }
+  elseif ($pa -eq '') { Remove-Item -LiteralPath $PWFILE -Force -ErrorAction SilentlyContinue; Write-Host 'The password has been removed - anyone can edit.' -ForegroundColor Yellow; Log 'Editing password removed.' }
+  else { [IO.File]::WriteAllText($PWFILE, (Hash-Text $pa), $utf8); Write-Host 'The password has been set. It works at once - no restart needed.' -ForegroundColor Green; Log 'Editing password set.' }
+  Read-Host 'Press Enter to close' | Out-Null
+  return
+}
 
 if ($Setup) {
   $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -107,14 +129,52 @@ function Read-Lock([string]$name) {
   try { return (Get-Content -LiteralPath $f -Raw -Encoding UTF8 | ConvertFrom-Json) } catch { return $null }
 }
 
+function Password-Ok($req, [string]$name) {
+  if ($cfg.Protect -notcontains $name) { return $true }
+  if (-not (Test-Path -LiteralPath $PWFILE)) { return $true }
+  $given = $req.Headers['X-Kit-Password']; if (-not $given) { return $false }
+  try { $given = [Uri]::UnescapeDataString($given) } catch { }
+  return ((Hash-Text $given) -eq ([IO.File]::ReadAllText($PWFILE, $utf8).Trim()))
+}
+function Handle-Case($req, $res, $parts) {
+  $tool = [string]$parts[2]
+  if ($tool -cnotmatch '^[a-z0-9_-]{1,40}$') { Send-Json $res 404 '{"error":"unknown tool"}'; return }
+  $dir = Join-Path (Join-Path $cfg.Data 'cases') $tool
+  if ($parts[1] -eq 'cases') {
+    $items = @()
+    if (Test-Path -LiteralPath $dir) { Get-ChildItem -LiteralPath $dir -Filter '*.json' -File | ForEach-Object { $items += ('{"name":' + (Q $_.Name) + ',"modified":' + (Mtime-Ms $_.FullName) + ',"size":' + $_.Length + '}') } }
+    Send-Json $res 200 ('[' + ($items -join ',') + ']'); return
+  }
+  $fname = [string]$parts[3]
+  if ($parts.Count -ne 4 -or $fname -notmatch '^[A-Za-z0-9 _.,()&+-]{1,125}\.json$' -or $fname.Contains('..')) { Send-Json $res 400 '{"error":"invalid file name"}'; return }
+  $f = Join-Path $dir $fname
+  if ($req.HttpMethod -eq 'GET') {
+    if (-not (Test-Path -LiteralPath $f)) { Send-Json $res 404 '{"error":"not found"}'; return }
+    Send $res 200 'application/json; charset=utf-8' ([IO.File]::ReadAllBytes($f)); return
+  }
+  if ($req.HttpMethod -eq 'PUT') {
+    $body = Read-Body $req
+    if (-not $body.TrimStart().StartsWith('{') -and -not $body.TrimStart().StartsWith('[')) { Send-Json $res 400 '{"error":"not a case file"}'; return }
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    if (Test-Path -LiteralPath $f) {
+      $bd = Join-Path $dir 'backup'; New-Item -ItemType Directory -Force -Path $bd | Out-Null
+      $bf = Join-Path $bd ([IO.Path]::GetFileNameWithoutExtension($fname) + '_' + (Get-Date -Format 'yyyy-MM-dd') + '.json')
+      if (-not (Test-Path -LiteralPath $bf)) { Copy-Item -LiteralPath $f -Destination $bf }
+    }
+    Write-Atomic $f $body
+    Send-Json $res 200 ('{"ok":true,"modified":' + (Mtime-Ms $f) + '}'); return
+  }
+  Send-Json $res 405 '{"error":"not allowed"}'
+}
 function Handle-Api($req, $res, [string]$path) {
   $parts = $path.Trim('/').Split('/')   # api, op, name
   $op = $parts[1]
   if ($op -eq 'info') {
     $files = @(Get-ChildItem -LiteralPath $cfg.Data -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object { Q $_.Name })
-    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"version":' + $KIT_VERSION + ',"lan":' + ($(if ($global:LanOk) { 'true' } else { 'false' })) + ',"files":[' + ($files -join ',') + ']}')
+    Send-Json $res 200 ('{"server":true,"computer":' + (Q $env:COMPUTERNAME) + ',"dataFolder":' + (Q $cfg.Data) + ',"dataName":' + (Q (Split-Path -Leaf $cfg.Data)) + ',"version":' + $KIT_VERSION + ',"protected":' + $(if (Test-Path -LiteralPath $PWFILE) { '[' + (($cfg.Protect | ForEach-Object { Q $_ }) -join ',') + ']' } else { '[]' }) + ',"lan":' + ($(if ($global:LanOk) { 'true' } else { 'false' })) + ',"files":[' + ($files -join ',') + ']}')
     return
   }
+  if ($op -eq 'cases' -or $op -eq 'case') { Handle-Case $req $res $parts; return }
   $name = $parts[2]
   if (-not $name -or $name -cnotmatch $NAME_RE) { Send-Json $res 404 '{"error":"unknown register"}'; return }
   $file = Join-Path $cfg.Data ($name + '.json')
@@ -127,6 +187,7 @@ function Handle-Api($req, $res, [string]$path) {
     } else { Send-Json $res 200 '{"data":null,"modified":null}' }
     return
   }
+  if (($m -eq 'PUT' -or $op -eq 'lock' -or $op -eq 'beat') -and $m -ne 'GET' -and -not (Password-Ok $req $name)) { Send-Json $res 401 '{"error":"password"}'; return }
   if ($op -eq 'db' -and $m -eq 'PUT') {
     $body = Read-Body $req
     if (-not $body.TrimStart().StartsWith('{')) { Send-Json $res 400 '{"error":"not a register"}'; return }
