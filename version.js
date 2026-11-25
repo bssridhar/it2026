@@ -3,9 +3,10 @@
  * Changed with every release; do not edit.
  */
 window.KIT_VERSION = {
-  version: 41,
+  version: 42,
   date: "2026-11-25",
   whatsNew: [
+    "DSC Register: Token Sl No (the number on the key tag) – read from \"Sl No\" in the Excel import, shown as a bold boxed number in the tag colour between DSC holder and Valid till, next free number for a new token, duplicates flagged, sort by token; Yellow / Red and other standard tag colours shown in their colour.",
     "Case files: if the tool kit server running on the main computer is older than the tool kit files, Save downloads a copy (as before) instead of failing; the message says how to restart the server.",
     "Case files through the tool kit server: Open lists the case files on the server, Save saves into the opened file without a dialog, Save as… asks for a new name – in all the tools.",
     "Editing password for the notices, holidays and birthdays (\"Set editing password.bat\" on the main computer): everyone can see them, only you can change them.",

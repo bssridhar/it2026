@@ -39,3 +39,10 @@ as Mobile, Email, PAN are picked up if present); export to Excel; renewal remind
 **inactive** – "Mark inactive" on an expired row, or Status in Edit. It stays in the register under the filter
 "Inactive clients", but is not counted or shown in the expired / renewal lists and has no reminder. "Reactivate" brings
 it back. In the Excel export the Status column shows "Inactive – <reason>"; an import reads it back.
+
+**Token Sl No.** The number printed on the key tag of the token (e.g. 17, BSS1). It is shown between "DSC holder" and
+"Valid till" as a bold, boxed number in the colour of the key tag; "Sort: token Sl No" lists the DSCs in tag order. A
+new DSC gets the lowest number not yet used (a number freed by a returned tag is used first) – change it if the tag has
+another number. A number used for two DSCs is marked with a red dashed border and shown at the top. In Excel the column is
+"Sl No" / "Token Sl No" (first column of the export); an import fills the number of DSCs already in the register where it
+is blank. Key tag colours with a standard name (Yellow, Red, Purple, …) get their colour automatically.
